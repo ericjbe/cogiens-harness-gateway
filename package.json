@@ -20,7 +20,8 @@
     "test": "node --test tests/conformance/mock-adapter.test.mjs",
     "verify:schemas": "node scripts/verify-schemas.mjs",
     "verify:boundary": "node scripts/verify-public-boundary.mjs",
-    "verify": "npm run verify:schemas && npm run verify:boundary && npm test",
+    "verify:discoverability": "node scripts/verify-discoverability.mjs",
+    "verify": "npm run verify:schemas && npm run verify:boundary && npm run verify:discoverability && npm test",
     "example:mock": "node examples/run-mock.mjs"
   }
 }

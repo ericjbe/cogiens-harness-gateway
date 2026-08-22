@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
+  <title id="title">Cogiens Harness Gateway social preview</title>
+  <desc id="desc">One contract, many harnesses, auditable execution.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071426"/>
+      <stop offset="1" stop-color="#102C45"/>
+    </linearGradient>
+    <linearGradient id="bridge" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#EB6100"/>
+      <stop offset="1" stop-color="#0085D0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="640" rx="28" fill="url(#background)"/>
+  <circle cx="1128" cy="88" r="220" fill="#0085D0" opacity="0.08"/>
+  <circle cx="116" cy="576" r="260" fill="#EB6100" opacity="0.08"/>
+  <rect x="76" y="66" width="198" height="38" rx="19" fill="#EB6100"/>
+  <text x="175" y="92" text-anchor="middle" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="1.5">OPEN SOURCE · MIT</text>
+  <text x="76" y="199" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="800" letter-spacing="1">COGIENS</text>
+  <text x="76" y="269" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="800" letter-spacing="1">HARNESS GATEWAY</text>
+  <text x="76" y="327" fill="#A8C3D9" font-family="Arial, Helvetica, sans-serif" font-size="27">One contract. Many harnesses. Auditable execution.</text>
+  <g transform="translate(77 382)">
+    <circle cx="38" cy="58" r="37" fill="#EB6100"/>
+    <circle cx="516" cy="58" r="37" fill="#0085D0"/>
+    <path d="M75 58 H479" stroke="url(#bridge)" stroke-width="18" stroke-linecap="round"/>
+    <path d="M230 58 L282 16 L334 58 L282 100 Z" fill="#FFFFFF"/>
+    <path d="M262 58 L282 42 L302 58 L282 74 Z" fill="#102C45"/>
+    <text x="38" y="64" text-anchor="middle" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">APP</text>
+    <text x="516" y="64" text-anchor="middle" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700">RUN</text>
+  </g>
+  <g fill="#DCEAF4" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" letter-spacing="1.2">
+    <text x="692" y="414">INTEROPERATE</text>
+    <text x="692" y="463">GOVERN</text>
+    <text x="692" y="512">AUDIT</text>
+  </g>
+  <g fill="#EB6100">
+    <rect x="655" y="399" width="20" height="20" rx="4"/>
+    <rect x="655" y="448" width="20" height="20" rx="4"/>
+    <rect x="655" y="497" width="20" height="20" rx="4"/>
+  </g>
+  <text x="76" y="585" fill="#7996AD" font-family="Arial, Helvetica, sans-serif" font-size="20">github.com/ericjbe/cogiens-harness-gateway</text>
+</svg>

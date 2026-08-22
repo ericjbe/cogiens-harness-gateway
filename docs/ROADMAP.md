@@ -4,6 +4,12 @@
 
 MIT public repository, governance, schemas, Mock Adapter, and conformance gates.
 
+## P0.1 — Discoverability and contributor entry points
+
+Canonical English and Chinese definitions, FAQ answer targets, machine-readable navigation and citation metadata, adapter catalog, contributor routes, Digital Job Pack proposal template, and discoverability verification gate.
+
+In parallel, collect at least three concrete Digital Job Pack proposals before freezing a portable role contract.
+
 ## P1 — Codex app-server adapter
 
 Pinned official interface, stdio lifecycle mapping, isolated worktree Runner, approval and cancellation evidence.

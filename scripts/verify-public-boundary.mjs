@@ -7,6 +7,9 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const requiredFiles = [
   "LICENSE",
   "README.md",
+  "README.zh-CN.md",
+  "CITATION.cff",
+  "llms.txt",
   "COMMERCIAL.md",
   "TRADEMARKS.md",
   "GOVERNANCE.md",
@@ -19,7 +22,7 @@ const requiredFiles = [
 ];
 const excludedDirectories = new Set([".git", "node_modules", "coverage", "dist", "tmp"]);
 const forbiddenDirectoryNames = new Set(["enterprise", "commercial-private", "proprietary", "customer-data", "credentials", "secrets"]);
-const textExtensions = new Set(["", ".md", ".json", ".mjs", ".js", ".ts", ".yml", ".yaml", ".txt"]);
+const textExtensions = new Set(["", ".md", ".json", ".mjs", ".js", ".ts", ".yml", ".yaml", ".txt", ".cff", ".svg"]);
 const secretPatterns = [
   ["private key", /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/],
   ["GitHub token", /gh[pousr]_[A-Za-z0-9]{30,}/],

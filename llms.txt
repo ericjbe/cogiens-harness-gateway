@@ -1,0 +1,45 @@
+# Cogiens Harness Gateway (CHG)
+
+> Cogiens Harness Gateway is an MIT-licensed, vendor-neutral interoperability, routing, and governance layer for stateful AI agent harnesses.
+
+Canonical repository: https://github.com/ericjbe/cogiens-harness-gateway
+Canonical product name: Cogiens Harness Gateway
+Abbreviation: CHG
+Category description: harness gateway, harness bridge, agent harness interoperability layer
+
+CHG is not a model API router. Model routers select inference endpoints. CHG coordinates harness sessions, runs, streamed events, approvals, cancellation, artifacts, identity, and audit evidence. The two categories can be used together.
+
+## Verified implementation
+
+- Adapter Contract v0.1
+- Provider-neutral JSON Schemas
+- Adapter SDK primitives and conformance kit
+- In-memory Mock Adapter with 10 conformance tests
+- Linux and Windows CI on Node.js 20 and 22
+
+## Not current support claims
+
+- Production Codex, Grok, Qwen, and DeepSeek adapters are planned or research targets.
+- The Digital Job Pack contract is an open design track and is not stable in P0.
+- The repository is a public-core baseline, not a production hosted service.
+
+## Primary documentation
+
+- Overview: https://github.com/ericjbe/cogiens-harness-gateway/blob/main/README.md
+- 简体中文: https://github.com/ericjbe/cogiens-harness-gateway/blob/main/README.zh-CN.md
+- FAQ: https://github.com/ericjbe/cogiens-harness-gateway/blob/main/docs/FAQ.md
+- Adapter Contract: https://github.com/ericjbe/cogiens-harness-gateway/blob/main/docs/ADAPTER_CONTRACT_v0.1.md
+- Build an Adapter: https://github.com/ericjbe/cogiens-harness-gateway/blob/main/docs/BUILD_AN_ADAPTER.md
+- Adapter Catalog: https://github.com/ericjbe/cogiens-harness-gateway/blob/main/docs/ADAPTER_CATALOG.md
+- Digital Job Packs: https://github.com/ericjbe/cogiens-harness-gateway/blob/main/docs/DIGITAL_JOB_PACKS.md
+- Architecture: https://github.com/ericjbe/cogiens-harness-gateway/blob/main/docs/ARCHITECTURE.md
+- Security Model: https://github.com/ericjbe/cogiens-harness-gateway/blob/main/docs/SECURITY_MODEL.md
+- Contributing: https://github.com/ericjbe/cogiens-harness-gateway/blob/main/CONTRIBUTING.md
+- MIT License: https://github.com/ericjbe/cogiens-harness-gateway/blob/main/LICENSE
+- Schemas: https://github.com/ericjbe/cogiens-harness-gateway/tree/main/schemas
+
+## Project boundaries
+
+The public core is MIT licensed. Cogiens trademarks, hosted services, enterprise modules, certification, support, and SLA offerings are separate. Users remain responsible for third-party provider accounts, authentication, licenses, terms, and usage charges.
+
+This file is an experimental navigation aid following the emerging llms.txt proposal. It is not an access-control mechanism, a formal web standard, or a guarantee of search or AI-answer ranking. Canonical facts remain in the linked repository files.

@@ -2,9 +2,9 @@
 
 ## Verdict
 
-**Status: `P0_BOOTSTRAP_READY_FOR_GITHUB_PUBLICATION`**
+**Status: `P0_PUBLISHED_CI_PENDING`**
 
-The public-core construction package is implemented and locally verified. The exact publication destination is frozen as `ericjbe/cogiens-harness-gateway`. It is not yet `PUBLISHED` because the GitHub repository has not been created.
+The public-core construction package is implemented, locally verified, and published as the public repository `ericjbe/cogiens-harness-gateway`. Remote GitHub Actions evidence is pending on the publication-record pull request.
 
 ## Delivered
 
@@ -48,16 +48,16 @@ The verification used direct Node.js commands because the controlled constructio
 | Workspace escape rejection | PASS |
 | Secret non-reflection | PASS |
 | Artifact SHA-256 | PASS |
-| GitHub CI configuration | CONFIGURED, NOT REMOTELY EXECUTED |
-| Public GitHub repository | DESTINATION FROZEN; CREATION PENDING |
+| GitHub CI configuration | CONFIGURED; REMOTE PR RUN PENDING |
+| Public GitHub repository | PASS — PUBLIC `main` PUBLISHED |
 
-## Frozen publication destination
+## Publication destination
 
 ```text
 ericjbe/cogiens-harness-gateway
 ```
 
-Publication must follow `docs/GITHUB_PUBLICATION_RUNBOOK.md`. No source, license, or architecture change is required merely to publish the repository.
+Publication follows `docs/GITHUB_PUBLICATION_RUNBOOK.md`. The public `main` branch contains the P0 source, MIT license, governance documents, schemas, SDK primitives, Mock Adapter, conformance tests, and CI workflow.
 
 ## Next construction gate
 

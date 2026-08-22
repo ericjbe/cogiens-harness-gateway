@@ -2,9 +2,9 @@
 
 ## Verdict
 
-**Status: `P0_PUBLISHED_CI_PENDING`**
+**Status: `P0_PUBLISHED_CI_PASS`**
 
-The public-core construction package is implemented, locally verified, and published as the public repository `ericjbe/cogiens-harness-gateway`. Remote GitHub Actions evidence is pending on the publication-record pull request.
+The public-core construction package is implemented, locally verified, and published as the public repository `ericjbe/cogiens-harness-gateway`. Remote GitHub Actions evidence passed on the publication-record pull request.
 
 ## Delivered
 
@@ -31,6 +31,7 @@ PASS verify-schemas: 6 schemas parsed with unique IDs
 PASS verify-public-boundary: 45 text files scanned
 PASS conformance: 10 tests, 10 passed, 0 failed
 PASS example: event sequence completed and one SHA-256 artifact produced
+PASS GitHub Actions run 32582031552: 4 matrix jobs passed, 0 failed
 ```
 
 The verification used direct Node.js commands because the controlled construction environment blocks package-manager network initialization. P0 has no package dependencies; this does not change the repository's runtime behavior or CI design.
@@ -48,7 +49,7 @@ The verification used direct Node.js commands because the controlled constructio
 | Workspace escape rejection | PASS |
 | Secret non-reflection | PASS |
 | Artifact SHA-256 | PASS |
-| GitHub CI configuration | CONFIGURED; REMOTE PR RUN PENDING |
+| GitHub CI configuration | PASS — RUN `32582031552`, 4/4 JOBS |
 | Public GitHub repository | PASS — PUBLIC `main` PUBLISHED |
 
 ## Publication destination

@@ -2,9 +2,9 @@
 
 ## Verdict
 
-**Status: `P0_BOOTSTRAP_READY_FOR_GITHUB_PUBLICATION`**
+**Status: `P0_PUBLISHED_CI_PASS`**
 
-The public-core construction package is implemented and locally verified. The exact publication destination is frozen as `ericjbe/cogiens-harness-gateway`. It is not yet `PUBLISHED` because the GitHub repository has not been created.
+The public-core construction package is implemented, locally verified, and published as the public repository `ericjbe/cogiens-harness-gateway`. Remote GitHub Actions evidence passed on the publication-record pull request.
 
 ## Delivered
 
@@ -31,6 +31,7 @@ PASS verify-schemas: 6 schemas parsed with unique IDs
 PASS verify-public-boundary: 45 text files scanned
 PASS conformance: 10 tests, 10 passed, 0 failed
 PASS example: event sequence completed and one SHA-256 artifact produced
+PASS GitHub Actions run 32582031552: 4 matrix jobs passed, 0 failed
 ```
 
 The verification used direct Node.js commands because the controlled construction environment blocks package-manager network initialization. P0 has no package dependencies; this does not change the repository's runtime behavior or CI design.
@@ -48,16 +49,16 @@ The verification used direct Node.js commands because the controlled constructio
 | Workspace escape rejection | PASS |
 | Secret non-reflection | PASS |
 | Artifact SHA-256 | PASS |
-| GitHub CI configuration | CONFIGURED, NOT REMOTELY EXECUTED |
-| Public GitHub repository | DESTINATION FROZEN; CREATION PENDING |
+| GitHub CI configuration | PASS — RUN `32582031552`, 4/4 JOBS |
+| Public GitHub repository | PASS — PUBLIC `main` PUBLISHED |
 
-## Frozen publication destination
+## Publication destination
 
 ```text
 ericjbe/cogiens-harness-gateway
 ```
 
-Publication must follow `docs/GITHUB_PUBLICATION_RUNBOOK.md`. No source, license, or architecture change is required merely to publish the repository.
+Publication follows `docs/GITHUB_PUBLICATION_RUNBOOK.md`. The public `main` branch contains the P0 source, MIT license, governance documents, schemas, SDK primitives, Mock Adapter, conformance tests, and CI workflow.
 
 ## Next construction gate
 

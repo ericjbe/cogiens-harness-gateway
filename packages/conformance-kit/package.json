@@ -1,0 +1,8 @@
+{
+  "name": "@cogiens/chg-conformance-kit",
+  "version": "0.1.0",
+  "description": "Shared assertions for CHG adapter conformance",
+  "type": "module",
+  "license": "MIT",
+  "exports": "./src/index.mjs"
+}

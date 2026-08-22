@@ -1,0 +1,8 @@
+{
+  "name": "@cogiens/chg-adapter-sdk",
+  "version": "0.1.0",
+  "description": "Dependency-free CHG Adapter Contract primitives",
+  "type": "module",
+  "license": "MIT",
+  "exports": "./src/index.mjs"
+}

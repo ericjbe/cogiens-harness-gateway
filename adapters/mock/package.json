@@ -1,0 +1,8 @@
+{
+  "name": "@cogiens/chg-adapter-mock",
+  "version": "0.1.0",
+  "description": "In-memory reference adapter for CHG P0",
+  "type": "module",
+  "license": "MIT",
+  "exports": "./src/index.mjs"
+}

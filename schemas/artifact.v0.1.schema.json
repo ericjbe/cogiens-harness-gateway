@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cogiens:chg:schema:artifact:v0.1",
+  "title": "CHG Artifact v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_id", "trace_id", "job_id", "run_id", "kind", "media_type", "size_bytes", "sha256", "created_at"],
+  "properties": {
+    "schema_version": { "const": "chg.artifact.v0.1" },
+    "artifact_id": { "type": "string", "pattern": "^art_[A-Za-z0-9_-]+$" },
+    "trace_id": { "type": "string", "pattern": "^trc_[A-Za-z0-9_-]+$" },
+    "job_id": { "type": "string", "pattern": "^job_[A-Za-z0-9_-]+$" },
+    "run_id": { "type": "string", "pattern": "^run_[A-Za-z0-9_-]+$" },
+    "kind": { "enum": ["diff", "file", "report", "test-report", "log", "structured-output", "other"] },
+    "media_type": { "type": "string", "minLength": 3 },
+    "size_bytes": { "type": "integer", "minimum": 0 },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "uri": { "type": ["string", "null"] },
+    "content": { "type": ["string", "null"] },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}

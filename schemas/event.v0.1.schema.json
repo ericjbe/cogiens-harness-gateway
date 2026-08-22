@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cogiens:chg:schema:event:v0.1",
+  "title": "CHG Event v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "event_id",
+    "trace_id",
+    "job_id",
+    "run_id",
+    "adapter_id",
+    "native_session_id",
+    "sequence",
+    "occurred_at",
+    "type",
+    "severity",
+    "payload"
+  ],
+  "properties": {
+    "schema_version": { "const": "chg.event.v0.1" },
+    "event_id": { "type": "string", "pattern": "^evt_[A-Za-z0-9_-]+$" },
+    "trace_id": { "type": "string", "pattern": "^trc_[A-Za-z0-9_-]+$" },
+    "job_id": { "type": "string", "pattern": "^job_[A-Za-z0-9_-]+$" },
+    "run_id": { "type": "string", "pattern": "^run_[A-Za-z0-9_-]+$" },
+    "adapter_id": { "type": "string", "minLength": 3 },
+    "native_session_id": { "type": "string", "minLength": 1 },
+    "sequence": { "type": "integer", "minimum": 1 },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "type": { "type": "string", "pattern": "^[a-z]+(?:[._][a-z]+)+$" },
+    "severity": { "enum": ["debug", "info", "warning", "error"] },
+    "payload": { "type": "object" },
+    "raw_event_ref": { "type": ["string", "null"] }
+  }
+}

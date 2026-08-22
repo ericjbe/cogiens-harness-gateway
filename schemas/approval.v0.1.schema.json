@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cogiens:chg:schema:approval:v0.1",
+  "title": "CHG Approval v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "approval_id", "run_id", "category", "summary", "risk", "requested_scope", "status"],
+  "properties": {
+    "schema_version": { "const": "chg.approval.v0.1" },
+    "approval_id": { "type": "string", "pattern": "^apr_[A-Za-z0-9_-]+$" },
+    "run_id": { "type": "string", "pattern": "^run_[A-Za-z0-9_-]+$" },
+    "category": {
+      "enum": [
+        "shell_command",
+        "network_access",
+        "write_outside_workspace",
+        "privileged_tool",
+        "external_system_write",
+        "credential_access",
+        "financial_action",
+        "business_commitment",
+        "other"
+      ]
+    },
+    "summary": { "type": "string", "minLength": 1 },
+    "risk": { "enum": ["low", "medium", "high", "critical"] },
+    "requested_scope": { "enum": ["one-shot", "session", "project"] },
+    "status": { "enum": ["pending", "approved", "denied", "expired"] },
+    "details": { "type": "object" },
+    "requested_at": { "type": "string", "format": "date-time" },
+    "decided_at": { "type": ["string", "null"], "format": "date-time" },
+    "decided_by": { "type": ["string", "null"] }
+  }
+}

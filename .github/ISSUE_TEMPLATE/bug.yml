@@ -1,0 +1,37 @@
+name: Bug report
+description: Report a reproducible public-core defect without disclosing secrets.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Do not report exploitable security vulnerabilities here. Use private security reporting.
+  - type: input
+    id: version
+    attributes:
+      label: CHG version or commit
+    validations:
+      required: true
+  - type: input
+    id: adapter
+    attributes:
+      label: Adapter and harness version
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Remove credentials, customer code, and private paths.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true

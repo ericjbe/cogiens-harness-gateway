@@ -1,0 +1,38 @@
+name: Adapter proposal
+description: Propose a new official or community harness adapter.
+title: "[Adapter]: "
+labels: [adapter, proposal]
+body:
+  - type: input
+    id: harness
+    attributes:
+      label: Harness name and official source
+    validations:
+      required: true
+  - type: input
+    id: transport
+    attributes:
+      label: Official transport or SDK
+      description: ACP, app-server, SDK, JSON-RPC, or structured headless mode.
+    validations:
+      required: true
+  - type: textarea
+    id: capabilities
+    attributes:
+      label: Verified capabilities
+      description: Streaming, approvals, cancel, resume, steer, artifacts, usage, and platform support.
+    validations:
+      required: true
+  - type: textarea
+    id: licensing
+    attributes:
+      label: License and authentication constraints
+    validations:
+      required: true
+  - type: checkboxes
+    id: agreement
+    attributes:
+      label: Contribution boundary
+      options:
+        - label: I will use official interfaces and will not submit provider credentials or proprietary code.
+          required: true

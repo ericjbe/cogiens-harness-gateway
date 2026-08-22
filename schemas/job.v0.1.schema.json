@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cogiens:chg:schema:job:v0.1",
+  "title": "CHG Job v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "job_id", "trace_id", "tenant_id", "project_id", "prompt", "status", "created_at"],
+  "properties": {
+    "schema_version": { "const": "chg.job.v0.1" },
+    "job_id": { "type": "string", "pattern": "^job_[A-Za-z0-9_-]+$" },
+    "trace_id": { "type": "string", "pattern": "^trc_[A-Za-z0-9_-]+$" },
+    "tenant_id": { "type": "string", "minLength": 1 },
+    "project_id": { "type": "string", "minLength": 1 },
+    "prompt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text"],
+      "properties": {
+        "text": { "type": "string", "minLength": 1 },
+        "attachments": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "acceptance": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "commands": { "type": "array", "items": { "type": "string" } },
+        "required_artifacts": { "type": "array", "items": { "type": "string" } },
+        "completion_policy": { "enum": ["response-only", "evidence-required", "manual-review"] }
+      }
+    },
+    "status": { "enum": ["created", "running", "needs_review", "accepted", "rejected", "cancelled"] },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}

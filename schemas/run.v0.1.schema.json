@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cogiens:chg:schema:run:v0.1",
+  "title": "CHG Run v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "job_id", "trace_id", "adapter_id", "state", "created_at"],
+  "properties": {
+    "schema_version": { "const": "chg.run.v0.1" },
+    "run_id": { "type": "string", "pattern": "^run_[A-Za-z0-9_-]+$" },
+    "job_id": { "type": "string", "pattern": "^job_[A-Za-z0-9_-]+$" },
+    "trace_id": { "type": "string", "pattern": "^trc_[A-Za-z0-9_-]+$" },
+    "adapter_id": { "type": "string", "minLength": 3 },
+    "native_session_id": { "type": ["string", "null"] },
+    "state": {
+      "enum": [
+        "QUEUED",
+        "STARTING",
+        "RUNNING",
+        "WAITING_APPROVAL",
+        "PAUSED",
+        "SUCCEEDED",
+        "FAILED",
+        "CANCELLED",
+        "TIMED_OUT",
+        "CLOSED"
+      ]
+    },
+    "business_acceptance": { "enum": ["PENDING", "ACCEPTED", "REJECTED", "NEEDS_REVIEW"] },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}

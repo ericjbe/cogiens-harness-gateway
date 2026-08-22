@@ -1,0 +1,12 @@
+# Default review owner for the public core.
+* @ericjbe
+
+# Contract, security, licensing, and governance require owner review.
+/schemas/ @ericjbe
+/docs/ADAPTER_CONTRACT_v0.1.md @ericjbe
+/docs/SECURITY_MODEL.md @ericjbe
+/SECURITY.md @ericjbe
+/LICENSE @ericjbe
+/COMMERCIAL.md @ericjbe
+/TRADEMARKS.md @ericjbe
+/GOVERNANCE.md @ericjbe

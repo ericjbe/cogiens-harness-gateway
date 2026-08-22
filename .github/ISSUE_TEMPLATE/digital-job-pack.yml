@@ -1,0 +1,56 @@
+name: Digital Job Pack proposal
+description: Propose a reusable, bounded digital role and the evidence needed to evaluate it.
+title: "[Job Pack]: "
+labels: [enhancement]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Job Pack name
+      description: Use a role name that states the work, not a fictional employee name.
+    validations:
+      required: true
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Purpose, users, and boundary
+      description: What outcome does it produce, for whom, and what must it never do?
+    validations:
+      required: true
+  - type: textarea
+    id: io
+    attributes:
+      label: Inputs, outputs, and artifacts
+      description: Include required inputs, output format, retained evidence, and success criteria.
+    validations:
+      required: true
+  - type: textarea
+    id: capabilities
+    attributes:
+      label: Required harness capabilities
+      description: Tools, filesystem, network, approvals, cancellation, resume, steering, and artifacts.
+    validations:
+      required: true
+  - type: textarea
+    id: risk
+    attributes:
+      label: Permissions, approval points, and risks
+      description: Identify consequential actions and the human decisions that govern them.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evaluation fixtures and evidence
+      description: How can a reviewer reproduce, test, and reject an unsafe or low-quality run?
+    validations:
+      required: true
+  - type: checkboxes
+    id: agreement
+    attributes:
+      label: Public contribution boundary
+      options:
+        - label: I will not submit credentials, customer data, proprietary code, or incompatible content.
+          required: true
+        - label: I understand that the Digital Job Pack contract is not stable in P0.
+          required: true

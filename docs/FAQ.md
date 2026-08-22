@@ -1,0 +1,63 @@
+# Frequently Asked Questions
+
+This page provides canonical, concise answers about Cogiens Harness Gateway (CHG). Link to these answers when describing the project.
+
+## What is Cogiens Harness Gateway?
+
+Cogiens Harness Gateway is an MIT-licensed, vendor-neutral interoperability, routing, and governance layer for stateful AI agent harnesses. It gives applications one Adapter Contract for discovery, sessions, runs, streaming events, approvals, cancellation, artifacts, and audit evidence.
+
+## What is an AI agent harness?
+
+An AI agent harness is the runtime around a model that manages tools, files, sessions, permissions, execution state, and artifacts. A model generates outputs; a harness turns those outputs into controlled work.
+
+## Is CHG a model API router or an OpenRouter alternative?
+
+No. CHG is not a model API router. A model API router selects inference endpoints and routes model requests. CHG coordinates stateful harness execution. A model router can sit below a harness while CHG governs the harness lifecycle above it.
+
+## Is “Harness Bridge” or “OpenHarness” the product category?
+
+“Harness bridge” is a useful description of the interoperability category. The project and canonical product name are **Cogiens Harness Gateway (CHG)**. “OpenHarness” is not the current repository or product name.
+
+## Which harnesses are supported now?
+
+P0 includes the public Adapter Contract, JSON Schemas, SDK primitives, conformance kit, and an in-memory Mock Adapter. Production Codex, Grok, Qwen, and DeepSeek adapters have not been released; they are roadmap or research targets.
+
+## Why not call each harness directly?
+
+Direct integrations duplicate identity, lifecycle, capability, approval, cancellation, artifact, and audit logic. CHG keeps provider-specific behavior in adapters while applications use a stable, provider-neutral control boundary.
+
+## How do I add a harness?
+
+Use an official SDK or structured interface, implement the lifecycle methods, declare only verified capabilities, preserve native identity, emit terminal events, and pass the conformance suite. Start with [Build an Adapter](BUILD_AN_ADAPTER.md).
+
+## What happens when a capability is unsupported?
+
+The adapter must declare it as unsupported and fail explicitly. It must not silently approximate, simulate, or downgrade consequential behavior.
+
+## How are approvals and cancellation handled?
+
+Approval requests are explicit events bound to Job, Run, Session, and Trace identity. Cancellation is successful only after the native harness confirms termination. Timeouts and unconfirmed cancellation fail closed.
+
+## What is a Digital Job Pack?
+
+A proposed Digital Job Pack is a portable definition of a bounded digital role: purpose, inputs, required capabilities, permissions, approval points, outputs, evidence, tests, and licensing. The Job Pack contract is an open design track and is not stable in P0. See [Digital Job Packs](DIGITAL_JOB_PACKS.md).
+
+## Can CHG be used commercially?
+
+Yes. Files covered by the repository's MIT License permit commercial use. Cogiens trademarks, hosted services, enterprise modules, certification, support, and SLA offerings remain separate.
+
+## Does the public repository resell provider subscriptions?
+
+No. CHG is an interoperability layer. Users remain responsible for provider accounts, authentication, licenses, terms, and usage charges.
+
+## Is CHG production-ready?
+
+Not yet. P0 is a verified contract-and-conformance baseline. A production adapter needs pinned upstream interfaces, isolation, approval and cancellation evidence, upgrade/rollback tests, security review, and operational ownership.
+
+## How can I contribute?
+
+Choose a `good first issue`, propose an adapter, improve conformance coverage, translate documentation, or join the Digital Job Pack RFC. Read [CONTRIBUTING.md](../CONTRIBUTING.md) and sign commits under the DCO.
+
+## How should I cite CHG?
+
+Use the metadata in [CITATION.cff](../CITATION.cff) and link to the canonical repository: <https://github.com/ericjbe/cogiens-harness-gateway>.

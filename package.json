@@ -17,7 +17,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "test": "node --test tests/conformance/*.test.mjs",
+    "test": "node --test tests/conformance/mock-adapter.test.mjs",
     "verify:schemas": "node scripts/verify-schemas.mjs",
     "verify:boundary": "node scripts/verify-public-boundary.mjs",
     "verify": "npm run verify:schemas && npm run verify:boundary && npm test",

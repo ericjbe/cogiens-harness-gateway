@@ -18,7 +18,7 @@ a27df5e5512b0c647e2e77c780f6f01bfe55e5181ae4583d07b69bd2628329a5  ./LICENSE
 657b626dfce2da5afaf3e6c4ddebe12fc7e438fef4917ce3bc42981d10b4c63d  ./NOTICE
 1c2bf4d07adb8138736fa2d761b4aa57f9bf23b273edb89c9264bea4cf580184  ./P0_DELIVERY_REPORT.md
 f6c91f0327201fe4a82107a252dc34f9bb50160712d641f91056da4a32d2561f  ./P1_DEPLOYMENT_REPORT.md
-20e10b36f3cdd5db1a0ce2ad41001b74fb209ac2a393ab9a6bfd0ad7cdb56d54  ./P2A_RELEASE_REPORT.md
+d65c0d962d324e4d20a2720bb9dbd63de9464c0c7d52f979817b6a4826abc6b3  ./P2A_RELEASE_REPORT.md
 d3684cdffdaff0f387931c95410512848c155f5bb8c39b3848f4e95978ceff38  ./README.md
 f96f235c71bc25b1e5ae0aabc90f88a7a2da5f921a900a9b2626da7d02cd2713  ./README.zh-CN.md
 eb70d9c81f28efacfda1c6470a0cf9d3472481b0ebfec0aa970ed9b8f0dd9142  ./SECURITY.md
@@ -73,7 +73,7 @@ cd5054d774e52297ffeeb102b4d90f15b03cbc6d16a8d362dd8089f8465613f8  ./packages/ada
 7973c6436538075cd852b610da01e59e826c99d2c2b7e0834a8de5adb7011d67  ./packages/conformance-kit/src/index.mjs
 9953fb1b504a019eaf81f05ddace31dffa5d3f4f05128a7524fc6e2c2da72f90  ./packages/gateway-core/src/federation-registry.mjs
 e127d23b7c87cad01f31c76b99124f27ef1a3c500d0b05e82a7961d1aff636a1  ./packages/gateway-core/src/registry.mjs
-a83ed8e97839afc9ff68c9cacde778859ae65d8e56aa9956f4c444402ac5ebb8  ./packages/gateway-core/src/runtime.mjs
+7609731baed201a1f9925c372c226d424150e390aaedc34ad833479b3def8d7e  ./packages/gateway-core/src/runtime.mjs
 c75b1cd1f45aeb6bba697c62ad18e2286fe3bf8caaa245129901841410bb8de4  ./schemas/approval.v0.1.schema.json
 6fa46785eadbc18a0360b0573a321c66ab6d65ab51896037ced7d36bbae031c5  ./schemas/artifact.v0.1.schema.json
 5a66aeccd987481fb92114cfb8466fb96f8afe1018ec97b1786fec7b581bb24a  ./schemas/combat-passport.v0.3-alpha.1.schema.json

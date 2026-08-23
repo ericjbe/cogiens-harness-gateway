@@ -13,6 +13,7 @@ Release scope: Federation Registry Runtime
 - Read-only federation HTTP routes and CLI commands
 - Two public JSON Schemas and a dedicated Registry verification gate
 - Backward-compatible v0.2 Job/Run fan-out runtime
+- Durable terminal-state publication so API completion cannot race the final on-disk Job snapshot
 
 ## Evidence boundary
 

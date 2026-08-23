@@ -22,11 +22,13 @@ Pinned official interface, stdio lifecycle mapping, isolated worktree Runner, ap
 
 The `v0.3.0-architecture-freeze` preview defines an extensible Registry, Capability model, Combat Passport evidence gate, isolated worktrees, artifact intake, joint review workflow, and telemetry boundary. Its first-class architecture cohort is Codex, Claude Code, Grok Build, Kimi Code, DeepSeek Harness, Qwen Code, Google Antigravity CLI, and Mistral Vibe.
 
-This is a public RFC, not an implementation or support claim. All eight targets start as `DECLARED_UNVERIFIED`; the v0.2 runtime remains the compatibility baseline.
+The architecture preview itself was not an implementation claim. `v0.3.0-alpha.1` now implements only the P2-A Registry slice; the v0.2 fan-out runtime remains the compatibility baseline.
 
-## P2 — Federation registry and evidence model
+## P2-A — Federation registry runtime (`v0.3.0-alpha.1`)
 
-Implement the registry loader, capability model, Combat Passport records, explicit support-state transitions, and backwards-compatible projection from v0.2 local adapter configuration.
+Implemented: zero-dependency registry loader, capability model, separate integration/deployment states, evidence-gated support transitions, read-only HTTP/CLI projection, and the H01 Codex Combat Passport. H01 is `CONFORMANCE_PARTIAL` and `NOT_READY`; H02-H08 remain `DECLARED_UNVERIFIED`.
+
+Still open: live local discovery projection, passport signing/provenance, H02-H08 evidence records, and any production certification.
 
 ## P2.1 — Isolation and artifact intake
 

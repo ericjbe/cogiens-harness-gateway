@@ -1,94 +1,153 @@
-schema_version: "0.3-draft"
-product: "Cogiens Harness Gateway"
-architecture_name: "Cogiens Joint Harness Gate"
-project_id: "CGS-HARNESS-GATE-001"
-status: "ARCHITECTURE_FREEZE_PREVIEW"
-runtime_implemented: false
-support_status_default: "DECLARED_UNVERIFIED"
-
-harnesses:
-  - harness_id: "H01"
-    canonical_name: "OPENAI_CODEX"
-    vendor: "OpenAI"
-    command_candidate: "codex"
-    integration_tier: "FIRST_CLASS"
-    support_status: "DECLARED_UNVERIFIED"
-    combat_passport: "NOT_READY"
-  - harness_id: "H02"
-    canonical_name: "ANTHROPIC_CLAUDE_CODE"
-    vendor: "Anthropic"
-    command_candidate: "claude"
-    integration_tier: "FIRST_CLASS"
-    support_status: "DECLARED_UNVERIFIED"
-    combat_passport: "NOT_READY"
-  - harness_id: "H03"
-    canonical_name: "XAI_GROK_BUILD"
-    vendor: "xAI"
-    command_candidate: "grok"
-    integration_tier: "FIRST_CLASS"
-    support_status: "DECLARED_UNVERIFIED"
-    combat_passport: "NOT_READY"
-  - harness_id: "H04"
-    canonical_name: "MOONSHOT_KIMI_CODE"
-    vendor: "Moonshot AI"
-    command_candidate: "kimi"
-    integration_tier: "FIRST_CLASS"
-    support_status: "DECLARED_UNVERIFIED"
-    combat_passport: "NOT_READY"
-  - harness_id: "H05"
-    canonical_name: "DEEPSEEK_HARNESS"
-    vendor: "DeepSeek"
-    command_candidate: "dsh"
-    package_candidate: "@deepseek-ai/dsh"
-    integration_tier: "FIRST_CLASS"
-    support_status: "DECLARED_UNVERIFIED"
-    combat_passport: "NOT_READY"
-  - harness_id: "H06"
-    canonical_name: "QWEN_CODE"
-    vendor: "Alibaba/Qwen"
-    command_candidate: "qwen"
-    integration_tier: "FIRST_CLASS"
-    support_status: "DECLARED_UNVERIFIED"
-    combat_passport: "NOT_READY"
-  - harness_id: "H07"
-    canonical_name: "GOOGLE_ANTIGRAVITY"
-    vendor: "Google"
-    command_candidate: "agy"
-    integration_tier: "FIRST_CLASS"
-    support_status: "DECLARED_UNVERIFIED"
-    combat_passport: "NOT_READY"
-  - harness_id: "H08"
-    canonical_name: "MISTRAL_VIBE"
-    vendor: "Mistral AI"
-    command_candidate: "vibe"
-    integration_tier: "FIRST_CLASS"
-    support_status: "DECLARED_UNVERIFIED"
-    combat_passport: "NOT_READY"
-
-auxiliary:
-  - harness_id: "AUX-H01"
-    canonical_name: "HERMES"
-    integration_tier: "AUXILIARY_COMPATIBILITY"
-    support_status: "EXPERIMENTAL_V0.2_ADAPTER"
-    combat_passport: "NOT_READY"
-
-required_evidence:
-  - official_source
-  - upstream_version
-  - install
-  - authentication
-  - headless_interface
-  - structured_output
-  - workspace_read
-  - workspace_write
-  - cancellation
-  - session_resume
-  - sandbox_or_worktree
-  - artifacts
-  - usage
-  - trace
-
-notes:
-  - "FIRST_CLASS is roadmap priority, not verified support."
-  - "Command and package fields are discovery candidates until a Combat Passport pins evidence."
-  - "This registry is architecture data; the v0.2 runtime does not load it."
+{
+  "schema_version": "0.3.0-alpha.1",
+  "registry_version": "0.3.0-alpha.1",
+  "product": "Cogiens Harness Gateway",
+  "architecture_name": "Cogiens Joint Harness Gate",
+  "project_id": "CGS-HARNESS-GATE-001",
+  "status": "P2_A_FEDERATION_REGISTRY_RUNTIME",
+  "runtime_implemented": true,
+  "support_status_default": "DECLARED_UNVERIFIED",
+  "local_deployment_status_default": "NOT_PROBED",
+  "harnesses": [
+    {
+      "harness_id": "H01",
+      "canonical_name": "OPENAI_CODEX",
+      "vendor": "OpenAI",
+      "command_candidate": "codex",
+      "integration_tier": "FIRST_CLASS",
+      "support_status": "CONFORMANCE_PARTIAL",
+      "local_deployment_status": "NOT_PROBED",
+      "capabilities": {
+        "headless_interface": "SUPPORTED",
+        "structured_output": "SUPPORTED",
+        "workspace_read": "LIMITED",
+        "workspace_write": "LIMITED",
+        "cancellation": "LIMITED",
+        "session_resume": "UNSUPPORTED",
+        "sandbox_or_worktree": "LIMITED",
+        "artifacts": "SUPPORTED",
+        "usage": "LIMITED",
+        "trace": "SUPPORTED",
+        "approvals": "UNSUPPORTED"
+      },
+      "combat_passport": {
+        "status": "NOT_READY",
+        "path": "config/combat-passports/H01.openai-codex.v0.3-alpha.1.json"
+      }
+    },
+    {
+      "harness_id": "H02",
+      "canonical_name": "ANTHROPIC_CLAUDE_CODE",
+      "vendor": "Anthropic",
+      "command_candidate": "claude",
+      "integration_tier": "FIRST_CLASS",
+      "support_status": "DECLARED_UNVERIFIED",
+      "local_deployment_status": "NOT_PROBED",
+      "default_capability_state": "UNKNOWN",
+      "combat_passport": { "status": "NOT_READY" }
+    },
+    {
+      "harness_id": "H03",
+      "canonical_name": "XAI_GROK_BUILD",
+      "vendor": "xAI",
+      "command_candidate": "grok",
+      "integration_tier": "FIRST_CLASS",
+      "support_status": "DECLARED_UNVERIFIED",
+      "local_deployment_status": "NOT_PROBED",
+      "default_capability_state": "UNKNOWN",
+      "combat_passport": { "status": "NOT_READY" }
+    },
+    {
+      "harness_id": "H04",
+      "canonical_name": "MOONSHOT_KIMI_CODE",
+      "vendor": "Moonshot AI",
+      "command_candidate": "kimi",
+      "integration_tier": "FIRST_CLASS",
+      "support_status": "DECLARED_UNVERIFIED",
+      "local_deployment_status": "NOT_PROBED",
+      "default_capability_state": "UNKNOWN",
+      "combat_passport": { "status": "NOT_READY" }
+    },
+    {
+      "harness_id": "H05",
+      "canonical_name": "DEEPSEEK_HARNESS",
+      "vendor": "DeepSeek",
+      "command_candidate": "dsh",
+      "package_candidate": "@deepseek-ai/dsh",
+      "integration_tier": "FIRST_CLASS",
+      "support_status": "DECLARED_UNVERIFIED",
+      "local_deployment_status": "NOT_PROBED",
+      "default_capability_state": "UNKNOWN",
+      "combat_passport": { "status": "NOT_READY" }
+    },
+    {
+      "harness_id": "H06",
+      "canonical_name": "QWEN_CODE",
+      "vendor": "Alibaba/Qwen",
+      "command_candidate": "qwen",
+      "integration_tier": "FIRST_CLASS",
+      "support_status": "DECLARED_UNVERIFIED",
+      "local_deployment_status": "NOT_PROBED",
+      "default_capability_state": "UNKNOWN",
+      "combat_passport": { "status": "NOT_READY" }
+    },
+    {
+      "harness_id": "H07",
+      "canonical_name": "GOOGLE_ANTIGRAVITY",
+      "vendor": "Google",
+      "command_candidate": "agy",
+      "integration_tier": "FIRST_CLASS",
+      "support_status": "DECLARED_UNVERIFIED",
+      "local_deployment_status": "NOT_PROBED",
+      "default_capability_state": "UNKNOWN",
+      "combat_passport": { "status": "NOT_READY" }
+    },
+    {
+      "harness_id": "H08",
+      "canonical_name": "MISTRAL_VIBE",
+      "vendor": "Mistral AI",
+      "command_candidate": "vibe",
+      "integration_tier": "FIRST_CLASS",
+      "support_status": "DECLARED_UNVERIFIED",
+      "local_deployment_status": "NOT_PROBED",
+      "default_capability_state": "UNKNOWN",
+      "combat_passport": { "status": "NOT_READY" }
+    }
+  ],
+  "auxiliary": [
+    {
+      "harness_id": "AUX-H01",
+      "canonical_name": "HERMES",
+      "vendor": "Nous Research",
+      "integration_tier": "AUXILIARY_COMPATIBILITY",
+      "support_status": "DECLARED_UNVERIFIED",
+      "local_deployment_status": "NOT_PROBED",
+      "default_capability_state": "UNKNOWN",
+      "combat_passport": { "status": "NOT_READY" },
+      "notes": ["A v0.2 candidate adapter exists; federation conformance evidence is not yet complete."]
+    }
+  ],
+  "required_evidence": [
+    "official_source",
+    "upstream_version",
+    "install",
+    "authentication",
+    "headless_interface",
+    "structured_output",
+    "adapter_unit_tests",
+    "workspace_read",
+    "workspace_write",
+    "cancellation",
+    "session_resume",
+    "sandbox_or_worktree",
+    "artifacts",
+    "usage",
+    "trace"
+  ],
+  "notes": [
+    "This file uses the JSON-compatible subset of YAML 1.2 so the public runtime needs no YAML dependency.",
+    "FIRST_CLASS is roadmap priority, not verified support.",
+    "Global support status and machine-local deployment status are independent evidence axes.",
+    "Command and package fields remain discovery candidates until a Combat Passport pins evidence."
+  ]
+}

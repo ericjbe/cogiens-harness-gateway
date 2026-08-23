@@ -3,6 +3,8 @@
 状态：架构冻结公开预览
 发布标签：`v0.3.0-architecture-freeze`
 运行基线：`v0.2.0-deployment-candidate`
+
+实施更新：`v0.3.0-alpha.1` 已实现 P2-A Registry Loader、能力模型、相互独立的支持/部署状态、证据门以及 H01 Combat Passport。下方队列表记录的是架构冻结时的初始状态；当前机器可读状态以运行时 Registry 为准。
 公共项目名称：Cogiens Harness Gateway（CHG）
 内部架构工作名称：Cogiens Joint Harness Gate
 

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cogiens:chg:schema:combat-passport:v0.3.0-alpha.1",
+  "title": "CHG Combat Passport v0.3.0-alpha.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "passport_id",
+    "harness_id",
+    "canonical_name",
+    "status",
+    "evaluated_support_status",
+    "evaluated_at",
+    "scope",
+    "evidence",
+    "blocking_gaps",
+    "decision"
+  ],
+  "properties": {
+    "schema_version": { "const": "0.3.0-alpha.1" },
+    "passport_id": { "type": "string", "minLength": 1 },
+    "harness_id": { "type": "string", "pattern": "^(?:H[0-9]{2}|AUX-H[0-9]{2})$" },
+    "canonical_name": { "type": "string", "pattern": "^[A-Z0-9_]+$" },
+    "status": { "enum": ["NOT_READY", "HUMAN_BRIDGED", "LIMITED_AUTONOMOUS", "NATIVE_AUTONOMOUS"] },
+    "evaluated_support_status": {
+      "enum": ["DECLARED_UNVERIFIED", "CONFORMANCE_PARTIAL", "CONFORMANCE_VERIFIED", "PRODUCTION_CANDIDATE", "PRODUCTION_CERTIFIED", "BLOCKED", "DEPRECATED"]
+    },
+    "evaluated_at": { "type": "string", "format": "date-time" },
+    "scope": {
+      "type": "object",
+      "required": ["adapter_id", "adapter_version", "upstream_version", "runtime_platform_evidence"],
+      "properties": {
+        "adapter_id": { "type": "string" },
+        "adapter_version": { "type": "string" },
+        "upstream_version": { "type": "string" },
+        "runtime_platform_evidence": { "type": "string" }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status", "summary"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["VERIFIED", "LIMITED", "NOT_OBSERVED", "UNSUPPORTED", "FAILED", "NOT_APPLICABLE"] },
+          "source": { "type": "string" },
+          "summary": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "blocking_gaps": { "type": "array", "items": { "type": "string" } },
+    "decision": { "type": "string", "minLength": 1 }
+  }
+}

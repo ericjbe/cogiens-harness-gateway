@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { AdapterError } from "../../../packages/adapter-sdk/src/index.mjs";
+import { loadFederationRegistry } from "../../../packages/gateway-core/src/federation-registry.mjs";
 import { createRegistry, loadGatewayConfig } from "../../../packages/gateway-core/src/registry.mjs";
 import { GatewayRuntime } from "../../../packages/gateway-core/src/runtime.mjs";
 
@@ -16,6 +17,10 @@ const port = Number(process.env.CHG_PORT ?? config.server?.port ?? 8787);
 const tokenName = config.server?.token_env ?? "CHG_API_TOKEN";
 const token = process.env[tokenName] ?? "";
 if (!isLoopback(host) && !token) throw new Error(`${tokenName} is required when binding beyond loopback`);
+const federationRegistry = await loadFederationRegistry(
+  process.env.CHG_FEDERATION_REGISTRY ?? path.join(ROOT, "config", "harness-registry.v0.3.yaml"),
+  { rootDirectory: ROOT }
+);
 
 const runtime = await new GatewayRuntime({
   config,
@@ -29,6 +34,19 @@ const server = http.createServer(async (request, response) => {
     const url = new URL(request.url, `http://${request.headers.host ?? `${host}:${port}`}`);
     if (request.method === "GET" && url.pathname === "/health") return send(response, 200, await runtime.health());
     if (request.method === "GET" && url.pathname === "/v1/adapters") return send(response, 200, { adapters: await runtime.listAdapters() });
+    if (request.method === "GET" && url.pathname === "/v1/federation/registry") return send(response, 200, federationRegistry.snapshot());
+    const federationMatch = url.pathname.match(/^\/v1\/federation\/harnesses\/([A-Za-z0-9_.-]+)(?:\/(capabilities|passport))?$/);
+    if (request.method === "GET" && federationMatch) {
+      const [, harnessId, resource] = federationMatch;
+      const payload = resource === "capabilities"
+        ? federationRegistry.getCapabilities(harnessId)
+        : resource === "passport"
+          ? federationRegistry.getCombatPassport(harnessId)
+          : federationRegistry.getHarness(harnessId);
+      return payload
+        ? send(response, 200, payload)
+        : send(response, 404, { error: { code: "HARNESS_NOT_FOUND", message: "Federation harness not found" } });
+    }
     if (request.method === "POST" && url.pathname === "/v1/jobs/fanout") {
       const body = await readJson(request, config.server?.max_request_bytes ?? 1024 * 1024);
       const job = await runtime.submitFanout(body);
@@ -53,8 +71,11 @@ const server = http.createServer(async (request, response) => {
 });
 
 server.listen(port, host, () => {
-  process.stdout.write(`Cogiens Harness Gateway v${config.version ?? "0.2.0"} listening on http://${host}:${port}\n`);
+  const address = server.address();
+  const listeningPort = typeof address === "object" && address ? address.port : port;
+  process.stdout.write(`Cogiens Harness Gateway v${config.version ?? "0.3.0-alpha.1"} listening on http://${host}:${listeningPort}\n`);
   process.stdout.write(`Config: ${config.config_path}\n`);
+  process.stdout.write(`Federation registry: ${federationRegistry.sourcePath}\n`);
 });
 
 for (const signal of ["SIGINT", "SIGTERM"]) {

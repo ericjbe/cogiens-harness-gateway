@@ -31,10 +31,11 @@
     "verify:boundary": "node scripts/verify-public-boundary.mjs",
     "verify:discoverability": "node scripts/verify-discoverability.mjs",
     "verify:federation": "node scripts/verify-federation-registry.mjs",
-    "verify": "npm run verify:schemas && npm run verify:boundary && npm run verify:discoverability && npm run verify:federation && npm test",
+    "verify": "npm run verify:schemas && npm run verify:boundary && npm run verify:discoverability && npm run verify:federation && npm test && node scripts/verify-md-links.mjs",
     "example:mock": "node examples/run-mock.mjs",
     "gateway": "node apps/gateway/src/server.mjs",
     "gateway:detect": "node scripts/detect-adapters.mjs",
-    "gateway:cli": "node scripts/chg.mjs"
+    "gateway:cli": "node scripts/chg.mjs",
+    "verify:md-links": "node scripts/verify-md-links.mjs"
   }
 }

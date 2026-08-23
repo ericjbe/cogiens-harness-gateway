@@ -25,6 +25,23 @@ This catalog separates verified support from integration intent. A vendor name i
 
 The experimental adapters deliberately declare native approval bridging as unsupported. They are suitable for local evaluation and contributor work, not a production certification claim.
 
+## v0.3 architecture targets
+
+The v0.3 federation registry separates roadmap priority from verified support. `FIRST_CLASS` means the architecture reserves a native integration path; it does not mean that an adapter is installed, runnable, conformant, or certified.
+
+| ID | Architecture target | Integration tier | Initial support status | Combat Passport |
+|---|---|---|---|---|
+| H01 | OpenAI Codex | FIRST_CLASS | DECLARED_UNVERIFIED | NOT_READY |
+| H02 | Anthropic Claude Code | FIRST_CLASS | DECLARED_UNVERIFIED | NOT_READY |
+| H03 | xAI Grok Build | FIRST_CLASS | DECLARED_UNVERIFIED | NOT_READY |
+| H04 | Moonshot Kimi Code | FIRST_CLASS | DECLARED_UNVERIFIED | NOT_READY |
+| H05 | DeepSeek Harness | FIRST_CLASS | DECLARED_UNVERIFIED | NOT_READY |
+| H06 | Qwen Code | FIRST_CLASS | DECLARED_UNVERIFIED | NOT_READY |
+| H07 | Google Antigravity CLI | FIRST_CLASS | DECLARED_UNVERIFIED | NOT_READY |
+| H08 | Mistral Vibe | FIRST_CLASS | DECLARED_UNVERIFIED | NOT_READY |
+
+Hermes remains an auxiliary compatibility integration. Read [RFC 0001](rfcs/0001-eight-harness-federation.md) and the [v0.3 registry](../config/harness-registry.v0.3.yaml). The current catalog above remains the source of truth for implemented v0.2 adapters.
+
 ## Add an adapter
 
 1. Read [Build an Adapter](BUILD_AN_ADAPTER.md) and the [Adapter Contract](ADAPTER_CONTRACT_v0.1.md).

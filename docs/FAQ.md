@@ -22,6 +22,10 @@ No. CHG is not a model API router. A model API router selects inference endpoint
 
 P0 includes the public Adapter Contract, JSON Schemas, SDK primitives, conformance kit, and an in-memory Mock Adapter. v0.2 adds local deployment candidates for Codex CLI, Hermes CLI, and the published DeepSeek Harness Python SDK. They must pass local preflight and are not production-certified. Independent Grok and Qwen harness adapters remain research targets.
 
+## Does v0.3 mean eight harnesses already work?
+
+No. `v0.3.0-architecture-freeze` is a public architecture preview. Codex, Claude Code, Grok Build, Kimi Code, DeepSeek Harness, Qwen Code, Google Antigravity CLI, and Mistral Vibe are first-class integration targets, but every one begins as `DECLARED_UNVERIFIED`. The implemented runtime remains v0.2. Each target must publish official-interface, authentication, lifecycle, isolation, cancellation, artifact, platform, and conformance evidence before its support status can advance.
+
 ## Why not call each harness directly?
 
 Direct integrations duplicate identity, lifecycle, capability, approval, cancellation, artifact, and audit logic. CHG keeps provider-specific behavior in adapters while applications use a stable, provider-neutral control boundary.

@@ -83,18 +83,28 @@ The stable contract must define:
 
 The registry support status and Run execution status are different dimensions.
 
-Proposed integration support states:
+Integration support states implemented by the P2-A Registry runtime:
 
 - `DECLARED_UNVERIFIED`
-- `DISCOVERED`
-- `INSTALLED`
-- `AUTHENTICATED`
 - `CONFORMANCE_PARTIAL`
 - `CONFORMANCE_VERIFIED`
 - `PRODUCTION_CANDIDATE`
 - `PRODUCTION_CERTIFIED`
 - `BLOCKED`
 - `DEPRECATED`
+
+Machine-local deployment states are separate:
+
+- `NOT_PROBED`
+- `NOT_DISCOVERED`
+- `DISCOVERED`
+- `AUTH_REQUIRED`
+- `AUTHENTICATED`
+- `HEALTHY`
+- `UNHEALTHY`
+- `BLOCKED`
+
+An installation or login result on one machine cannot promote the public integration support state.
 
 Proposed Combat Passport readiness states:
 
@@ -105,4 +115,4 @@ Proposed Combat Passport readiness states:
 
 ## Compatibility rule
 
-Existing v0.1 schemas and v0.2 runtime behavior remain normative for released code until a later release explicitly freezes and implements v0.3. Publication of this file does not change the runtime contract version.
+Existing v0.1 adapter schemas and v0.2 Job/Run behavior remain normative. The P2-A Registry runtime implements evidence and discovery metadata only; it does not freeze this draft or change the adapter contract version.

@@ -1,0 +1,39 @@
+{
+  "schema_version": "0.3.0-alpha.1",
+  "passport_id": "CP-H01-OPENAI-CODEX-0.3.0-alpha.1",
+  "harness_id": "H01",
+  "canonical_name": "OPENAI_CODEX",
+  "status": "NOT_READY",
+  "evaluated_support_status": "CONFORMANCE_PARTIAL",
+  "evaluated_at": "2026-08-23T00:00:00Z",
+  "scope": {
+    "adapter_id": "openai.codex.cli",
+    "adapter_version": "0.3.0-alpha.1",
+    "upstream_version": "NOT_PINNED",
+    "runtime_platform_evidence": "NOT_OBSERVED_IN_RELEASE_BUILDER"
+  },
+  "evidence": [
+    { "id": "official_source", "status": "VERIFIED", "source": "https://developers.openai.com/codex/cli/reference/", "summary": "Official Codex CLI reference documents the stable non-interactive exec interface." },
+    { "id": "upstream_version", "status": "NOT_OBSERVED", "summary": "The release builder did not have a Codex executable; no upstream binary version is certified." },
+    { "id": "install", "status": "NOT_OBSERVED", "summary": "Installation remains a machine-local preflight concern." },
+    { "id": "authentication", "status": "NOT_OBSERVED", "source": "https://developers.openai.com/codex/auth/", "summary": "Official authentication flows are documented, but no account session is included or certified." },
+    { "id": "headless_interface", "status": "VERIFIED", "source": "https://developers.openai.com/codex/cli/reference/", "summary": "The adapter invokes codex exec non-interactively and sends the prompt through stdin." },
+    { "id": "structured_output", "status": "VERIFIED", "source": "https://developers.openai.com/codex/cli/reference/", "summary": "The adapter consumes the documented --json JSONL event stream." },
+    { "id": "adapter_unit_tests", "status": "VERIFIED", "source": "tests/adapters/codex-cli-adapter.test.mjs", "summary": "Unit tests lock safe invocation flags, JSONL result parsing, usage capture and failure mapping." },
+    { "id": "workspace_read", "status": "LIMITED", "summary": "The adapter sets an explicit working directory; a live vendor-runtime conformance run is still required." },
+    { "id": "workspace_write", "status": "LIMITED", "summary": "workspace-write is the default sandbox, but filesystem effects are not yet certified across platforms." },
+    { "id": "cancellation", "status": "LIMITED", "summary": "CHG terminates the spawned process tree; native Codex cancellation semantics are not yet mapped." },
+    { "id": "session_resume", "status": "UNSUPPORTED", "summary": "The v0.3 alpha adapter is deliberately ephemeral and does not expose exec resume." },
+    { "id": "sandbox_or_worktree", "status": "LIMITED", "source": "https://developers.openai.com/codex/cli/reference/", "summary": "The adapter defaults to workspace-write; isolated worktree orchestration is not yet implemented." },
+    { "id": "artifacts", "status": "VERIFIED", "source": "tests/runtime/process-adapter.test.mjs", "summary": "CHG converts the final response into a SHA-256 evidence artifact." },
+    { "id": "usage", "status": "LIMITED", "summary": "Usage is forwarded when present in turn.completed events; normalization is not yet certified." },
+    { "id": "trace", "status": "VERIFIED", "source": "tests/conformance/mock-adapter.test.mjs", "summary": "Gateway events and artifacts bind trace, job, run, adapter and native session identities." }
+  ],
+  "blocking_gaps": [
+    "Pin and record a tested upstream Codex CLI version.",
+    "Run authentication and health probes without exporting credentials.",
+    "Pass Linux, Windows and macOS live-runtime conformance evidence.",
+    "Verify cancellation, workspace effects and upgrade/rollback behavior."
+  ],
+  "decision": "Eligible for CONFORMANCE_PARTIAL only; not ready for production certification."
+}

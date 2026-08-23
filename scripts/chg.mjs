@@ -6,6 +6,13 @@ const token = process.env.CHG_API_TOKEN ?? "";
 
 if (command === "health") print(await request("GET", "/health"));
 else if (command === "adapters") print(await request("GET", "/v1/adapters"));
+else if (command === "federation") print(await request("GET", "/v1/federation/registry"));
+else if (["harness", "capabilities", "passport"].includes(command)) {
+  const id = argv[0];
+  if (!id) fail(`Usage: node scripts/chg.mjs ${command} HARNESS_ID`);
+  const suffix = command === "harness" ? "" : `/${command}`;
+  print(await request("GET", `/v1/federation/harnesses/${encodeURIComponent(id)}${suffix}`));
+}
 else if (command === "job") {
   const id = argv[0];
   if (!id) fail("Usage: node scripts/chg.mjs job JOB_ID");
@@ -40,7 +47,7 @@ else if (command === "job") {
   if (job.gateway_status === "FAILED") process.exitCode = 2;
 } else {
   process.stdout.write("Cogiens Harness Gateway CLI\n\n");
-  process.stdout.write("  health\n  adapters\n  job JOB_ID\n");
+  process.stdout.write("  health\n  adapters\n  federation\n  harness HARNESS_ID\n  capabilities HARNESS_ID\n  passport HARNESS_ID\n  job JOB_ID\n");
   process.stdout.write("  fanout --workspace ABS_PATH --prompt-file task.txt [--adapters id1,id2] [--timeout 1800] [--concurrency 3]\n");
 }
 

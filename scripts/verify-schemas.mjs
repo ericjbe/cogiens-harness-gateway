@@ -7,7 +7,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const schemaDirectory = path.join(root, "schemas");
 const fileNames = (await readdir(schemaDirectory)).filter((name) => name.endsWith(".schema.json")).sort();
 
-assert.equal(fileNames.length, 6, "P0 requires exactly six public schemas");
+assert.equal(fileNames.length, 8, "v0.3.0-alpha.1 requires eight public schemas");
 
 const ids = new Set();
 for (const fileName of fileNames) {

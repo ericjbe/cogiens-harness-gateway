@@ -24,7 +24,11 @@ P0 includes the public Adapter Contract, JSON Schemas, SDK primitives, conforman
 
 ## Does v0.3 mean eight harnesses already work?
 
-No. `v0.3.0-architecture-freeze` is a public architecture preview. Codex, Claude Code, Grok Build, Kimi Code, DeepSeek Harness, Qwen Code, Google Antigravity CLI, and Mistral Vibe are first-class integration targets, but every one begins as `DECLARED_UNVERIFIED`. The implemented runtime remains v0.2. Each target must publish official-interface, authentication, lifecycle, isolation, cancellation, artifact, platform, and conformance evidence before its support status can advance.
+No. `v0.3.0-alpha.1` implements the Registry, capability states, evidence gates, and read-only inspection—not eight vendor adapters. H01 Codex is only `CONFORMANCE_PARTIAL` and its Passport is `NOT_READY`; H02-H08 remain `DECLARED_UNVERIFIED`. Each target must publish official-interface, authentication, lifecycle, isolation, cancellation, artifact, platform, and conformance evidence before its support status can advance.
+
+## Why are support status and local login status separate?
+
+Support status is a global, reviewable product claim. Local deployment status describes one machine's executable, authentication, and health. Installing or logging in on one computer cannot promote global support, and a globally verified adapter can still be unhealthy on a particular machine.
 
 ## Why not call each harness directly?
 

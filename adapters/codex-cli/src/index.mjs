@@ -4,6 +4,7 @@ export function createCodexCliAdapter(config = {}) {
   const command = config.command ?? "codex";
   return new OneShotProcessAdapter({
     adapterId: config.id ?? "openai.codex.cli",
+    adapterVersion: "0.3.0-alpha.1",
     command,
     harnessVersion: config.harness_version ?? "codex-cli",
     versionArgs: ["--version"],

@@ -1,0 +1,88 @@
+import http from "node:http";
+import { existsSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+import { AdapterError } from "../../../packages/adapter-sdk/src/index.mjs";
+import { createRegistry, loadGatewayConfig } from "../../../packages/gateway-core/src/registry.mjs";
+import { GatewayRuntime } from "../../../packages/gateway-core/src/runtime.mjs";
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
+const localConfig = path.join(ROOT, "config", "harnesses.local.json");
+const configPath = process.env.CHG_CONFIG ?? (existsSync(localConfig) ? localConfig : path.join(ROOT, "config", "harnesses.example.json"));
+const config = await loadGatewayConfig(configPath);
+const host = process.env.CHG_HOST ?? config.server?.host ?? "127.0.0.1";
+const port = Number(process.env.CHG_PORT ?? config.server?.port ?? 8787);
+const tokenName = config.server?.token_env ?? "CHG_API_TOKEN";
+const token = process.env[tokenName] ?? "";
+if (!isLoopback(host) && !token) throw new Error(`${tokenName} is required when binding beyond loopback`);
+
+const runtime = await new GatewayRuntime({
+  config,
+  registry: createRegistry(config),
+  dataRoot: process.env.CHG_DATA_ROOT ?? path.join(ROOT, "var")
+}).initialize();
+
+const server = http.createServer(async (request, response) => {
+  try {
+    if (!authorized(request, token)) return send(response, 401, { error: { code: "AUTH_REQUIRED", message: "Invalid bearer token" } });
+    const url = new URL(request.url, `http://${request.headers.host ?? `${host}:${port}`}`);
+    if (request.method === "GET" && url.pathname === "/health") return send(response, 200, await runtime.health());
+    if (request.method === "GET" && url.pathname === "/v1/adapters") return send(response, 200, { adapters: await runtime.listAdapters() });
+    if (request.method === "POST" && url.pathname === "/v1/jobs/fanout") {
+      const body = await readJson(request, config.server?.max_request_bytes ?? 1024 * 1024);
+      const job = await runtime.submitFanout(body);
+      return send(response, 202, job, { location: `/v1/jobs/${job.job_id}` });
+    }
+    const jobMatch = url.pathname.match(/^\/v1\/jobs\/(job_[A-Za-z0-9_-]+)$/);
+    if (request.method === "GET" && jobMatch) {
+      const job = runtime.getJob(jobMatch[1]);
+      return job ? send(response, 200, job) : send(response, 404, { error: { code: "NOT_FOUND", message: "Job not found" } });
+    }
+    const cancelMatch = url.pathname.match(/^\/v1\/jobs\/(job_[A-Za-z0-9_-]+)\/runs\/(run_[A-Za-z0-9_-]+)\/cancel$/);
+    if (request.method === "POST" && cancelMatch) {
+      const body = await readJson(request, 64 * 1024);
+      const result = await runtime.cancelRun(cancelMatch[1], cancelMatch[2], body.reason ?? "user");
+      return result ? send(response, 200, result) : send(response, 404, { error: { code: "NOT_FOUND", message: "Run not found" } });
+    }
+    return send(response, 404, { error: { code: "NOT_FOUND", message: "Route not found" } });
+  } catch (error) {
+    const status = error instanceof AdapterError && ["POLICY_DENIED", "WORKSPACE_INVALID", "PROTOCOL_MISMATCH"].includes(error.code) ? 400 : 500;
+    return send(response, status, { error: error instanceof AdapterError ? error.toJSON() : { code: "INTERNAL_ERROR", message: error instanceof Error ? error.message : String(error) } });
+  }
+});
+
+server.listen(port, host, () => {
+  process.stdout.write(`Cogiens Harness Gateway v${config.version ?? "0.2.0"} listening on http://${host}:${port}\n`);
+  process.stdout.write(`Config: ${config.config_path}\n`);
+});
+
+for (const signal of ["SIGINT", "SIGTERM"]) {
+  process.on(signal, () => server.close(() => process.exit(0)));
+}
+
+function authorized(request, expected) {
+  if (!expected) return true;
+  return request.headers.authorization === `Bearer ${expected}`;
+}
+
+function isLoopback(value) {
+  return new Set(["127.0.0.1", "::1", "localhost"]).has(value);
+}
+
+async function readJson(request, maxBytes) {
+  let body = "";
+  let bytes = 0;
+  for await (const chunk of request) {
+    bytes += chunk.length;
+    if (bytes > maxBytes) throw new AdapterError("POLICY_DENIED", "Request body is too large");
+    body += chunk.toString("utf8");
+  }
+  try { return body ? JSON.parse(body) : {}; } catch { throw new AdapterError("PROTOCOL_MISMATCH", "Request body must be valid JSON"); }
+}
+
+function send(response, status, payload, headers = {}) {
+  const body = `${JSON.stringify(payload, null, 2)}\n`;
+  response.writeHead(status, { "content-type": "application/json; charset=utf-8", "content-length": Buffer.byteLength(body), ...headers });
+  response.end(body);
+}

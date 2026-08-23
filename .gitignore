@@ -12,5 +12,7 @@ tmp/
 *.session
 secrets/
 credentials/
+var/
+config/harnesses.local.json
 .DS_Store
 Thumbs.db

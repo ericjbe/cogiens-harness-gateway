@@ -1,0 +1,39 @@
+{
+  "version": "0.2.0",
+  "server": {
+    "host": "127.0.0.1",
+    "port": 8787,
+    "token_env": "CHG_API_TOKEN",
+    "max_request_bytes": 1048576,
+    "max_output_bytes": 4194304,
+    "max_runtime_seconds": 3600,
+    "max_concurrency": 4,
+    "max_adapters_per_job": 8
+  },
+  "adapters": [
+    {
+      "id": "openai.codex.cli",
+      "kind": "codex-cli",
+      "enabled": false,
+      "command": "codex",
+      "sandbox": "workspace-write",
+      "approval_mode": "never"
+    },
+    {
+      "id": "nous.hermes.cli",
+      "kind": "hermes-cli",
+      "enabled": false,
+      "command": "hermes",
+      "provider": "auto"
+    },
+    {
+      "id": "deepseek.harness.python",
+      "kind": "deepseek-python",
+      "enabled": false,
+      "command": "python3",
+      "provider": "deepseek-official",
+      "model": "deepseek-v4-flash",
+      "required_env": ["DEEPSEEK_API_KEY"]
+    }
+  ]
+}

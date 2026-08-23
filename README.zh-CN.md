@@ -7,7 +7,7 @@
 [![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-339933.svg)](package.json)
 [![欢迎 PR](https://img.shields.io/badge/PRs-welcome-EB6100.svg)](CONTRIBUTING.md)
 
-[English](README.md) · [简体中文](README.zh-CN.md) · [部署手册](docs/DEPLOYMENT.zh-CN.md) · [常见问题](docs/FAQ.md) · [开发适配器](docs/BUILD_AN_ADAPTER.md) · [路线图](docs/ROADMAP.md)
+[English](README.md) · [简体中文](README.zh-CN.md) · [v0.3 八 Harness 架构预览](docs/rfcs/0001-eight-harness-federation.zh-CN.md) · [部署手册](docs/DEPLOYMENT.zh-CN.md) · [常见问题](docs/FAQ.md) · [开发适配器](docs/BUILD_AN_ADAPTER.md) · [路线图](docs/ROADMAP.md)
 
 **Cogiens Harness Gateway 是一个采用 MIT 许可证、厂商中立的网关。一个应用可以通过统一的 Adapter Contract，发现、调用、观察、审批、取消和审计多个有状态的 AI Agent Harness。**
 
@@ -35,7 +35,7 @@ Harness 是模型外围的执行系统，负责会话、工具、文件、审批
 
 ## 当前真实状态
 
-`v0.2.0` 在经过验证的 P0 公共核心上增加了可运行的本地部署候选；它不是生产级托管服务，也不代表生产认证。
+`v0.2.0` 在经过验证的 P0 公共核心上增加了可运行的本地部署候选；它不是生产级托管服务，也不代表生产认证。`v0.3.0-architecture-freeze` 是“八 Harness 联邦”的纯文档公开预览；当前真正实现的运行时仍是 v0.2。
 
 | 组件 | 状态 |
 |---|---|
@@ -47,12 +47,21 @@ Harness 是模型外围的执行系统，负责会话、工具、文件、审批
 | Codex CLI one-shot Adapter | 候选；要求本机已安装并登录 |
 | Hermes CLI one-shot Adapter | 候选；要求本机已安装并配置 Provider |
 | DeepSeek Harness Python SDK Adapter | 候选；Windows 建议通过 WSL2 运行 |
+| 八 Harness 联邦 RFC | 架构方向已冻结并公开征求意见；尚未实现 |
+| Adapter Contract v0.3 | 草案；v0.1 仍是当前规范 |
+| Harness Registry v0.3 | 仅为架构数据；H01-H08 全部为 `DECLARED_UNVERIFIED` |
 | Linux / Windows，Node.js 20 / 22 CI | 已验证 |
 | 生产认证厂商适配器 | 规划中，尚未发布 |
 | 可移植 Digital Job Pack Contract | 公开设计中，尚未稳定 |
 | Cogiens Cloud 与企业模块 | 独立商业范围 |
 
 Codex、Hermes 和 DeepSeek Harness 已有 one-shot 部署候选，但还没有生产认证。Grok 与 Qwen 可以先作为 Hermes 的模型 Provider 使用，这不等于已经存在独立的 Grok/Qwen Harness Adapter。准确状态见[适配器目录](docs/ADAPTER_CATALOG.md)。
+
+## v0.3 八 Harness 联邦架构公开预览
+
+公开架构队列包括 OpenAI Codex、Anthropic Claude Code、xAI Grok Build、Moonshot Kimi Code、DeepSeek Harness、Qwen Code、Google Antigravity CLI 和 Mistral Vibe。它们是第一优先级的**架构目标**，不是当前支持声明。每一个目标都从 `DECLARED_UNVERIFIED` 开始，只有取得公开、可复验的 Combat Passport 证据后才能升级支持状态。
+
+因此，CHG 是面向多 Harness 编排和 AI Agent Harness 互操作的开放基础设施，不是模型路由器，也没有声称八个厂商运行时已经接通。请审阅[中文架构预览](docs/rfcs/0001-eight-harness-federation.zh-CN.md)、[完整英文 RFC](docs/rfcs/0001-eight-harness-federation.md)、[v0.3 Adapter Contract 草案](docs/contracts/adapter-contract.v0.3-draft.md)、[Registry](config/harness-registry.v0.3.yaml)和[迁移计划](docs/migrations/v0.2-to-v0.3.md)。
 
 ## 快速开始
 

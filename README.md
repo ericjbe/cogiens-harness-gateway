@@ -7,7 +7,7 @@
 [![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-339933.svg)](package.json)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-EB6100.svg)](CONTRIBUTING.md)
 
-[English](README.md) · [简体中文](README.zh-CN.md) · [Deploy](docs/DEPLOYMENT.zh-CN.md) · [FAQ](docs/FAQ.md) · [Build an adapter](docs/BUILD_AN_ADAPTER.md) · [Roadmap](docs/ROADMAP.md)
+[English](README.md) · [简体中文](README.zh-CN.md) · [v0.3 Architecture Preview](docs/rfcs/0001-eight-harness-federation.md) · [Deploy](docs/DEPLOYMENT.zh-CN.md) · [FAQ](docs/FAQ.md) · [Build an adapter](docs/BUILD_AN_ADAPTER.md) · [Roadmap](docs/ROADMAP.md)
 
 **Cogiens Harness Gateway is an MIT-licensed, vendor-neutral gateway that lets one application discover, invoke, observe, approve, cancel, and audit multiple stateful AI agent harnesses through one Adapter Contract.**
 
@@ -44,7 +44,7 @@ Model routers and CHG can be used together. One chooses a model endpoint; the ot
 
 ## Current status
 
-`v0.2.0` adds a local-first deployment candidate to the verified P0 public core. It is runnable, but it is not a production hosted service or a production certification claim.
+`v0.2.0` adds a local-first deployment candidate to the verified P0 public core. It is runnable, but it is not a production hosted service or a production certification claim. `v0.3.0-architecture-freeze` is a documentation-only public preview of the proposed Eight-Harness Federation; the implemented runtime remains v0.2.
 
 | Component | Status |
 |---|---|
@@ -56,6 +56,9 @@ Model routers and CHG can be used together. One chooses a model endpoint; the ot
 | Codex CLI one-shot adapter | Candidate; requires installed and authenticated CLI |
 | Hermes CLI one-shot adapter | Candidate; requires installed and configured CLI |
 | DeepSeek Harness Python SDK adapter | Candidate on SDK-supported Linux/macOS; WSL2 recommended on Windows |
+| Eight-Harness Federation RFC | Architecture frozen for public review; not implemented |
+| Adapter Contract v0.3 | Draft for review; v0.1 remains normative |
+| Harness Registry v0.3 | Architecture data only; every H01-H08 target is `DECLARED_UNVERIFIED` |
 | Linux and Windows CI on Node.js 20/22 | Passing |
 | Production-certified vendor adapters | Planned; not yet released |
 | Portable Digital Job Pack contract | Open design track; not yet stable |
@@ -73,6 +76,12 @@ Model routers and CHG can be used together. One chooses a model endpoint; the ot
 | DeepSeek Harness Python SDK | P1 deployment candidate | Published SDK/JSON-RPC runtime; no Windows-native claim |
 
 The names above identify integration targets only. CHG is not affiliated with or endorsed by their respective vendors. See the [Adapter Catalog](docs/ADAPTER_CATALOG.md) for acceptance rules.
+
+### v0.3 Eight-Harness Federation architecture preview
+
+The public architecture cohort is OpenAI Codex, Anthropic Claude Code, xAI Grok Build, Moonshot Kimi Code, DeepSeek Harness, Qwen Code, Google Antigravity CLI, and Mistral Vibe. These are first-class **architecture targets**, not current support claims. Every target begins as `DECLARED_UNVERIFIED` and must earn a public Combat Passport before support can advance.
+
+This makes CHG a proposed multi-harness orchestration and AI agent harness interoperability layer—not a model router and not a claim that eight vendor runtimes already work. Review the [English RFC](docs/rfcs/0001-eight-harness-federation.md), [Chinese summary](docs/rfcs/0001-eight-harness-federation.zh-CN.md), [draft v0.3 Adapter Contract](docs/contracts/adapter-contract.v0.3-draft.md), [registry](config/harness-registry.v0.3.yaml), and [migration plan](docs/migrations/v0.2-to-v0.3.md).
 
 ## Quick start
 

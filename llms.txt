@@ -15,11 +15,15 @@ CHG is not a model API router. Model routers select inference endpoints. CHG coo
 - Provider-neutral JSON Schemas
 - Adapter SDK primitives and conformance kit
 - In-memory Mock Adapter with 10 conformance tests
+- Local HTTP gateway with bounded parallel fan-out
+- Candidate one-shot adapters for Codex CLI and Hermes CLI
+- Candidate bridge for the published DeepSeek Harness Python SDK on its declared platforms
 - Linux and Windows CI on Node.js 20 and 22
 
 ## Not current support claims
 
-- Production Codex, Grok, Qwen, and DeepSeek adapters are planned or research targets.
+- Candidate adapters are not production-certified; native approval bridging and distributed runners remain open work.
+- Independent Grok and Qwen harness adapters remain research targets. Hermes model-provider selection is not an independent harness adapter.
 - The Digital Job Pack contract is an open design track and is not stable in P0.
 - The repository is a public-core baseline, not a production hosted service.
 
@@ -34,6 +38,7 @@ CHG is not a model API router. Model routers select inference endpoints. CHG coo
 - Digital Job Packs: https://github.com/ericjbe/cogiens-harness-gateway/blob/main/docs/DIGITAL_JOB_PACKS.md
 - Architecture: https://github.com/ericjbe/cogiens-harness-gateway/blob/main/docs/ARCHITECTURE.md
 - Security Model: https://github.com/ericjbe/cogiens-harness-gateway/blob/main/docs/SECURITY_MODEL.md
+- Deployment: https://github.com/ericjbe/cogiens-harness-gateway/blob/main/docs/DEPLOYMENT.zh-CN.md
 - Contributing: https://github.com/ericjbe/cogiens-harness-gateway/blob/main/CONTRIBUTING.md
 - MIT License: https://github.com/ericjbe/cogiens-harness-gateway/blob/main/LICENSE
 - Schemas: https://github.com/ericjbe/cogiens-harness-gateway/tree/main/schemas

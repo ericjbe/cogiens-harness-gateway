@@ -1,0 +1,1 @@
+Inspect the workspace, identify the highest-impact defect that can be verified locally, implement a bounded fix, run the relevant tests, and report changed files plus evidence.

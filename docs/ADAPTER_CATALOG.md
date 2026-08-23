@@ -17,10 +17,13 @@ This catalog separates verified support from integration intent. A vendor name i
 | Harness / adapter | Level | Interface | Evidence | Maintainer |
 |---|---|---|---|---|
 | In-memory Mock Harness | Reference | Local JavaScript interface | 10 conformance tests | Cogiens contributors |
-| OpenAI Codex app-server | Planned | Official interface must be pinned | Not yet published | Open |
+| OpenAI Codex CLI | Experimental | Official `codex exec --json` one-shot mode | Runtime tests; production evidence pending | Cogiens contributors |
+| Nous Hermes CLI | Experimental | Official `hermes chat --query-file -` one-shot mode | Runtime tests; production evidence pending | Cogiens contributors |
 | Grok-compatible harness | Planned | Official structured/headless interface required | Not yet published | Open |
 | Qwen-compatible harness | Planned | ACP or official structured interface required | Not yet published | Open |
-| DeepSeek-compatible harness | Planned | Official structured interface required | Not yet published | Open |
+| DeepSeek Harness Python SDK | Experimental | Published Python SDK over stdio JSON-RPC | Bridge testable on SDK-supported platforms; production evidence pending | Cogiens contributors |
+
+The experimental adapters deliberately declare native approval bridging as unsupported. They are suitable for local evaluation and contributor work, not a production certification claim.
 
 ## Add an adapter
 

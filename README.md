@@ -7,7 +7,7 @@
 [![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-339933.svg)](package.json)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-EB6100.svg)](CONTRIBUTING.md)
 
-[English](README.md) · [简体中文](README.zh-CN.md) · [FAQ](docs/FAQ.md) · [Build an adapter](docs/BUILD_AN_ADAPTER.md) · [Roadmap](docs/ROADMAP.md)
+[English](README.md) · [简体中文](README.zh-CN.md) · [Deploy](docs/DEPLOYMENT.zh-CN.md) · [FAQ](docs/FAQ.md) · [Build an adapter](docs/BUILD_AN_ADAPTER.md) · [Roadmap](docs/ROADMAP.md)
 
 **Cogiens Harness Gateway is an MIT-licensed, vendor-neutral gateway that lets one application discover, invoke, observe, approve, cancel, and audit multiple stateful AI agent harnesses through one Adapter Contract.**
 
@@ -44,7 +44,7 @@ Model routers and CHG can be used together. One chooses a model endpoint; the ot
 
 ## Current status
 
-`v0.1.0-p0-bootstrap` is the verified public-core baseline, not a production hosted service.
+`v0.2.0` adds a local-first deployment candidate to the verified P0 public core. It is runnable, but it is not a production hosted service or a production certification claim.
 
 | Component | Status |
 |---|---|
@@ -52,8 +52,12 @@ Model routers and CHG can be used together. One chooses a model endpoint; the ot
 | JSON Schemas | Available |
 | Adapter SDK primitives | Available |
 | In-memory Mock Adapter | Conformance verified |
+| Local HTTP control plane and bounded parallel fan-out | Deployment candidate |
+| Codex CLI one-shot adapter | Candidate; requires installed and authenticated CLI |
+| Hermes CLI one-shot adapter | Candidate; requires installed and configured CLI |
+| DeepSeek Harness Python SDK adapter | Candidate on SDK-supported Linux/macOS; WSL2 recommended on Windows |
 | Linux and Windows CI on Node.js 20/22 | Passing |
-| Production vendor adapters | Planned; not yet released |
+| Production-certified vendor adapters | Planned; not yet released |
 | Portable Digital Job Pack contract | Open design track; not yet stable |
 | Cogiens Cloud and enterprise modules | Separate commercial scope |
 
@@ -62,10 +66,11 @@ Model routers and CHG can be used together. One chooses a model endpoint; the ot
 | Harness / adapter | Stage | Evidence |
 |---|---|---|
 | In-memory Mock Harness | P0 reference | Conformance suite included |
-| OpenAI Codex app-server | P1 planned | Official interface pinning required |
+| OpenAI Codex CLI | P1 deployment candidate | Official `codex exec --json` one-shot interface |
+| Nous Hermes CLI | P1 deployment candidate | Official `hermes chat --query-file -` one-shot interface |
 | Grok-compatible harness | Research track | Official headless interface required |
 | Qwen-compatible harness | Research track | ACP or official structured interface required |
-| DeepSeek-compatible harness | Experimental research track | No production claim |
+| DeepSeek Harness Python SDK | P1 deployment candidate | Published SDK/JSON-RPC runtime; no Windows-native claim |
 
 The names above identify integration targets only. CHG is not affiliated with or endorsed by their respective vendors. See the [Adapter Catalog](docs/ADAPTER_CATALOG.md) for acceptance rules.
 
@@ -80,7 +85,7 @@ npm run verify
 npm run example:mock
 ```
 
-There are no runtime or development dependencies in P0.
+To deploy the real local gateway on Windows or WSL2, follow the [deployment guide](docs/DEPLOYMENT.zh-CN.md). The Gateway itself has no npm runtime dependencies; vendor harnesses remain separately installed and authenticated.
 
 Expected verification gates:
 
@@ -88,7 +93,7 @@ Expected verification gates:
 PASS verify-schemas
 PASS verify-public-boundary
 PASS verify-discoverability
-PASS conformance: 10 tests
+PASS tests: 14
 ```
 
 ## Build a harness adapter
@@ -131,10 +136,15 @@ That contract is **not frozen yet**. Read [Digital Job Packs](docs/DIGITAL_JOB_P
 
 ```text
 adapters/mock/            Reference in-memory adapter
+adapters/*-cli/           Candidate real harness adapters
+apps/gateway/             Local HTTP control plane
+config/                   Adapter registry and safe defaults
+deploy/                   Windows and WSL2 lifecycle scripts
 docs/                     Contract, architecture, security, FAQ, and author guides
 examples/                 Runnable examples
 packages/adapter-sdk/     Adapter validation and event primitives
 packages/conformance-kit/ Shared conformance assertions
+packages/gateway-core/    Fan-out orchestration and persistence
 schemas/                  Provider-neutral JSON Schemas
 scripts/                  Verification gates
 tests/conformance/        Adapter conformance tests
@@ -152,7 +162,7 @@ No. A model router such as an inference-routing service selects model endpoints.
 
 ### Which harnesses work today?
 
-P0 ships a verified in-memory Mock Adapter and the public contract needed to build real adapters. Production Codex, Grok, Qwen, and DeepSeek adapters are roadmap items, not completed claims.
+P0 ships the verified Mock Adapter. v0.2 adds candidate one-shot adapters for Codex CLI, Hermes CLI, and the published DeepSeek Harness Python SDK. They run only after local preflight passes, and they are not yet production-certified. Grok and Qwen can be selected as Hermes model providers where Hermes supports them; that is not the same as an independent Grok or Qwen harness adapter.
 
 ### Can I use CHG commercially?
 

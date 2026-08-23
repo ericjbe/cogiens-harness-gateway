@@ -1,7 +1,7 @@
 {
-  "name": "@cogiens/chg-p0-bootstrap",
-  "version": "0.1.0",
-  "description": "P0 bootstrap for the Cogiens Harness Gateway public core",
+  "name": "@cogiens/harness-gateway",
+  "version": "0.2.0",
+  "description": "Local-first control plane for routing one job to multiple real agent harnesses",
   "type": "module",
   "license": "MIT",
   "private": false,
@@ -17,11 +17,14 @@
     "node": ">=20"
   },
   "scripts": {
-    "test": "node --test tests/conformance/mock-adapter.test.mjs",
+    "test": "node --test",
     "verify:schemas": "node scripts/verify-schemas.mjs",
     "verify:boundary": "node scripts/verify-public-boundary.mjs",
     "verify:discoverability": "node scripts/verify-discoverability.mjs",
     "verify": "npm run verify:schemas && npm run verify:boundary && npm run verify:discoverability && npm test",
-    "example:mock": "node examples/run-mock.mjs"
+    "example:mock": "node examples/run-mock.mjs",
+    "gateway": "node apps/gateway/src/server.mjs",
+    "gateway:detect": "node scripts/detect-adapters.mjs",
+    "gateway:cli": "node scripts/chg.mjs"
   }
 }

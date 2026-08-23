@@ -201,6 +201,10 @@ export function redactSecrets(value) {
 function redactText(text) {
   return String(text)
     .replace(/\bsk-[A-Za-z0-9_-]{12,}\b/g, "[REDACTED]")
+    .replace(/\bxai-[A-Za-z0-9_-]{12,}\b/g, "[REDACTED]")
+    .replace(/\bAIza[A-Za-z0-9_-]{20,}\b/g, "[REDACTED]")
+    .replace(/\bAKIA[A-Z0-9]{16}\b/g, "[REDACTED]")
+    .replace(/\bBearer\s+[A-Za-z0-9._~+\/-]{12,}/gi, "Bearer [REDACTED]")
     .replace(/\bgh[pousr]_[A-Za-z0-9]{20,}\b/g, "[REDACTED]")
     .replace(/-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/g, "[REDACTED PRIVATE KEY]");
 }

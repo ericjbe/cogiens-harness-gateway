@@ -20,7 +20,7 @@ No. CHG is not a model API router. A model API router selects inference endpoint
 
 ## Which harnesses are supported now?
 
-P0 includes the public Adapter Contract, JSON Schemas, SDK primitives, conformance kit, and an in-memory Mock Adapter. Production Codex, Grok, Qwen, and DeepSeek adapters have not been released; they are roadmap or research targets.
+P0 includes the public Adapter Contract, JSON Schemas, SDK primitives, conformance kit, and an in-memory Mock Adapter. v0.2 adds local deployment candidates for Codex CLI, Hermes CLI, and the published DeepSeek Harness Python SDK. They must pass local preflight and are not production-certified. Independent Grok and Qwen harness adapters remain research targets.
 
 ## Why not call each harness directly?
 
@@ -52,7 +52,7 @@ No. CHG is an interoperability layer. Users remain responsible for provider acco
 
 ## Is CHG production-ready?
 
-Not yet. P0 is a verified contract-and-conformance baseline. A production adapter needs pinned upstream interfaces, isolation, approval and cancellation evidence, upgrade/rollback tests, security review, and operational ownership.
+Not yet. v0.2 is a runnable local deployment candidate. A production adapter still needs pinned upstream interfaces, stronger isolation, approval and cancellation evidence, upgrade/rollback tests, security review, and operational ownership.
 
 ## How can I contribute?
 

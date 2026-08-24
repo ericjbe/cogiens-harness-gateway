@@ -2,6 +2,7 @@ node_modules/
 coverage/
 dist/
 tmp/
+.chg-tmp/
 .env
 .env.*
 !.env.example

@@ -8,19 +8,20 @@ export function createCodexCliAdapter(config = {}) {
     harnessVersion: config.harness_version ?? "codex-cli",
     versionArgs: ["--version"],
     authModes: ["provider-login", "api-key", "oauth"],
+    blockedEnv: ["OPENAI_API_KEY"],
     capabilities: { structured_output: true, file_diff: true, usage: true, mcp: true },
     healthCheck: async () => {
-      const status = await probe(command, ["login", "status"], 15_000);
+      const status = await probe(command, ["login", "status"], 15_000, { blockedEnv: ["OPENAI_API_KEY"] });
       return status.ok ? { ok: true } : { ok: false, reason: "codex_not_authenticated" };
     },
     buildInvocation: ({ cwd, policy }) => {
       const args = [
+        "-c", `approval_policy=${JSON.stringify(config.approval_mode ?? "never")}`,
         "exec",
         "--json",
         "--ephemeral",
         "--color", "never",
         "--sandbox", config.sandbox ?? "workspace-write",
-        "--ask-for-approval", config.approval_mode ?? "never",
         "--skip-git-repo-check",
         "-C", cwd
       ];

@@ -20,7 +20,9 @@ const requiredFiles = [
   "NOTICE",
   "THIRD_PARTY_NOTICES.md"
 ];
-const excludedDirectories = new Set([".git", "node_modules", "coverage", "dist", "tmp"]);
+// V8's repository-local compile cache is binary and cannot contain committable source;
+// .chg-tmp itself remains scanned so prompt/output or credential material is not hidden.
+const excludedDirectories = new Set([".git", "node-compile-cache", "node_modules", "coverage", "dist", "tmp"]);
 const forbiddenDirectoryNames = new Set(["enterprise", "commercial-private", "proprietary", "customer-data", "credentials", "secrets"]);
 const textExtensions = new Set(["", ".md", ".json", ".mjs", ".js", ".ts", ".yml", ".yaml", ".txt", ".cff", ".svg"]);
 const secretPatterns = [

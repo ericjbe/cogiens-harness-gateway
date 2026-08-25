@@ -7,7 +7,7 @@
 [![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-339933.svg)](package.json)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-EB6100.svg)](CONTRIBUTING.md)
 
-[English](README.md) · [简体中文](README.zh-CN.md) · [Open Source Boundary](OPEN_SOURCE_BOUNDARY.md) · [v0.3 Architecture Preview](docs/rfcs/0001-eight-harness-federation.md) · [Deploy](docs/DEPLOYMENT.zh-CN.md) · [FAQ](docs/FAQ.md) · [Build an adapter](docs/BUILD_AN_ADAPTER.md) · [Roadmap](docs/ROADMAP.md)
+[English](README.md) · [简体中文](README.zh-CN.md) · [Open Source Boundary](OPEN_SOURCE_BOUNDARY.md) · [v0.3 Federation Runtime](docs/COMBAT_PASSPORTS.md) · [Architecture RFC](docs/rfcs/0001-eight-harness-federation.md) · [Deploy](docs/DEPLOYMENT.zh-CN.md) · [FAQ](docs/FAQ.md) · [Build an adapter](docs/BUILD_AN_ADAPTER.md) · [Roadmap](docs/ROADMAP.md)
 
 **Cogiens Harness Gateway is an MIT-licensed, vendor-neutral gateway that lets one application discover, invoke, observe, approve, cancel, and audit multiple stateful AI agent harnesses through one Adapter Contract.**
 
@@ -46,7 +46,7 @@ Model routers and CHG can be used together. One chooses a model endpoint; the ot
 
 ## Current status
 
-`v0.2.0` adds a local-first deployment candidate to the verified P0 public core. It is runnable, but it is not a production hosted service or a production certification claim. `v0.3.0-architecture-freeze` is a documentation-only public preview of the proposed Eight-Harness Federation; the implemented runtime remains v0.2.
+`v0.3.0-alpha.1` implements the first bounded slice of the Eight-Harness Federation: a zero-dependency Registry Loader, capability states, evidence-gated support transitions, read-only HTTP/CLI inspection, and the first public H01 Codex Combat Passport. The v0.2 job fan-out runtime remains compatible and Adapter Contract v0.1 remains normative.
 
 | Component | Status |
 |---|---|
@@ -58,9 +58,10 @@ Model routers and CHG can be used together. One chooses a model endpoint; the ot
 | Codex CLI one-shot adapter | Candidate; requires installed and authenticated CLI |
 | Hermes CLI one-shot adapter | Candidate; requires installed and configured CLI |
 | DeepSeek Harness Python SDK adapter | Candidate on SDK-supported Linux/macOS; WSL2 recommended on Windows |
-| Eight-Harness Federation RFC | Architecture frozen for public review; not implemented |
+| Eight-Harness Federation Registry runtime | P2-A alpha; loader and read-only inspection implemented |
 | Adapter Contract v0.3 | Draft for review; v0.1 remains normative |
-| Harness Registry v0.3 | Architecture data only; every H01-H08 target is `DECLARED_UNVERIFIED` |
+| Harness Registry v0.3 | Runtime-loaded; H01 is `CONFORMANCE_PARTIAL`, H02-H08 remain `DECLARED_UNVERIFIED` |
+| H01 Codex Combat Passport | Public evidence record; `NOT_READY`, no production claim |
 | Linux and Windows CI on Node.js 20/22 | Passing |
 | Production-certified vendor adapters | Planned; not yet released |
 | Portable Digital Job Pack contract | Open design track; not yet stable |
@@ -79,11 +80,11 @@ Model routers and CHG can be used together. One chooses a model endpoint; the ot
 
 The names above identify integration targets only. CHG is not affiliated with or endorsed by their respective vendors. See the [Adapter Catalog](docs/ADAPTER_CATALOG.md) for acceptance rules.
 
-### v0.3 Eight-Harness Federation architecture preview
+### v0.3 Eight-Harness Federation runtime alpha
 
-The public architecture cohort is OpenAI Codex, Anthropic Claude Code, xAI Grok Build, Moonshot Kimi Code, DeepSeek Harness, Qwen Code, Google Antigravity CLI, and Mistral Vibe. These are first-class **architecture targets**, not current support claims. Every target begins as `DECLARED_UNVERIFIED` and must earn a public Combat Passport before support can advance.
+The public architecture cohort is OpenAI Codex, Anthropic Claude Code, xAI Grok Build, Moonshot Kimi Code, DeepSeek Harness, Qwen Code, Google Antigravity CLI, and Mistral Vibe. These are first-class **architecture targets**, not blanket support claims. H02-H08 remain `DECLARED_UNVERIFIED`. H01 advances only to `CONFORMANCE_PARTIAL` because the public record verifies the official headless/JSON interface and adapter unit tests; its live executable, login, upstream version, platform matrix, and production gates remain unverified.
 
-This makes CHG a proposed multi-harness orchestration and AI agent harness interoperability layer—not a model router and not a claim that eight vendor runtimes already work. Review the [English RFC](docs/rfcs/0001-eight-harness-federation.md), [Chinese summary](docs/rfcs/0001-eight-harness-federation.zh-CN.md), [draft v0.3 Adapter Contract](docs/contracts/adapter-contract.v0.3-draft.md), [registry](config/harness-registry.v0.3.yaml), and [migration plan](docs/migrations/v0.2-to-v0.3.md).
+The Registry now runs, but eight vendor adapters do not. Review the [Combat Passport rules](docs/COMBAT_PASSPORTS.md), [H01 evidence](config/combat-passports/H01.openai-codex.v0.3-alpha.1.json), [English RFC](docs/rfcs/0001-eight-harness-federation.md), [draft v0.3 Adapter Contract](docs/contracts/adapter-contract.v0.3-draft.md), [registry](config/harness-registry.v0.3.yaml), and [migration plan](docs/migrations/v0.2-to-v0.3.md).
 
 ## Quick start
 
@@ -98,7 +99,24 @@ npm run example:mock
 
 To deploy the real local gateway on Windows or WSL2, follow the [deployment guide](docs/DEPLOYMENT.zh-CN.md). The Gateway itself has no npm runtime dependencies; vendor harnesses remain separately installed and authenticated.
 
-Expected verification gates include schema validation, public-boundary verification, discoverability checks, and the test suite.
+Expected verification gates:
+
+```text
+PASS verify-schemas
+PASS verify-public-boundary
+PASS verify-discoverability
+PASS verify-federation-registry
+PASS tests
+```
+
+With the local Gateway running, inspect the federation without mutating it:
+
+```bash
+node scripts/chg.mjs federation
+node scripts/chg.mjs harness H01
+node scripts/chg.mjs capabilities H01
+node scripts/chg.mjs passport H01
+```
 
 ## Build a harness adapter
 

@@ -3,7 +3,7 @@ import path from "node:path";
 
 import { AdapterError } from "../../../packages/adapter-sdk/src/index.mjs";
 
-export function createGatewayHandler({ runtime, fleetRegistry, missionService, token = "", publicRoot }) {
+export function createGatewayHandler({ runtime, fleetRegistry, missionService, federationRegistry, token = "", publicRoot }) {
   return async function handle(request, response) {
     try {
       const url = new URL(request.url, `http://${request.headers.host ?? "127.0.0.1"}`);
@@ -13,6 +13,19 @@ export function createGatewayHandler({ runtime, fleetRegistry, missionService, t
       if (!authorized(request, token)) return sendJson(response, 401, { error: { code: "AUTH_REQUIRED", message: "Valid bearer token required" } });
       if (request.method === "GET" && url.pathname === "/health") return sendJson(response, 200, await runtime.health());
       if (request.method === "GET" && url.pathname === "/v1/adapters") return sendJson(response, 200, { adapters: await runtime.listAdapters() });
+      if (request.method === "GET" && url.pathname === "/v1/federation/registry") return sendJson(response, 200, federationRegistry.snapshot());
+      const federation = url.pathname.match(/^\/v1\/federation\/harnesses\/([A-Za-z0-9_.-]+)(?:\/(capabilities|passport))?$/);
+      if (request.method === "GET" && federation) {
+        const [, harnessId, resource] = federation;
+        const value = resource === "capabilities"
+          ? federationRegistry.getCapabilities(harnessId)
+          : resource === "passport"
+            ? federationRegistry.getCombatPassport(harnessId)
+            : federationRegistry.getHarness(harnessId);
+        return value
+          ? sendJson(response, 200, value)
+          : sendJson(response, 404, { error: { code: "HARNESS_NOT_FOUND", message: "Federation harness not found" } });
+      }
       if (request.method === "GET" && url.pathname === "/api/v1/fleet") return sendJson(response, 200, { fleet: await fleetRegistry.list() });
       if (request.method === "POST" && url.pathname === "/api/v1/missions") {
         const mission = missionService.create(await readJson(request, 1024 * 1024));

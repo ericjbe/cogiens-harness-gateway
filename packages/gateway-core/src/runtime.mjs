@@ -91,11 +91,17 @@ export class GatewayRuntime {
     this.jobs.set(job.job_id, job);
     await this.#persist(job);
     void this.#execute(job, normalized).catch(async (error) => {
-      job.gateway_status = "FAILED";
-      job.status = "rejected";
-      job.error = stableError(error);
-      job.updated_at = new Date().toISOString();
-      await this.#persist(job);
+      const failure = {
+        gateway_status: "FAILED",
+        status: "rejected",
+        error: stableError(error),
+        updated_at: new Date().toISOString()
+      };
+      try {
+        await this.#commitDurableState(job, failure);
+      } catch (persistenceError) {
+        Object.assign(job, failure, { persistence_error: stableError(persistenceError) });
+      }
     });
     return publicJob(job);
   }
@@ -123,10 +129,11 @@ export class GatewayRuntime {
   async #execute(job, input) {
     await mapLimit(job.runs, input.maxConcurrency, (run) => this.#executeRun(job, run, input));
     const succeeded = job.runs.filter((run) => run.state === "SUCCEEDED").length;
-    job.gateway_status = succeeded === job.runs.length ? "COMPLETED" : succeeded > 0 ? "PARTIAL" : "FAILED";
-    job.status = succeeded > 0 ? "needs_review" : "rejected";
-    job.updated_at = new Date().toISOString();
-    await this.#persist(job);
+    await this.#commitDurableState(job, {
+      gateway_status: succeeded === job.runs.length ? "COMPLETED" : succeeded > 0 ? "PARTIAL" : "FAILED",
+      status: succeeded > 0 ? "needs_review" : "rejected",
+      updated_at: new Date().toISOString()
+    });
   }
 
   async #executeRun(job, run, input) {
@@ -201,6 +208,12 @@ export class GatewayRuntime {
     run.error = stableError(error);
     run.updated_at = new Date().toISOString();
     await this.#persist(job);
+  }
+
+  async #commitDurableState(job, fields) {
+    const durableSnapshot = Object.assign(structuredClone(job), fields);
+    await this.#persist(durableSnapshot);
+    Object.assign(job, fields);
   }
 
   async #persist(job) {

@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cogiens:chg:schema:federation-registry:v0.3.0-alpha.1",
+  "title": "CHG Federation Registry v0.3.0-alpha.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "registry_version",
+    "product",
+    "status",
+    "runtime_implemented",
+    "support_status_default",
+    "local_deployment_status_default",
+    "harnesses",
+    "required_evidence"
+  ],
+  "$defs": {
+    "supportStatus": {
+      "enum": [
+        "DECLARED_UNVERIFIED",
+        "CONFORMANCE_PARTIAL",
+        "CONFORMANCE_VERIFIED",
+        "PRODUCTION_CANDIDATE",
+        "PRODUCTION_CERTIFIED",
+        "BLOCKED",
+        "DEPRECATED"
+      ]
+    },
+    "localDeploymentStatus": {
+      "enum": ["NOT_PROBED", "NOT_DISCOVERED", "DISCOVERED", "AUTH_REQUIRED", "AUTHENTICATED", "HEALTHY", "UNHEALTHY", "BLOCKED"]
+    },
+    "capabilityState": { "enum": ["SUPPORTED", "LIMITED", "UNSUPPORTED", "UNKNOWN"] },
+    "harness": {
+      "type": "object",
+      "required": ["harness_id", "canonical_name", "integration_tier", "support_status", "local_deployment_status", "combat_passport"],
+      "properties": {
+        "harness_id": { "type": "string", "pattern": "^(?:H[0-9]{2}|AUX-H[0-9]{2})$" },
+        "canonical_name": { "type": "string", "pattern": "^[A-Z0-9_]+$" },
+        "vendor": { "type": "string" },
+        "command_candidate": { "type": "string" },
+        "package_candidate": { "type": "string" },
+        "integration_tier": { "enum": ["FIRST_CLASS", "AUXILIARY_COMPATIBILITY"] },
+        "support_status": { "$ref": "#/$defs/supportStatus" },
+        "local_deployment_status": { "$ref": "#/$defs/localDeploymentStatus" },
+        "default_capability_state": { "$ref": "#/$defs/capabilityState" },
+        "capabilities": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/capabilityState" }
+        },
+        "combat_passport": {
+          "type": "object",
+          "required": ["status"],
+          "properties": {
+            "status": { "enum": ["NOT_READY", "HUMAN_BRIDGED", "LIMITED_AUTONOMOUS", "NATIVE_AUTONOMOUS"] },
+            "path": { "type": "string" }
+          }
+        },
+        "notes": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "properties": {
+    "schema_version": { "const": "0.3.0-alpha.1" },
+    "registry_version": { "const": "0.3.0-alpha.1" },
+    "product": { "type": "string", "minLength": 1 },
+    "architecture_name": { "type": "string" },
+    "project_id": { "type": "string" },
+    "status": { "const": "P2_A_FEDERATION_REGISTRY_RUNTIME" },
+    "runtime_implemented": { "const": true },
+    "support_status_default": { "$ref": "#/$defs/supportStatus" },
+    "local_deployment_status_default": { "$ref": "#/$defs/localDeploymentStatus" },
+    "harnesses": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/harness" }
+    },
+    "auxiliary": { "type": "array", "items": { "$ref": "#/$defs/harness" } },
+    "required_evidence": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string" } },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  }
+}

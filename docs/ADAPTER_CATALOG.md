@@ -31,7 +31,7 @@ The v0.3 federation registry separates roadmap priority from verified support. `
 
 | ID | Architecture target | Integration tier | Initial support status | Combat Passport |
 |---|---|---|---|---|
-| H01 | OpenAI Codex | FIRST_CLASS | DECLARED_UNVERIFIED | NOT_READY |
+| H01 | OpenAI Codex | FIRST_CLASS | CONFORMANCE_PARTIAL | NOT_READY |
 | H02 | Anthropic Claude Code | FIRST_CLASS | DECLARED_UNVERIFIED | NOT_READY |
 | H03 | xAI Grok Build | FIRST_CLASS | DECLARED_UNVERIFIED | NOT_READY |
 | H04 | Moonshot Kimi Code | FIRST_CLASS | DECLARED_UNVERIFIED | NOT_READY |
@@ -40,7 +40,9 @@ The v0.3 federation registry separates roadmap priority from verified support. `
 | H07 | Google Antigravity CLI | FIRST_CLASS | DECLARED_UNVERIFIED | NOT_READY |
 | H08 | Mistral Vibe | FIRST_CLASS | DECLARED_UNVERIFIED | NOT_READY |
 
-Hermes remains an auxiliary compatibility integration. Read [RFC 0001](rfcs/0001-eight-harness-federation.md) and the [v0.3 registry](../config/harness-registry.v0.3.yaml). The current catalog above remains the source of truth for implemented v0.2 adapters.
+H01's partial status covers the official non-interactive JSON interface and repository unit tests only. Its executable, login, pinned upstream version, live platform matrix, native cancellation semantics, and production gates are not certified. See the [Combat Passport](../config/combat-passports/H01.openai-codex.v0.3-alpha.1.json) and [evidence rules](COMBAT_PASSPORTS.md).
+
+Hermes remains an auxiliary compatibility integration. Read [RFC 0001](rfcs/0001-eight-harness-federation.md) and the [v0.3 registry](../config/harness-registry.v0.3.yaml). The v0.2 adapter catalog and the v0.3 federation evidence state are separate views.
 
 ## Add an adapter
 

@@ -1,7 +1,16 @@
 {
   "name": "@cogiens/harness-gateway",
-  "version": "0.2.0",
-  "description": "Local-first control plane for routing one job to multiple real agent harnesses",
+  "version": "0.3.0-alpha.1",
+  "description": "Vendor-neutral harness gateway and harness bridge for federating stateful AI agent runtimes",
+  "keywords": [
+    "ai-agent-harness",
+    "harness-gateway",
+    "harness-bridge",
+    "agent-runtime",
+    "multi-agent",
+    "interoperability",
+    "codex"
+  ],
   "type": "module",
   "license": "MIT",
   "private": false,
@@ -21,7 +30,8 @@
     "verify:schemas": "node scripts/verify-schemas.mjs",
     "verify:boundary": "node scripts/verify-public-boundary.mjs",
     "verify:discoverability": "node scripts/verify-discoverability.mjs",
-    "verify": "npm run verify:schemas && npm run verify:boundary && npm run verify:discoverability && npm test",
+    "verify:federation": "node scripts/verify-federation-registry.mjs",
+    "verify": "npm run verify:schemas && npm run verify:boundary && npm run verify:discoverability && npm run verify:federation && npm test",
     "example:mock": "node examples/run-mock.mjs",
     "gateway": "node apps/gateway/src/server.mjs",
     "gateway:detect": "node scripts/detect-adapters.mjs",

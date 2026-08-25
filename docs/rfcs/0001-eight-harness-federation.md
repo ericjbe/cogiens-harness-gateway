@@ -3,6 +3,8 @@
 Status: Architecture freeze preview
 Release label: `v0.3.0-architecture-freeze`
 Runtime baseline: `v0.2.0-deployment-candidate`
+
+Implementation update: `v0.3.0-alpha.1` implements the P2-A Registry Loader, capability model, split support/deployment states, evidence gates, and H01 Combat Passport. The cohort table below records the original architecture-freeze starting state; the runtime Registry is the current machine-readable status source.
 Public project: Cogiens Harness Gateway (CHG)
 Working architecture name: Cogiens Joint Harness Gate
 

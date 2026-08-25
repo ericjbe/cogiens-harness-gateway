@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { createGatewayHandler } from "./app.mjs";
 import { FleetRegistry } from "../../../packages/gateway-core/src/fleet-registry.mjs";
 import { MissionService } from "../../../packages/gateway-core/src/mission-service.mjs";
+import { loadFederationRegistry } from "../../../packages/gateway-core/src/federation-registry.mjs";
 import { createRegistry, loadGatewayConfig } from "../../../packages/gateway-core/src/registry.mjs";
 import { GatewayRuntime } from "../../../packages/gateway-core/src/runtime.mjs";
 
@@ -22,15 +23,22 @@ if (!token) throw new Error(`${tokenName} is required; dashboard dispatch is nev
 
 const registry = createRegistry(config);
 const runtime = await new GatewayRuntime({ config, registry, dataRoot: process.env.CHG_DATA_ROOT ?? path.join(ROOT, "var") }).initialize();
+const federationRegistry = await loadFederationRegistry(
+  process.env.CHG_FEDERATION_REGISTRY ?? path.join(ROOT, "config", "harness-registry.v0.3.yaml"),
+  { rootDirectory: ROOT }
+);
 const fleetRegistry = new FleetRegistry({ gatewayRegistry: registry });
 const safeWorkspaceRoot = path.resolve(process.env.CHG_SAFE_WORKSPACE_ROOT ?? ROOT);
 const missionService = new MissionService({ runtime, fleetRegistry, defaultWorkspace: ROOT, safeWorkspaceRoot });
-const handler = createGatewayHandler({ runtime, fleetRegistry, missionService, token, publicRoot: path.join(ROOT, "apps", "gateway", "public") });
+const handler = createGatewayHandler({ runtime, fleetRegistry, missionService, federationRegistry, token, publicRoot: path.join(ROOT, "apps", "gateway", "public") });
 const server = http.createServer(handler);
 
 server.listen(port, host, () => {
-  process.stdout.write(`Cogiens War Room listening on http://${host}:${port}\n`);
+  const address = server.address();
+  const listeningPort = typeof address === "object" && address ? address.port : port;
+  process.stdout.write(`Cogiens War Room / Harness Gateway v${config.version ?? "0.4.0"} listening on http://${host}:${listeningPort}\n`);
   process.stdout.write(`Config: ${config.config_path}\n`);
+  process.stdout.write(`Federation registry: ${federationRegistry.sourcePath}\n`);
 });
 for (const signal of ["SIGINT", "SIGTERM"]) process.on(signal, () => server.close(() => process.exit(0)));
 

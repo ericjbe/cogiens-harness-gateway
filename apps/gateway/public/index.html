@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CHG War Room</title>
+  <link rel="stylesheet" href="/dashboard.css">
+</head>
+<body>
+  <header><div><span class="eyebrow">CGS-HARNESS-GATE-001 · LOCAL JOINT COMMAND</span><h1>War Room</h1></div><div class="local">127.0.0.1 · LOCAL ONLY</div></header>
+  <main>
+    <section class="mission panel">
+      <div class="section-title"><span>01</span><h2>Mission Control</h2></div>
+      <div class="fields">
+        <label>Gateway token<input id="token" type="password" autocomplete="off" placeholder="CHG_API_TOKEN (kept in this tab only)"></label>
+        <label>Project<input id="project" value="CGS-HARNESS-GATE-001"></label>
+        <label>Campaign<input id="campaign" value="v0.4-P0"></label>
+        <label>Mission<input id="title" value="Joint command mission"></label>
+        <label>Workspace<input id="workspace" placeholder="Must be inside configured safe root"></label>
+      </div>
+      <p class="warning">Security boundary: dispatch grants Codex write access inside the configured safe workspace root. Paths outside that root are rejected by the API.</p>
+      <label>Mission Editor<textarea id="prompt" rows="7" placeholder="State the mission, evidence required, and acceptance gates."></textarea></label>
+    </section>
+    <section class="panel">
+      <div class="section-title"><span>02</span><h2>Fleet Registry</h2><small id="fleet-status">Discovering...</small></div>
+      <div id="fleet" class="fleet" aria-live="polite"></div>
+    </section>
+    <section class="panel command">
+      <div class="section-title"><span>03</span><h2>Command</h2></div>
+      <div id="selection">Select fleet assets and assign roles.</div>
+      <button id="deploy" type="button">DEPLOY MISSION</button>
+      <div id="campaign-state" class="state">CAMPAIGN STATE · READY</div>
+    </section>
+    <section class="results panel"><div class="section-title"><span>04</span><h2>Result / Artifacts</h2></div><pre id="results">Awaiting deployment.</pre></section>
+    <section class="decision panel"><div class="section-title"><span>05</span><h2>Decision Center</h2></div><p>Human review and approval routing placeholder.</p></section>
+  </main>
+  <script type="module" src="/dashboard.js"></script>
+</body>
+</html>

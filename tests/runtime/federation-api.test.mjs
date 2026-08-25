@@ -10,9 +10,10 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 
 test("P2A-012 HTTP runtime exposes read-only registry, capability and passport views", async () => {
   const dataRoot = await mkdtemp(path.join(os.tmpdir(), "chg-p2a-api-"));
+  const token = "federation-test-token";
   const child = spawn(process.execPath, [path.join(root, "apps", "gateway", "src", "server.mjs")], {
     cwd: root,
-    env: { ...process.env, CHG_PORT: "0", CHG_DATA_ROOT: dataRoot },
+    env: { ...process.env, CHG_PORT: "0", CHG_DATA_ROOT: dataRoot, CHG_API_TOKEN: token },
     stdio: ["ignore", "pipe", "pipe"]
   });
 
@@ -20,10 +21,10 @@ test("P2A-012 HTTP runtime exposes read-only registry, capability and passport v
     const port = await waitForPort(child);
     const base = `http://127.0.0.1:${port}`;
     const [registry, h01, h02Capabilities, passport] = await Promise.all([
-      getJson(`${base}/v1/federation/registry`),
-      getJson(`${base}/v1/federation/harnesses/H01`),
-      getJson(`${base}/v1/federation/harnesses/H02/capabilities`),
-      getJson(`${base}/v1/federation/harnesses/H01/passport`)
+      getJson(`${base}/v1/federation/registry`, token),
+      getJson(`${base}/v1/federation/harnesses/H01`, token),
+      getJson(`${base}/v1/federation/harnesses/H02/capabilities`, token),
+      getJson(`${base}/v1/federation/harnesses/H01/passport`, token)
     ]);
     assert.equal(registry.runtime_implemented, true);
     assert.equal(registry.harnesses.length, 8);
@@ -31,7 +32,8 @@ test("P2A-012 HTTP runtime exposes read-only registry, capability and passport v
     assert.equal(h02Capabilities.default_capability_state, "UNKNOWN");
     assert.equal(passport.status, "NOT_READY");
 
-    const missing = await fetch(`${base}/v1/federation/harnesses/H99`);
+    assert.equal((await fetch(`${base}/v1/federation/registry`)).status, 401);
+    const missing = await fetch(`${base}/v1/federation/harnesses/H99`, { headers: { authorization: `Bearer ${token}` } });
     assert.equal(missing.status, 404);
   } finally {
     child.kill();
@@ -64,8 +66,8 @@ async function waitForPort(child) {
   });
 }
 
-async function getJson(url) {
-  const response = await fetch(url);
+async function getJson(url, token) {
+  const response = await fetch(url, { headers: { authorization: `Bearer ${token}` } });
   assert.equal(response.status, 200, `${url} must return 200`);
   return response.json();
 }

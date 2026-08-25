@@ -7,9 +7,11 @@
 [![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-339933.svg)](package.json)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-EB6100.svg)](CONTRIBUTING.md)
 
-[English](README.md) · [简体中文](README.zh-CN.md) · [v0.3 Federation Runtime](docs/COMBAT_PASSPORTS.md) · [Deploy](docs/DEPLOYMENT.zh-CN.md) · [FAQ](docs/FAQ.md) · [Build an adapter](docs/BUILD_AN_ADAPTER.md) · [Roadmap](docs/ROADMAP.md)
+[English](README.md) · [简体中文](README.zh-CN.md) · [Open Source Boundary](OPEN_SOURCE_BOUNDARY.md) · [v0.3 Federation Runtime](docs/COMBAT_PASSPORTS.md) · [Architecture RFC](docs/rfcs/0001-eight-harness-federation.md) · [Deploy](docs/DEPLOYMENT.zh-CN.md) · [FAQ](docs/FAQ.md) · [Build an adapter](docs/BUILD_AN_ADAPTER.md) · [Roadmap](docs/ROADMAP.md)
 
 **Cogiens Harness Gateway is an MIT-licensed, vendor-neutral gateway that lets one application discover, invoke, observe, approve, cancel, and audit multiple stateful AI agent harnesses through one Adapter Contract.**
+
+**Open CHG, not Cogiens.** This repository contains only the CHG public core. The Cogiens Business System and proprietary commercial implementations are closed source and are not part of this repository. A public API, schema, SDK, or integration point does not imply that the implementation behind it is open source. See [OPEN_SOURCE_BOUNDARY.md](OPEN_SOURCE_BOUNDARY.md).
 
 Use CHG when your product must coordinate different agent runtimes—such as coding harnesses, research harnesses, or enterprise agent systems—without hard-coding every provider's session model, event format, approval flow, cancellation behavior, and artifact handling.
 
@@ -40,7 +42,7 @@ Model routers and CHG can be used together. One chooses a model endpoint; the ot
 - **Safe approval workflows:** fail closed on consequential actions, missing approval, unsupported capabilities, or unconfirmed cancellation.
 - **Harness comparison and evaluation:** run the same Job through multiple adapters while preserving provider-native behavior.
 - **Community adapters:** implement the public Adapter Contract without moving vendor-specific logic into the Gateway core.
-- **Future Digital Job Packs:** participate in the open RFC for portable job definitions that can run across compatible harnesses.
+- **Future Digital Job Pack standards:** participate in the open RFC for portable job definitions that can run across compatible harnesses. Proprietary job implementations remain outside the public core unless separately approved for MIT publication.
 
 ## Current status
 
@@ -63,7 +65,7 @@ Model routers and CHG can be used together. One chooses a model endpoint; the ot
 | Linux and Windows CI on Node.js 20/22 | Passing |
 | Production-certified vendor adapters | Planned; not yet released |
 | Portable Digital Job Pack contract | Open design track; not yet stable |
-| Cogiens Cloud and enterprise modules | Separate commercial scope |
+| Hosted, enterprise, and proprietary Cogiens systems | Outside this repository and outside the CHG MIT public core |
 
 ### Adapter catalog
 
@@ -104,7 +106,7 @@ PASS verify-schemas
 PASS verify-public-boundary
 PASS verify-discoverability
 PASS verify-federation-registry
-PASS tests: 30
+PASS tests
 ```
 
 With the local Gateway running, inspect the federation without mutating it:
@@ -135,11 +137,13 @@ Capabilities must be detected and declared. Unsupported behavior must fail expli
 
 Start with the [20-minute adapter guide](docs/BUILD_AN_ADAPTER.md), inspect the [Mock Adapter](adapters/mock/src/index.mjs), and run the [conformance suite](tests/conformance/mock-adapter.test.mjs).
 
-## Build a Digital Job Pack
+## Build a Digital Job Pack standard
 
-The long-term ecosystem goal is not only to connect harnesses. It is to let developers publish reusable digital jobs—researchers, reviewers, sales operators, engineering inspectors, information collectors, and other bounded roles—that can execute through compatible harness adapters.
+The open design track may define a portable format for bounded jobs across compatible harnesses. The public format may describe manifests, inputs, permissions, evidence, and tests.
 
-That contract is **not frozen yet**. Read [Digital Job Packs](docs/DIGITAL_JOB_PACKS.md) and open a Job Pack proposal to help define the portable manifest, inputs, permissions, evidence, tests, and licensing rules.
+That does **not** make proprietary Cogiens job implementations, commercial prompts, workflow packs, or internal operating logic part of the CHG public core. Those remain outside this repository unless explicitly approved for unrestricted MIT publication.
+
+Read [Digital Job Packs](docs/DIGITAL_JOB_PACKS.md) and open a Job Pack proposal to help define the public portable contract.
 
 [Propose a Digital Job Pack](https://github.com/ericjbe/cogiens-harness-gateway/issues/new?template=digital-job-pack.yml) · [Propose a Harness Adapter](https://github.com/ericjbe/cogiens-harness-gateway/issues/new?template=adapter.yml) · [Find a first contribution](https://github.com/ericjbe/cogiens-harness-gateway/contribute)
 
@@ -150,7 +154,7 @@ That contract is **not frozen yet**. Read [Digital Job Packs](docs/DIGITAL_JOB_P
 3. **Capability negotiation is explicit and fail-closed.**
 4. **Approvals, cancellation, isolation, and artifact evidence are acceptance gates.**
 5. **Credential references are allowed; plaintext credentials are not.**
-6. **Public MIT code and Cogiens commercial services remain clearly separated.**
+6. **Open CHG, not Cogiens: public interoperability infrastructure and proprietary commercial systems remain separate.**
 
 ## Repository map
 
@@ -186,11 +190,11 @@ P0 ships the verified Mock Adapter. v0.2 adds candidate one-shot adapters for Co
 
 ### Can I use CHG commercially?
 
-Yes. The public-core files covered by [LICENSE](LICENSE) are MIT licensed and permit commercial use. Cogiens trademarks, hosted services, enterprise modules, certification, support, and SLA offerings are separate.
+Yes. The public-core files covered by [LICENSE](LICENSE) are MIT licensed and permit commercial use. That permission does not extend to Cogiens proprietary systems, hosted services, commercial implementations, trademarks, certification, support, or other rights outside this repository. See [OPEN_SOURCE_BOUNDARY.md](OPEN_SOURCE_BOUNDARY.md) and [COMMERCIAL.md](COMMERCIAL.md).
 
 ### How can I contribute?
 
-Start with [CONTRIBUTING.md](CONTRIBUTING.md), choose a `good first issue`, propose an adapter, improve a conformance test, or join the Digital Job Pack RFC. Contributions require DCO sign-off.
+Start with [CONTRIBUTING.md](CONTRIBUTING.md), choose a `good first issue`, propose an adapter, improve a conformance test, or join a public contract RFC. Contributions require DCO sign-off and must pass the Commercial Boundary Gate.
 
 More answers: [docs/FAQ.md](docs/FAQ.md)
 
@@ -200,18 +204,19 @@ If CHG solves a real interoperability problem for you:
 
 1. **Star** the repository so demand for an open harness interoperability layer is visible.
 2. **Watch** releases if you want adapter and contract updates.
-3. **Open an issue** naming the harness or digital job you need.
-4. **Submit a PR** with tests and evidence.
+3. **Open an issue** naming the harness or public interoperability feature you need.
+4. **Submit a PR** with tests, evidence, and Commercial Boundary attestation.
 
-A star is not the product. Working adapters, repeatable jobs, conformance evidence, and an active contributor community are the product.
+A star is not the product. Working adapters, conformance evidence, stable contracts, and an active contributor community are the public-core product.
 
 ## Licensing, security, and commercial boundary
 
-- Public core: [MIT License](LICENSE)
+- Public-core boundary: [OPEN_SOURCE_BOUNDARY.md](OPEN_SOURCE_BOUNDARY.md)
+- Public core license: [MIT License](LICENSE)
 - Contribution rules: [CONTRIBUTING.md](CONTRIBUTING.md)
 - Security reporting: [SECURITY.md](SECURITY.md)
 - Governance: [GOVERNANCE.md](GOVERNANCE.md)
-- Commercial scope: [COMMERCIAL.md](COMMERCIAL.md)
+- Commercial boundary: [COMMERCIAL.md](COMMERCIAL.md)
 - Trademark policy: [TRADEMARKS.md](TRADEMARKS.md)
 - Citation metadata: [CITATION.cff](CITATION.cff)
 

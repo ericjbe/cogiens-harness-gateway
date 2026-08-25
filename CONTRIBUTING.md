@@ -2,13 +2,15 @@
 
 CHG is developed in public for global users. Contributions are welcome when they preserve the security, compatibility, provenance, and public/commercial boundaries of the project.
 
+**Open CHG, not Cogiens.** Before contributing, read [OPEN_SOURCE_BOUNDARY.md](OPEN_SOURCE_BOUNDARY.md). The CHG public core is open source; the Cogiens Business System and proprietary commercial implementations are not part of this repository.
+
 ## Choose a contribution route
 
 | I want to… | Start here |
 |---|---|
 | Make a first contribution | Choose a [`good first issue`](https://github.com/ericjbe/cogiens-harness-gateway/contribute) and keep the first PR small |
 | Connect a harness | Read [Build an Adapter](docs/BUILD_AN_ADAPTER.md), then open an [Adapter proposal](https://github.com/ericjbe/cogiens-harness-gateway/issues/new?template=adapter.yml) |
-| Define a reusable digital role | Read [Digital Job Packs](docs/DIGITAL_JOB_PACKS.md), then open a [Job Pack proposal](https://github.com/ericjbe/cogiens-harness-gateway/issues/new?template=digital-job-pack.yml) |
+| Define a reusable digital role format | Read [Digital Job Packs](docs/DIGITAL_JOB_PACKS.md), then open a [Job Pack proposal](https://github.com/ericjbe/cogiens-harness-gateway/issues/new?template=digital-job-pack.yml) |
 | Improve interoperability evidence | Add conformance cases, platform results, or an official-interface evidence table |
 | Improve access and understanding | Fix docs, examples, accessibility, diagrams, or translations |
 | Report a vulnerability | Follow [SECURITY.md](SECURITY.md); do not open a public exploit report |
@@ -22,6 +24,29 @@ Good first pull requests change one reviewable thing, include the relevant test 
 3. Keep vendor-specific behavior inside the relevant adapter.
 4. Add or update conformance tests.
 5. Do not submit credentials, customer data, copied proprietary code, model-provider session files, or code with an incompatible license.
+6. Apply the Commercial Boundary Gate before writing or importing code.
+
+## Commercial Boundary Gate
+
+Ask this before every public contribution:
+
+> If a competitor forks this repository tomorrow and legally uses this exact change in a commercial product under MIT, are we explicitly willing to permit that?
+
+If the answer is not an unqualified **yes**, do not submit the material here.
+
+The following categories are not acceptable public contributions:
+
+- Cogiens Business System source code or private commercial-system implementation;
+- customer, tenant, account, transaction, pricing, billing, settlement, or revenue logic;
+- proprietary digital workers, mission templates, prompts, sales/acquisition logic, scoring logic, conversion logic, or commercial workflow packs;
+- internal orchestration rules, operational playbooks, private runbooks, production topology, or private infrastructure automation;
+- private memory, trace, evidence, policy, or decision-system implementation;
+- customer-specific integrations or confidential business information;
+- any code that is intended to remain proprietary or separately licensed.
+
+A public API, SDK, schema, or protocol may be appropriate when explicitly approved for publication, but that does not make the implementation behind the interface open source.
+
+When unsure, keep the work private and request a boundary review.
 
 ## Developer Certificate of Origin
 
@@ -46,10 +71,11 @@ By signing off, you certify that you have the right to submit the contribution u
 - List tests and evidence.
 - Identify third-party source or generated content.
 - Run `npm run verify` before submission.
-- Do not weaken approval, sandbox, credential, or isolation behavior merely to make a test pass.
+- Complete the Commercial Boundary attestation in the PR template.
+- Do not weaken approval, sandbox, credential, isolation, or public/private boundaries merely to make a test pass.
 
-Adapter pull requests must also state the pinned upstream interface, verified capabilities, known gaps, supported platforms, license source, and maintainer. Job Pack work remains an RFC track until a stable contract is approved.
+Adapter pull requests must also state the pinned upstream interface, verified capabilities, known gaps, supported platforms, license source, and maintainer. Job Pack work remains an RFC track until a stable public-format contract is approved; proprietary Cogiens job implementations do not belong in this repository.
 
 ## License boundary
 
-Contributions to this public repository are submitted under MIT. Do not submit Cogiens commercial modules or code that requires a commercial-only license.
+Contributions intentionally accepted into this public repository are submitted under MIT. Do not submit Cogiens commercial modules or any code that is intended to remain closed source.

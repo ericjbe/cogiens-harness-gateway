@@ -177,6 +177,7 @@ export class OneShotProcessAdapter {
       stdin: invocation.stdin ?? request.prompt.text,
       cwd,
       env: invocation.env ?? {},
+      blockedEnv: this.options.blockedEnv ?? [],
       timeoutMs,
       maxOutputBytes,
       onSpawn: (child) => { state.child = child; }
@@ -285,15 +286,15 @@ export class OneShotProcessAdapter {
   }
 }
 
-export async function probe(command, args = ["--version"], timeoutMs = 10_000) {
-  const result = await runChild({ command, args, stdin: "", cwd: process.cwd(), env: {}, timeoutMs, maxOutputBytes: 64 * 1024 });
+export async function probe(command, args = ["--version"], timeoutMs = 10_000, options = {}) {
+  const result = await runChild({ command, args, stdin: "", cwd: process.cwd(), env: {}, blockedEnv: options.blockedEnv ?? [], timeoutMs, maxOutputBytes: 64 * 1024 });
   if (result.spawnError) return { ok: false, reason: "executable_not_found", output: "" };
   if (result.timedOut) return { ok: false, reason: "health_check_timed_out", output: "" };
   if (result.code !== 0) return { ok: false, reason: "health_check_failed", output: tail(result.stderr || result.stdout) };
   return { ok: true, reason: null, output: tail(result.stdout || result.stderr).trim() };
 }
 
-async function runChild({ command, args, stdin, cwd, env, timeoutMs, maxOutputBytes, onSpawn = () => {} }) {
+export async function runChild({ command, args, stdin, cwd, env = {}, blockedEnv = [], timeoutMs, maxOutputBytes, onSpawn = () => {} }) {
   return new Promise((resolve) => {
     let stdout = "";
     let stderr = "";
@@ -302,9 +303,11 @@ async function runChild({ command, args, stdin, cwd, env, timeoutMs, maxOutputBy
     let timedOut = false;
     let outputExceeded = false;
     let spawnError = null;
+    const childEnv = { ...process.env, ...env };
+    for (const name of blockedEnv) delete childEnv[name];
     const child = spawn(command, args, {
       cwd,
-      env: { ...process.env, ...env },
+      env: childEnv,
       shell: false,
       windowsHide: true,
       detached: process.platform !== "win32",
@@ -346,9 +349,23 @@ async function terminateProcessTree(child) {
   if (process.platform === "win32") {
     await new Promise((resolve) => {
       const killer = spawn("taskkill", ["/PID", String(child.pid), "/T", "/F"], { shell: false, windowsHide: true, stdio: "ignore" });
-      killer.on("error", resolve);
-      killer.on("close", resolve);
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        resolve();
+      };
+      const timer = setTimeout(() => {
+        try { killer.kill(); } catch {}
+        finish();
+      }, 5_000);
+      killer.on("error", finish);
+      killer.on("close", finish);
     });
+    if (child.exitCode === null) {
+      try { child.kill("SIGKILL"); } catch {}
+    }
     return;
   }
   try { process.kill(-child.pid, "SIGTERM"); } catch { try { child.kill("SIGTERM"); } catch {} }

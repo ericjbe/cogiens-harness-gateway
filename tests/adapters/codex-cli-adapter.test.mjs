@@ -12,10 +12,10 @@ test("H01-001 descriptor remains fail-closed for approvals and resume", async ()
   assert.equal(descriptor.capabilities.resume, false);
 });
 
-test("H01-002 invocation uses documented non-interactive and bounded flags", () => {
+test("H01-002 invocation uses Codex 0.149.0 global approval config before bounded exec flags", () => {
   const adapter = createCodexCliAdapter();
   const invocation = adapter.options.buildInvocation({ cwd: "/workspace/project", policy: { network: "restricted" } });
-  assert.deepEqual(invocation.args.slice(0, 3), ["exec", "--json", "--ephemeral"]);
+  assert.deepEqual(invocation.args.slice(0, 5), ["-c", 'approval_policy="never"', "exec", "--json", "--ephemeral"]);
   assert.ok(invocation.args.includes("workspace-write"));
   assert.ok(invocation.args.includes("never"));
   assert.equal(invocation.args.at(-1), "-");

@@ -7,9 +7,11 @@
 [![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-339933.svg)](package.json)
 [![欢迎 PR](https://img.shields.io/badge/PRs-welcome-EB6100.svg)](CONTRIBUTING.md)
 
-[English](README.md) · [简体中文](README.zh-CN.md) · [v0.3 联邦运行时](docs/COMBAT_PASSPORTS.md) · [部署手册](docs/DEPLOYMENT.zh-CN.md) · [常见问题](docs/FAQ.md) · [开发适配器](docs/BUILD_AN_ADAPTER.md) · [路线图](docs/ROADMAP.md)
+[English](README.md) · [简体中文](README.zh-CN.md) · [开源边界](OPEN_SOURCE_BOUNDARY.md) · [v0.3 联邦运行时](docs/COMBAT_PASSPORTS.md) · [架构 RFC](docs/rfcs/0001-eight-harness-federation.zh-CN.md) · [部署手册](docs/DEPLOYMENT.zh-CN.md) · [常见问题](docs/FAQ.md) · [开发适配器](docs/BUILD_AN_ADAPTER.md) · [路线图](docs/ROADMAP.md)
 
 **Cogiens Harness Gateway 是一个采用 MIT 许可证、厂商中立的网关。一个应用可以通过统一的 Adapter Contract，发现、调用、观察、审批、取消和审计多个有状态的 AI Agent Harness。**
+
+**开放 CHG，不开放 Cogiens。** 本仓库只包含 CHG 公共核心。Cogiens Business System 及所有专有商业系统均为闭源，不属于本仓库。公开 API、Schema、SDK 或接入协议，不等于公开其背后的实现。规范边界见 [OPEN_SOURCE_BOUNDARY.md](OPEN_SOURCE_BOUNDARY.md)。
 
 当产品需要同时协调代码、研究或企业 Agent Runtime，而又不希望为每一家厂商分别硬编码会话、事件、审批、取消和产物逻辑时，可以使用 CHG。
 
@@ -54,7 +56,7 @@ Harness 是模型外围的执行系统，负责会话、工具、文件、审批
 | Linux / Windows，Node.js 20 / 22 CI | 已验证 |
 | 生产认证厂商适配器 | 规划中，尚未发布 |
 | 可移植 Digital Job Pack Contract | 公开设计中，尚未稳定 |
-| Cogiens Cloud 与企业模块 | 独立商业范围 |
+| 托管、企业及其他 Cogiens 专有系统 | 不属于本仓库，也不属于 CHG MIT 公共核心 |
 
 Codex、Hermes 和 DeepSeek Harness 已有 one-shot 部署候选，但还没有生产认证。Grok 与 Qwen 可以先作为 Hermes 的模型 Provider 使用，这不等于已经存在独立的 Grok/Qwen Harness Adapter。准确状态见[适配器目录](docs/ADAPTER_CATALOG.md)。
 
@@ -88,10 +90,12 @@ node scripts/chg.mjs passport H01
 
 ## 参与建设
 
-我们希望形成两个开放生态：
+开放生态只围绕 CHG 公共核心展开，包括：
 
 1. **Harness Adapter：** 把一个厂商或社区 Harness 接入统一契约。
-2. **Digital Job Pack：** 定义可复用的数字岗位，包括输入、权限、审批、输出、证据和测试。
+2. **公共 Digital Job Pack 标准：** 研究可移植任务格式、输入、权限、审批、证据与测试。
+
+公开“任务格式标准”不等于公开 Cogiens 的商业岗位实现、商业 Prompt、工作流包或内部运营逻辑。后者不属于本仓库，除非另行明确批准采用 MIT 许可证公开。
 
 当前可以立即贡献适配器、测试、文档和协议设计。Digital Job Pack Contract 还没有冻结，必须先通过公开 RFC 共同定义，不能把未来目标描述成已实现功能。
 
@@ -101,7 +105,17 @@ node scripts/chg.mjs passport H01
 - [寻找第一个贡献](https://github.com/ericjbe/cogiens-harness-gateway/contribute)
 - [贡献规则](CONTRIBUTING.md)
 
-所有提交都需要 DCO 签署，公共仓库贡献采用 MIT 许可证。不得提交密钥、客户数据、厂商会话文件、专有代码或许可证不兼容的代码。
+所有提交都需要 DCO 签署，并必须通过 Commercial Boundary Gate。公共仓库贡献采用 MIT 许可证。不得提交密钥、客户数据、厂商会话文件、专有代码或许可证不兼容的代码。
+
+## 开源边界原则
+
+CHG 的公共代码只负责 Harness 互操作基础设施。Cogiens 的商业系统、客户系统、商业任务编排、商业岗位实现、内部 Prompt、定价/结算/收入逻辑、内部运营规则和其他专有实现均不属于本仓库。
+
+每一个 PR 在进入公共仓库前都必须回答：
+
+> 如果竞争对手明天 Fork 本仓库，并依法根据 MIT 将这项修改用于商业产品，我们是否明确愿意允许？
+
+只有答案为无条件的“是”，才允许进入公共仓库；否则必须留在私有系统中。
 
 ## Star、关注与传播
 
@@ -109,18 +123,20 @@ node scripts/chg.mjs passport H01
 
 1. 给仓库一个 **Star**，让真实需求被看见；
 2. **Watch** Releases，关注契约与适配器更新；
-3. 提交 Issue，告诉我们你需要接入的 Harness 或数字岗位；
-4. 用测试与证据提交 PR。
+3. 提交 Issue，告诉我们你需要接入的 Harness 或公共互操作能力；
+4. 用测试、证据和 Commercial Boundary 声明提交 PR。
 
-Star 不是产品本身。可工作的适配器、可复现的数字岗位、公开的一致性证据和持续贡献者才是产品。
+Star 不是产品本身。可工作的适配器、公开一致性证据、稳定契约和持续贡献者才是 CHG 公共核心的价值。
 
 ## 许可证与商业边界
 
+- 开源边界：[OPEN_SOURCE_BOUNDARY.md](OPEN_SOURCE_BOUNDARY.md)
 - 公共核心：[MIT License](LICENSE)
+- 贡献规则：[CONTRIBUTING.md](CONTRIBUTING.md)
 - 安全报告：[SECURITY.md](SECURITY.md)
 - 项目治理：[GOVERNANCE.md](GOVERNANCE.md)
-- 商业范围：[COMMERCIAL.md](COMMERCIAL.md)
+- 商业边界：[COMMERCIAL.md](COMMERCIAL.md)
 - 商标规则：[TRADEMARKS.md](TRADEMARKS.md)
 - 机器可读引用：[CITATION.cff](CITATION.cff)
 
-MIT 允许商业使用；Cogiens 商标、托管服务、企业模块、认证、支持与 SLA 不包含在公共核心许可中。
+MIT 允许对 CHG 公共核心进行商业使用，但该许可不延伸到 Cogiens 专有系统、托管服务、商业实现、商标、认证、支持或本仓库之外的其他权利。

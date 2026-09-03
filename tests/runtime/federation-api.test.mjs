@@ -8,28 +8,39 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
-test("P2A-012 HTTP runtime exposes read-only registry, capability and passport views", async () => {
+test("P2A-012 HTTP runtime exposes federation views and dashboard command center", async () => {
   const dataRoot = await mkdtemp(path.join(os.tmpdir(), "chg-p2a-api-"));
   const child = spawn(process.execPath, [path.join(root, "apps", "gateway", "src", "server.mjs")], {
     cwd: root,
-    env: { ...process.env, CHG_PORT: "0", CHG_DATA_ROOT: dataRoot },
+    env: { ...process.env, CHG_PORT: "0", CHG_DATA_ROOT: dataRoot, OLLAMA_BASE_URL: "http://127.0.0.1:1" },
     stdio: ["ignore", "pipe", "pipe"]
   });
 
   try {
     const port = await waitForPort(child);
     const base = `http://127.0.0.1:${port}`;
-    const [registry, h01, h02Capabilities, passport] = await Promise.all([
+    const [registry, h01, h02Capabilities, passport, summary] = await Promise.all([
       getJson(`${base}/v1/federation/registry`),
       getJson(`${base}/v1/federation/harnesses/H01`),
       getJson(`${base}/v1/federation/harnesses/H02/capabilities`),
-      getJson(`${base}/v1/federation/harnesses/H01/passport`)
+      getJson(`${base}/v1/federation/harnesses/H01/passport`),
+      getJson(`${base}/v1/dashboard/summary`)
     ]);
     assert.equal(registry.runtime_implemented, true);
     assert.equal(registry.harnesses.length, 8);
     assert.equal(h01.support_status, "CONFORMANCE_PARTIAL");
     assert.equal(h02Capabilities.default_capability_state, "UNKNOWN");
     assert.equal(passport.status, "NOT_READY");
+    assert.equal(summary.schema_version, "chg.dashboard.summary.v0.1");
+    assert.equal(summary.federation.harnesses.length, 8);
+    assert.equal(summary.models.expected_count, 10);
+    assert.equal(summary.models.models.length, 10);
+    assert.ok(Array.isArray(summary.jobs));
+
+    const dashboard = await fetch(`${base}/dashboard/`);
+    assert.equal(dashboard.status, 200);
+    assert.match(dashboard.headers.get("content-type") ?? "", /text\/html/);
+    assert.match(await dashboard.text(), /八国联军开发指挥台/);
 
     const missing = await fetch(`${base}/v1/federation/harnesses/H99`);
     assert.equal(missing.status, 404);

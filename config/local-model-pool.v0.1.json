@@ -1,0 +1,17 @@
+{
+  "schema_version": "chg.local-model-pool.v0.1",
+  "pool_id": "M3-LOCAL-MODEL-ARENA-001",
+  "status": "FROZEN_TEST_COHORT",
+  "models": [
+    {"id":"M01","name":"Qwen3-Coder 30B","ollama_tag":"qwen3-coder:30b","role":"coding / repository tasks"},
+    {"id":"M02","name":"Devstral Small 2 24B","ollama_tag":"devstral-small-2","role":"software engineering agent"},
+    {"id":"M03","name":"GPT-OSS 20B","ollama_tag":"gpt-oss:20b","role":"general agent / reasoning / tools"},
+    {"id":"M04","name":"Qwen3 30B","ollama_tag":"qwen3:30b","role":"Chinese / general reasoning / agent"},
+    {"id":"M05","name":"DeepSeek-R1 32B","ollama_tag":"deepseek-r1:32b","role":"deep reasoning / planning"},
+    {"id":"M06","name":"Nemotron 3.5 Lightning 30B-A3B","ollama_tag":"nemotron-3.5-lightning:30b-a3b","role":"long-running agent / tools"},
+    {"id":"M07","name":"Ministral 3 14B","ollama_tag":"ministral-3:14b","role":"small agent / function calling"},
+    {"id":"M08","name":"DeepCoder 14B","ollama_tag":"deepcoder:14b","role":"coding baseline"},
+    {"id":"M09","name":"Magistral 24B","ollama_tag":"magistral:24b","role":"reasoning harness"},
+    {"id":"M10","name":"Qwen3-Coder-Next 80B-A3B","ollama_tag":"qwen3-coder-next:q4_K_M","role":"advanced agent / long repository"}
+  ]
+}

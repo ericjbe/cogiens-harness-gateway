@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cogiens 八国联军开发指挥台</title>
+  <link rel="stylesheet" href="/dashboard/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">M-3 JOINT HARNESS COMMAND</div>
+      <h1>Cogiens 八国联军开发指挥台</h1>
+      <p>一眼看清 H01–H08、十模型池、任务、失败、证据与派单状态。</p>
+    </div>
+    <div class="toolbar">
+      <span id="clock" class="clock">--:--:--</span>
+      <button id="refreshBtn" class="button secondary">刷新</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="auth-strip">
+      <div><strong>Gateway</strong> <span id="gatewayUrl"></span></div>
+      <label>API Token（仅非本机绑定时需要）
+        <input id="tokenInput" type="password" autocomplete="off" placeholder="CHG_API_TOKEN" />
+      </label>
+      <button id="saveTokenBtn" class="button tiny">保存到本次浏览器会话</button>
+      <span id="lastUpdated" class="muted">尚未刷新</span>
+    </section>
+
+    <section id="alertBox" class="alert hidden"></section>
+
+    <section class="metric-grid">
+      <article class="metric"><span>联军成员</span><strong id="metricHarnesses">0/8</strong><small>Registry cohort</small></article>
+      <article class="metric"><span>本机可用 Harness</span><strong id="metricHealthy">0</strong><small>Adapter health</small></article>
+      <article class="metric"><span>已安装模型</span><strong id="metricModels">0/10</strong><small>Ollama pool</small></article>
+      <article class="metric"><span>运行任务</span><strong id="metricRunning">0</strong><small>Jobs / runs</small></article>
+      <article class="metric"><span>成功率</span><strong id="metricSuccess">—</strong><small>Recent terminal runs</small></article>
+      <article class="metric"><span>Gateway</span><strong id="metricGateway">UNKNOWN</strong><small id="metricChecked">No data</small></article>
+    </section>
+
+    <section class="section-head">
+      <div><div class="eyebrow">FEDERATION</div><h2>八支 Harness 作战状态</h2></div>
+      <div class="legend"><i class="dot green"></i>健康 <i class="dot amber"></i>待验证 <i class="dot red"></i>异常</div>
+    </section>
+    <section id="harnessGrid" class="harness-grid"></section>
+
+    <section class="two-col">
+      <div>
+        <div class="section-head compact"><div><div class="eyebrow">LOCAL MODEL POOL</div><h2>十模型弹药库</h2></div></div>
+        <div id="modelList" class="panel model-list"></div>
+      </div>
+      <div>
+        <div class="section-head compact"><div><div class="eyebrow">DISPATCH</div><h2>一键派单</h2></div></div>
+        <form id="dispatchForm" class="panel dispatch-form">
+          <label>Project ID<input id="projectId" value="M3-DASHBOARD-TEST" required /></label>
+          <label>Workspace<input id="workspace" value="D:\\FND\\M3-Harness-Projects\\01_projects\\water-intelligence" required /></label>
+          <label>任务指令<textarea id="prompt" rows="6" required placeholder="例如：读取仓库，运行测试，修复失败项；不得修改测试；输出 diff 与证据。"></textarea></label>
+          <fieldset><legend>选择 Harness</legend><div id="dispatchHarnesses" class="check-grid"></div></fieldset>
+          <div class="dispatch-actions"><button class="button primary" type="submit">下达任务</button><span id="dispatchStatus" class="muted"></span></div>
+        </form>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><div><div class="eyebrow">OPERATIONS</div><h2>最近任务与 Run</h2></div></div>
+      <div class="panel table-wrap">
+        <table>
+          <thead><tr><th>Job</th><th>Project</th><th>状态</th><th>Harness</th><th>Run结果</th><th>Artifacts</th><th>更新时间</th></tr></thead>
+          <tbody id="jobsBody"><tr><td colspan="7" class="empty">暂无任务</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="two-col">
+      <div>
+        <div class="section-head compact"><div><div class="eyebrow">ARENA</div><h2>竞技场概览</h2></div></div>
+        <div class="panel" id="arenaPanel"><p class="muted">Arena 排名将在同任务跨 Harness / 模型产生可比较运行记录后自动形成。V1 先记录成功、失败、耗时与产物。</p></div>
+      </div>
+      <div>
+        <div class="section-head compact"><div><div class="eyebrow">COMMAND RULES</div><h2>三条军规</h2></div></div>
+        <div class="panel rules"><p><b>01</b> 未通过 Gate 的 Harness 不得进入生产仓。</p><p><b>02</b> 自己施工不得自己宣布 PASS。</p><p><b>03</b> 代码属于 GitHub；M-3 只保存工作副本与证据。</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>Cogiens Harness Gateway · M-3 Joint Development Force · Dashboard v1</footer>
+  <script type="module" src="/dashboard/dashboard.js"></script>
+</body>
+</html>

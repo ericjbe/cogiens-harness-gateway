@@ -166,7 +166,9 @@ async function serveDashboardAsset(response, pathname) {
     ["/dashboard/", ["index.html", "text/html; charset=utf-8"]],
     ["/dashboard/index.html", ["index.html", "text/html; charset=utf-8"]],
     ["/dashboard/styles.css", ["styles.css", "text/css; charset=utf-8"]],
-    ["/dashboard/dashboard.js", ["dashboard.js", "text/javascript; charset=utf-8"]]
+    ["/dashboard/dashboard.js", ["dashboard.js", "text/javascript; charset=utf-8"]],
+    ["/dashboard/shuishu-logo.svg", ["shuishu-logo.svg", "image/svg+xml; charset=utf-8"]],
+    ["/dashboard/shuishu.ico", ["shuishu.ico", "image/x-icon"]]
   ]);
   const asset = files.get(pathname);
   if (!asset) return send(response, 404, { error: { code: "NOT_FOUND", message: "Dashboard asset not found" } });
@@ -177,7 +179,7 @@ async function serveDashboardAsset(response, pathname) {
     "content-length": body.length,
     "cache-control": "no-store",
     "x-content-type-options": "nosniff",
-    "content-security-policy": "default-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self'"
+    "content-security-policy": "default-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self'; img-src 'self' data:"
   });
   response.end(body);
 }

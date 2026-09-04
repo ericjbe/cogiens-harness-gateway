@@ -18,21 +18,19 @@
 <body>
   <div class="app-shell">
     <aside class="sidebar">
-      <div class="sidebar-brand">
-        <img class="sidebar-logo" src="/dashboard/cogiens-mark.png" alt="Cogiens" />
-        <div class="sidebar-os-name">Cogiens Workforce OS</div>
-      </div>
+      <div class="sidebar-spacer" aria-hidden="true"></div>
 
       <nav class="sidebar-nav" aria-label="水枢主导航">
-        <a class="active" href="#overview"><span class="nav-icon">⌂</span>概览</a>
-        <a href="#engines"><span class="nav-icon">⚙</span>执行引擎</a>
-        <a href="#models"><span class="nav-icon">◇</span>模型资源</a>
-        <a href="#tasks"><span class="nav-icon">▤</span>任务中心</a>
-        <a href="#knowledge"><span class="nav-icon">▣</span>知识库</a>
-        <a href="#tools"><span class="nav-icon">⌘</span>工具与能力</a>
-        <a href="#monitor"><span class="nav-icon">◉</span>监控与告警</a>
-        <a href="#arena"><span class="nav-icon">♜</span>评测竞技场</a>
-        <a href="#system"><span class="nav-icon">⚙</span>系统管理</a>
+        <a class="active" href="#overview"><span class="nav-icon">▦</span><span>概览</span></a>
+        <a href="#workforce"><span class="nav-icon">⊙</span><span>人员管理</span></a>
+        <a href="#positions"><span class="nav-icon">▣</span><span>岗位管理</span></a>
+        <a href="#engines"><span class="nav-icon">⚙</span><span>执行引擎</span></a>
+        <a href="#models"><span class="nav-icon">◇</span><span>模型资源</span></a>
+        <a href="#tasks"><span class="nav-icon">▤</span><span>任务中心</span></a>
+        <a href="#knowledge"><span class="nav-icon">▧</span><span>知识库</span></a>
+        <a href="#tools"><span class="nav-icon">⌘</span><span>工具与能力</span></a>
+        <a href="#monitor"><span class="nav-icon">◉</span><span>监控与告警</span></a>
+        <a href="#system"><span class="nav-icon">⚙</span><span>系统设置</span></a>
       </nav>
 
       <div class="sidebar-status" id="system">
@@ -50,40 +48,50 @@
             <span class="view-kicker">WORKFORCE OVERVIEW</span>
             <h1>概览</h1>
           </div>
-          <div class="view-actions">
-            <span id="clock" class="clock">--:--:--</span>
-            <button id="refreshBtn" class="button secondary">刷新</button>
-          </div>
         </section>
 
         <section class="technical-strip" aria-hidden="true">
           <span id="gatewayUrl"></span>
           <input id="tokenInput" type="password" autocomplete="off" placeholder="CHG_API_TOKEN" />
           <button id="saveTokenBtn" type="button">save</button>
+          <button id="refreshBtn" type="button">refresh</button>
+          <span id="clock">--:--:--</span>
         </section>
 
         <section id="alertBox" class="alert hidden"></section>
 
-        <section class="metric-grid">
-          <article class="metric"><div class="metric-icon">▱</div><span>执行引擎</span><strong id="metricHarnesses">0/8</strong><small>Engine registry</small></article>
-          <article class="metric"><div class="metric-icon">◆</div><span>本机可用引擎</span><strong id="metricHealthy">0</strong><small>Runtime health</small></article>
-          <article class="metric"><div class="metric-icon">▣</div><span>已安装模型</span><strong id="metricModels">0/10</strong><small>Local model pool</small></article>
-          <article class="metric"><div class="metric-icon">▶</div><span>运行任务</span><strong id="metricRunning">0</strong><small>Jobs / runs</small></article>
-          <article class="metric accent"><div class="metric-icon">↗</div><span>成功率</span><strong id="metricSuccess">—</strong><small>Recent terminal runs</small></article>
-          <article class="metric health"><div class="metric-icon">✓</div><span>系统状态</span><strong id="metricGateway">UNKNOWN</strong><small id="metricChecked">No data</small></article>
+        <section class="metric-grid" aria-label="核心指标">
+          <article class="metric">
+            <div class="metric-icon blue">👥</div>
+            <div class="metric-copy"><span>执行引擎</span><strong id="metricHarnesses">0/8</strong></div>
+          </article>
+          <article class="metric">
+            <div class="metric-icon green">◆</div>
+            <div class="metric-copy"><span>本机可用引擎</span><strong id="metricHealthy">0</strong></div>
+          </article>
+          <article class="metric">
+            <div class="metric-icon orange">▣</div>
+            <div class="metric-copy"><span>已安装模型</span><strong id="metricModels">0/10</strong></div>
+          </article>
+          <article class="metric">
+            <div class="metric-icon navy">▶</div>
+            <div class="metric-copy"><span>运行任务</span><strong id="metricRunning">0</strong></div>
+          </article>
         </section>
 
-        <section class="command-grid">
+        <section class="primary-grid">
           <article class="dashboard-card engine-panel" id="engines">
-            <div class="card-head"><div><div class="eyebrow">EXECUTION ENGINES</div><h2>执行引擎状态</h2></div><div class="legend"><i class="dot green"></i>健康 <i class="dot amber"></i>待验证 <i class="dot red"></i>异常</div></div>
+            <div class="card-head"><h2>执行引擎状态</h2></div>
             <div id="harnessGrid" class="harness-grid"></div>
           </article>
 
           <article class="dashboard-card model-panel" id="models">
-            <div class="card-head"><div><div class="eyebrow">LOCAL MODEL POOL</div><h2>本地模型资源池</h2></div></div>
+            <div class="card-head"><h2>本地模型资源池</h2></div>
             <div id="modelList" class="model-list"></div>
           </article>
+        </section>
 
+        <section class="secondary-grid">
           <article class="dashboard-card dispatch-panel" id="tools">
             <div class="card-head"><div><div class="eyebrow">DISPATCH</div><h2>一键派单</h2></div></div>
             <form id="dispatchForm" class="dispatch-form">
@@ -93,6 +101,16 @@
               <fieldset><legend>选择执行引擎</legend><div id="dispatchHarnesses" class="check-grid"></div></fieldset>
               <div class="dispatch-actions"><button class="button primary" type="submit">立即派单</button><span id="dispatchStatus" class="muted"></span></div>
             </form>
+          </article>
+
+          <article class="dashboard-card runtime-panel" id="monitor">
+            <div class="card-head"><div><div class="eyebrow">RUNTIME</div><h2>运行概况</h2></div></div>
+            <div class="runtime-grid">
+              <div><span>Gateway</span><strong id="runtimeGateway">—</strong></div>
+              <div><span>近期成功率</span><strong id="runtimeSuccess">—</strong></div>
+              <div><span>版本</span><strong id="runtimeVersion">—</strong></div>
+              <div><span>检查时间</span><strong id="runtimeChecked">—</strong></div>
+            </div>
           </article>
         </section>
 
@@ -111,13 +129,14 @@
             <div class="card-head"><div><div class="eyebrow">ARENA</div><h2>能力竞技场</h2></div></div>
             <div id="arenaPanel"><p class="muted">同一任务跨执行引擎 / 模型产生可比较运行记录后，将自动形成成功率、耗时、人工干预与产物质量排名。</p></div>
           </article>
-          <article class="dashboard-card" id="monitor">
+          <article class="dashboard-card" id="knowledge">
             <div class="card-head"><div><div class="eyebrow">OPERATING PRINCIPLES</div><h2>运行原则</h2></div></div>
             <div class="principles"><div><b>安全合规</b><span>数据本地化，权限最小化，全链路审计可追溯。</span></div><div><b>可靠稳定</b><span>验证后上岗，失败可隔离，任务可恢复。</span></div><div><b>高效智能</b><span>按任务自动选择执行引擎与本地模型。</span></div><div><b>开放扩展</b><span>标准接口、模型可替换、岗位能力可扩展。</span></div></div>
           </article>
         </section>
 
-        <section id="knowledge" class="anchor-only"></section>
+        <section id="workforce" class="anchor-only"></section>
+        <section id="positions" class="anchor-only"></section>
       </main>
       <footer>水枢 · Cogiens Workforce OS · Powered by Cogiens Harness Gateway</footer>
     </div>

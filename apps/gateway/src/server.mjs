@@ -166,6 +166,7 @@ async function serveDashboardAsset(response, pathname) {
     ["/dashboard/index.html", ["index.html", "text/html; charset=utf-8"]],
     ["/dashboard/styles.css", ["styles.css", "text/css; charset=utf-8"]],
     ["/dashboard/proportions.css", ["proportions.css", "text/css; charset=utf-8"]],
+    ["/dashboard/header-shell.css", ["header-shell.css", "text/css; charset=utf-8"]],
     ["/dashboard/dashboard.js", ["dashboard.js", "text/javascript; charset=utf-8"]],
     ["/dashboard/cogiens-mark.png", ["cogiens-mark.png", "image/png"]],
     ["/dashboard/shuishu-logo.svg", ["shuishu-logo.svg", "image/svg+xml; charset=utf-8"]],

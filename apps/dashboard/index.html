@@ -7,6 +7,14 @@
   <title>水枢 · Cogiens Workforce OS</title>
   <link rel="icon" type="image/png" href="/dashboard/cogiens-mark.png" />
   <link rel="stylesheet" href="/dashboard/styles.css" />
+  <style id="cogiens-header-logo-dedupe">
+    /* The universal header must expose only the approved horizontal Cogiens lockup + product name. */
+    body > header .brand:not(.cg-brand-hard),
+    body > header .brand:not(.cg-brand-hard) *,
+    body > header .cg-brand-logo,
+    body > header .cg-brand-copy { display:none !important; }
+    body > header .cg-brand-hard { display:flex !important; visibility:visible !important; opacity:1 !important; }
+  </style>
 </head>
 <body>
   <div class="app-shell">

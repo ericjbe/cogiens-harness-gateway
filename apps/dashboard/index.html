@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0D2C54" />
   <title>水枢 · Cogiens Workforce OS</title>
-  <link rel="icon" type="image/svg+xml" href="/dashboard/shuishu-logo.svg" />
+  <link rel="icon" type="image/svg+xml" sizes="any" href="/dashboard/shuishu-logo.svg" />
   <link rel="stylesheet" href="/dashboard/styles.css" />
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar">
       <div class="sidebar-brand">
-        <img class="sidebar-logo" src="/dashboard/shuishu-logo.svg" alt="水枢" />
+        <img class="sidebar-logo" src="/dashboard/shuishu-logo.svg" alt="Cogiens" />
         <div class="sidebar-brand-copy">
           <strong>水枢</strong>
           <span>Cogiens Workforce OS</span>
@@ -40,19 +40,18 @@
     </aside>
 
     <div class="workspace">
-      <section class="workspace-bar">
-        <div>
-          <div class="eyebrow">COGIENS WORKFORCE OS</div>
-          <h1>水枢</h1>
-          <p>数字岗位、执行引擎、本地模型、任务与证据，一屏掌控。</p>
-        </div>
-        <div class="workspace-actions">
-          <span id="clock" class="clock">--:--:--</span>
-          <button id="refreshBtn" class="button secondary">刷新</button>
-        </div>
-      </section>
-
       <main id="overview">
+        <section class="view-toolbar" aria-label="当前视图">
+          <div>
+            <span class="view-kicker">WORKFORCE OVERVIEW</span>
+            <h1>概览</h1>
+          </div>
+          <div class="view-actions">
+            <span id="clock" class="clock">--:--:--</span>
+            <button id="refreshBtn" class="button secondary">刷新</button>
+          </div>
+        </section>
+
         <section class="technical-strip" aria-hidden="true">
           <span id="gatewayUrl"></span>
           <input id="tokenInput" type="password" autocomplete="off" placeholder="CHG_API_TOKEN" />

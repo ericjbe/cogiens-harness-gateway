@@ -1,0 +1,194 @@
+/*
+ * 水枢 Dashboard proportion pass
+ * Keeps the approved visual language while fixing large-screen/browser-zoom scaling.
+ * Loaded after styles.css so these rules intentionally win.
+ */
+
+/* Scale the brand header by viewport width instead of fixed pixels. */
+body > header {
+  height: 7.8vw !important;
+  min-height: 112px !important;
+}
+body > header .wrap.nav {
+  height: 7.8vw !important;
+  min-height: 112px !important;
+  padding-left: 3.25vw !important;
+  padding-right: 3.25vw !important;
+}
+body > header .cg-brand-hard img {
+  height: 4.58vw !important;
+  max-height: none !important;
+  max-width: 17.7vw !important;
+}
+body > header .shuishu-product-name {
+  margin-left: 2vw !important;
+  padding-left: 2vw !important;
+  font-size: 2.5vw !important;
+}
+body > header .shuishu-os-label {
+  margin-left: 1.15vw !important;
+  font-size: 1.15vw !important;
+}
+
+/* The old fixed 354px sidebar collapsed visually when browser zoom was reduced. */
+.app-shell {
+  grid-template-columns: 18.4vw minmax(0,1fr) !important;
+  min-height: calc(100vh - 7.8vw) !important;
+}
+.sidebar {
+  min-height: calc(100vh - 7.8vw) !important;
+  padding-left: 1.25vw !important;
+  padding-right: 1.25vw !important;
+  padding-bottom: 1.4vw !important;
+}
+.sidebar-spacer {
+  height: 6.1vw !important;
+  flex: 0 0 6.1vw !important;
+}
+.sidebar-nav {
+  gap: .42vw !important;
+  padding-top: 1.55vw !important;
+  padding-bottom: 1vw !important;
+}
+.sidebar-nav a {
+  min-height: 3.05vw !important;
+  padding-left: 1.35vw !important;
+  padding-right: 1.35vw !important;
+  gap: .78vw !important;
+  border-radius: .68vw !important;
+  font-size: max(15px,.94vw) !important;
+  letter-spacing: .01em;
+}
+.nav-icon {
+  width: 1.25vw !important;
+  font-size: max(16px,1vw) !important;
+}
+.sidebar-status {
+  padding: 1vw .95vw 0 !important;
+}
+.sidebar-status-title { font-size: max(12px,.72vw) !important; }
+.status-line { font-size: max(11px,.65vw) !important; }
+.status-meta { font-size: max(10px,.56vw) !important; }
+
+/* Let the work surface use the screen instead of sitting inside a 1900px island. */
+main {
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 2.85vw 3.05vw 3.2vw !important;
+}
+.view-toolbar {
+  min-height: 5.2vw !important;
+  margin-bottom: 1.55vw !important;
+}
+.view-kicker,
+.eyebrow {
+  font-size: max(14px,.88vw) !important;
+}
+.view-toolbar h1 {
+  margin-top: .52vw !important;
+  font-size: max(38px,2.7vw) !important;
+}
+
+/* KPI cards: retain the approved proportions at any desktop zoom level. */
+.metric-grid {
+  gap: 1.04vw !important;
+  margin-bottom: 1.15vw !important;
+}
+.metric {
+  min-height: 8.35vw !important;
+  gap: 1.15vw !important;
+  padding: 1.45vw !important;
+  border-radius: 1.04vw !important;
+}
+.metric-icon {
+  width: 4.05vw !important;
+  height: 4.05vw !important;
+  flex-basis: 4.05vw !important;
+  font-size: max(24px,1.65vw) !important;
+}
+.metric-copy span { font-size: max(15px,.9vw) !important; }
+.metric-copy strong {
+  margin-top: .36vw !important;
+  font-size: max(34px,2.08vw) !important;
+}
+
+/* Main content should feel broad and deliberate, not like a centered form. */
+.primary-grid,
+.secondary-grid,
+.bottom-grid {
+  gap: 1.04vw !important;
+  margin-bottom: 1.15vw !important;
+}
+.primary-grid {
+  grid-template-columns: minmax(0,1.65fr) minmax(25vw,1fr) !important;
+}
+.secondary-grid {
+  grid-template-columns: minmax(0,1.55fr) minmax(24vw,.9fr) !important;
+}
+.dashboard-card {
+  padding: 1.25vw !important;
+  border-radius: 1.04vw !important;
+}
+.card-head { margin-bottom: .94vw !important; }
+.card-head h2 { font-size: max(21px,1.3vw) !important; }
+.engine-panel,
+.model-panel { height: 14.2vw !important; min-height: 260px; }
+.harness-grid {
+  grid-auto-columns: calc((100% - 1.9vw)/4) !important;
+  gap: .62vw !important;
+  padding-bottom: .42vw !important;
+}
+.harness-card {
+  height: 7.55vw !important;
+  min-height: 138px;
+  padding: .88vw .82vw !important;
+  border-radius: .72vw !important;
+}
+.harness-id { font-size: max(15px,.88vw) !important; }
+.harness-vendor { margin-top: .42vw !important; font-size: max(11px,.67vw) !important; }
+.harness-status { margin-top: 1.25vw !important; font-size: max(11px,.63vw) !important; }
+.model-list { max-height: 10.7vw !important; min-height: 190px; }
+.model-row {
+  min-height: 2.25vw !important;
+  padding-top: .42vw !important;
+  padding-bottom: .42vw !important;
+}
+.model-name { font-size: max(12px,.72vw) !important; }
+.model-state { font-size: max(11px,.67vw) !important; }
+
+/* Lower sections were especially undersized in the screenshot. */
+.dispatch-form label { font-size: max(11px,.64vw) !important; }
+.dispatch-form input,
+.dispatch-form textarea { padding: .56vw .62vw !important; font-size: max(12px,.7vw) !important; }
+.runtime-grid { gap: .62vw !important; }
+.runtime-grid > div { min-height: 4.8vw !important; padding: .83vw !important; }
+.runtime-grid span { font-size: max(10px,.58vw) !important; }
+.runtime-grid strong { font-size: max(16px,.94vw) !important; }
+.tasks-panel { margin-bottom: 1.15vw !important; }
+th,td { padding: .58vw .68vw !important; font-size: max(10px,.62vw) !important; }
+th { font-size: max(9px,.52vw) !important; }
+.principles { gap: .52vw !important; }
+.principles div { padding: .68vw !important; }
+.principles b { font-size: max(11px,.66vw) !important; }
+.principles span { font-size: max(10px,.57vw) !important; }
+footer { padding: 1.15vw !important; font-size: max(10px,.55vw) !important; }
+
+/* Normal desktop/laptop safety net. */
+@media (max-width: 1180px) {
+  body > header { height:126px !important; min-height:126px !important; }
+  body > header .wrap.nav { height:126px !important; min-height:126px !important; padding:0 28px !important; }
+  body > header .cg-brand-hard img { height:66px !important; max-width:250px !important; }
+  body > header .shuishu-product-name { font-size:34px !important; margin-left:22px !important; padding-left:22px !important; }
+  body > header .shuishu-os-label { font-size:15px !important; margin-left:14px !important; }
+  .app-shell { grid-template-columns:250px minmax(0,1fr) !important; min-height:calc(100vh - 126px) !important; }
+  .sidebar { min-height:calc(100vh - 126px) !important; padding:0 18px 22px !important; }
+  .sidebar-spacer { height:90px !important; flex-basis:90px !important; }
+  .sidebar-nav { padding-top:20px !important; }
+  .sidebar-nav a { min-height:48px !important; padding:0 16px !important; font-size:14px !important; border-radius:10px !important; }
+  main { padding:38px 30px !important; }
+  .metric-grid { grid-template-columns:repeat(2,1fr) !important; }
+  .metric { min-height:130px !important; padding:22px !important; }
+  .primary-grid,.secondary-grid,.bottom-grid { grid-template-columns:1fr !important; }
+  .engine-panel,.model-panel { height:auto !important; min-height:265px; }
+  .harness-grid { grid-auto-columns:calc((100% - 24px)/3) !important; }
+}

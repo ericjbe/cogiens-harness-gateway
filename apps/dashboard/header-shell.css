@@ -99,32 +99,12 @@ body > header { display:none !important; }
   min-height:calc(100vh - clamp(140px,9vw,300px)) !important;
 }
 
-/* Restore the approved sidebar identity block. */
-.sidebar-spacer { display:none !important; }
-.sidebar-brand {
-  min-height:clamp(150px,10.5vw,300px);
-  display:flex !important;
-  flex-direction:column;
-  align-items:flex-start;
-  justify-content:center;
-  gap:clamp(12px,.8vw,22px);
-  padding:clamp(18px,1.2vw,34px) 1.45vw !important;
-  border-bottom:1px solid rgba(255,255,255,.13);
-}
-.sidebar-logo {
-  display:block !important;
-  width:clamp(80px,5.2vw,150px) !important;
-  height:clamp(80px,5.2vw,150px) !important;
-  object-fit:contain;
-  filter:drop-shadow(0 9px 18px rgba(0,0,0,.16));
-}
+/* Sidebar is navigation only: no repeated logo, product name, or brand block. */
+.sidebar-spacer,
+.sidebar-brand,
+.sidebar-logo,
 .sidebar-os-name {
-  display:block !important;
-  font-size:max(17px,1.08vw) !important;
-  line-height:1.2;
-  font-weight:500;
-  color:#F2F6FC;
-  white-space:nowrap;
+  display:none !important;
 }
 .sidebar-nav {
   padding-top:clamp(20px,1.25vw,38px) !important;
@@ -144,7 +124,5 @@ body > header { display:none !important; }
   .shuishu-product-lockup-local span { font-size:15px; }
   .app-shell { min-height:calc(100vh - 126px) !important; }
   .sidebar { min-height:calc(100vh - 126px) !important; }
-  .sidebar-brand { min-height:150px; padding:20px 16px !important; }
-  .sidebar-logo { width:76px !important; height:76px !important; }
-  .sidebar-os-name { font-size:15px !important; }
+  .sidebar-nav { padding-top:20px !important; }
 }

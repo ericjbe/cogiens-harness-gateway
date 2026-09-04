@@ -22,8 +22,12 @@ if ([string]::IsNullOrWhiteSpace($ShortcutName)) {
 
 $legacyName = "Cogiens " + (Convert-CodePointsToString -CodePoints @(0x516B, 0x56FD, 0x8054, 0x519B, 0x6307, 0x6325, 0x53F0))
 $launcher = Join-Path $RepoRoot "deploy\m3\start-dashboard.ps1"
+$icon = Join-Path $RepoRoot "apps\dashboard\shuishu.ico"
 if (-not (Test-Path -LiteralPath $launcher)) {
   throw "Dashboard launcher not found: $launcher"
+}
+if (-not (Test-Path -LiteralPath $icon)) {
+  throw "Shuishu icon not found: $icon"
 }
 
 $powershell = (Get-Command powershell.exe -ErrorAction Stop).Source
@@ -50,6 +54,7 @@ function New-CogiensShortcut {
   $shortcut.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$launcher`""
   $shortcut.WorkingDirectory = $RepoRoot
   $shortcut.Description = "Shuishu - Cogiens Workforce OS"
+  $shortcut.IconLocation = "$icon,0"
   $shortcut.WindowStyle = 1
   $shortcut.Save()
 }

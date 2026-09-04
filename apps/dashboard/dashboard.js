@@ -11,17 +11,26 @@ headerObserver.observe(document.documentElement, { childList: true, subtree: tru
 setTimeout(() => headerObserver?.disconnect(), 15000);
 
 const tokenInput = $("tokenInput");
-tokenInput.value = sessionStorage.getItem("chg_dashboard_token") ?? "";
-$("gatewayUrl").textContent = location.origin;
-$("saveTokenBtn").addEventListener("click", () => {
-  sessionStorage.setItem("chg_dashboard_token", tokenInput.value.trim());
+if (tokenInput) tokenInput.value = sessionStorage.getItem("chg_dashboard_token") ?? "";
+if ($("gatewayUrl")) $("gatewayUrl").textContent = location.origin;
+$("saveTokenBtn")?.addEventListener("click", () => {
+  sessionStorage.setItem("chg_dashboard_token", tokenInput?.value.trim() ?? "");
   showAlert("Token 已保存到当前浏览器会话。", false);
   refresh();
 });
-$("refreshBtn").addEventListener("click", refresh);
-$("dispatchForm").addEventListener("submit", dispatchJob);
+$("refreshBtn")?.addEventListener("click", refresh);
+$("dispatchForm")?.addEventListener("submit", dispatchJob);
 
-setInterval(() => $("clock").textContent = new Date().toLocaleString("zh-CN", { hour12: false }), 1000);
+document.querySelectorAll(".sidebar-nav a").forEach((link) => {
+  link.addEventListener("click", () => {
+    document.querySelectorAll(".sidebar-nav a").forEach((item) => item.classList.remove("active"));
+    link.classList.add("active");
+  });
+});
+
+setInterval(() => {
+  if ($("clock")) $("clock").textContent = new Date().toLocaleString("zh-CN", { hour12: false });
+}, 1000);
 setInterval(refresh, 5000);
 refresh();
 
@@ -37,6 +46,7 @@ function syncCogiensHeaderBrand() {
     productName.classList.add("shuishu-product-name");
     const parent = productName.parentElement;
     if (!parent) continue;
+    parent.classList.add("shuishu-product-lockup");
     if (parent.querySelector(":scope > .shuishu-os-label")) continue;
     const suffix = document.createElement("span");
     suffix.className = "shuishu-os-label";
@@ -47,7 +57,7 @@ function syncCogiensHeaderBrand() {
 
 async function api(path, options = {}) {
   const headers = new Headers(options.headers ?? {});
-  const token = tokenInput.value.trim();
+  const token = tokenInput?.value.trim() ?? "";
   if (token) headers.set("authorization", `Bearer ${token}`);
   if (options.body && !headers.has("content-type")) headers.set("content-type", "application/json");
   const response = await fetch(path, { ...options, headers });
@@ -64,7 +74,9 @@ async function refresh() {
     const summary = await api("/v1/dashboard/summary");
     state.summary = summary;
     render(summary);
-    $("lastUpdated").textContent = `更新时间 ${new Date(summary.checked_at).toLocaleTimeString("zh-CN", { hour12: false })}`;
+    if ($("lastUpdated")) {
+      $("lastUpdated").textContent = `更新时间 ${new Date(summary.checked_at).toLocaleTimeString("zh-CN", { hour12: false })}`;
+    }
     hideAlert();
   } catch (error) {
     showAlert(`Dashboard 数据读取失败：${error.message}`);
@@ -80,19 +92,23 @@ function render(summary) {
   const succeeded = terminalRuns.filter((run) => run.state === "SUCCEEDED").length;
   const running = jobs.filter((job) => job.gateway_status === "RUNNING").length;
   const gatewayHealthy = summary.gateway?.status === "healthy";
+  const healthyAdapters = adapters.filter((item) => item.enabled && item.health?.status === "healthy").length;
+  const installedModels = models.filter((item) => item.installed).length;
+  const successRate = terminalRuns.length ? `${Math.round(100 * succeeded / terminalRuns.length)}%` : "—";
 
-  $("metricHarnesses").textContent = `${harnesses.length}/8`;
-  $("metricHealthy").textContent = adapters.filter((item) => item.enabled && item.health?.status === "healthy").length;
-  $("metricModels").textContent = `${models.filter((item) => item.installed).length}/10`;
-  $("metricRunning").textContent = running;
-  $("metricSuccess").textContent = terminalRuns.length ? `${Math.round(100 * succeeded / terminalRuns.length)}%` : "—";
-  $("metricGateway").textContent = String(summary.gateway?.status ?? "unknown").toUpperCase();
-  $("metricGateway").style.color = gatewayHealthy ? "var(--cg-green)" : "var(--cg-amber)";
-  $("metricChecked").textContent = summary.gateway?.version ?? "runtime";
+  setText("metricHarnesses", `${harnesses.length}/8`);
+  setText("metricHealthy", healthyAdapters);
+  setText("metricModels", `${installedModels}/10`);
+  setText("metricRunning", running);
 
-  $("sidebarSystemStatus").textContent = gatewayHealthy ? "正常运行" : String(summary.gateway?.status ?? "检查中");
-  $("sidebarVersion").textContent = summary.gateway?.version ?? "—";
-  $("sidebarUpdated").textContent = summary.checked_at ? new Date(summary.checked_at).toLocaleTimeString("zh-CN", { hour12: false }) : "—";
+  setText("sidebarSystemStatus", gatewayHealthy ? "正常运行" : String(summary.gateway?.status ?? "检查中"));
+  setText("sidebarVersion", summary.gateway?.version ?? "—");
+  setText("sidebarUpdated", summary.checked_at ? new Date(summary.checked_at).toLocaleTimeString("zh-CN", { hour12: false }) : "—");
+
+  setText("runtimeGateway", String(summary.gateway?.status ?? "unknown").toUpperCase());
+  setText("runtimeSuccess", successRate);
+  setText("runtimeVersion", summary.gateway?.version ?? "—");
+  setText("runtimeChecked", summary.checked_at ? new Date(summary.checked_at).toLocaleTimeString("zh-CN", { hour12: false }) : "—");
 
   renderHarnesses(harnesses, adapters);
   renderModels(models, summary.models);
@@ -103,32 +119,50 @@ function render(summary) {
 
 function renderHarnesses(harnesses, adapters) {
   const grid = $("harnessGrid");
+  if (!grid) return;
   grid.innerHTML = "";
+
   for (const harness of harnesses) {
     const matched = matchAdapter(harness, adapters);
     const health = matched?.health?.status ?? "not_configured";
-    const visual = health === "healthy" ? "healthy" : health === "unhealthy" ? "bad" : "warn";
-    const deployment = harness.local_deployment_status ?? "NOT_PROBED";
-    const support = harness.support_status ?? "UNKNOWN";
-    const passport = harness.combat_passport?.status ?? "NOT_READY";
+    const support = String(harness.support_status ?? "UNKNOWN");
+    const passport = String(harness.combat_passport?.status ?? "NOT_READY");
+    const visual = engineVisualState(health, support, passport);
     const card = document.createElement("article");
     card.className = "harness-card";
     card.innerHTML = `
-      <div class="harness-title"><span class="harness-id">${esc(harness.harness_id)}</span><span class="status-pill ${visual}">${esc(health.toUpperCase())}</span></div>
-      <div class="harness-name">${esc(prettyHarnessName(harness.canonical_name))}</div>
+      <div class="harness-title"><span class="harness-id">${esc(harness.harness_id)} · ${esc(engineShortName(harness))}</span></div>
       <div class="harness-vendor">${esc(harness.vendor ?? "")}</div>
-      <div class="harness-meta">
-        <div><small>Support</small><b>${esc(support)}</b></div>
-        <div><small>M-3</small><b>${esc(deployment)}</b></div>
-        <div><small>Passport</small><b>${esc(passport)}</b></div>
-        <div><small>Adapter</small><b>${esc(matched?.id ?? "未接入")}</b></div>
-      </div>`;
+      <div class="harness-status ${visual.className}"><span class="status-dot"></span>${esc(visual.label)}</div>`;
     grid.appendChild(card);
   }
 }
 
+function engineVisualState(health, support, passport) {
+  if (health === "unhealthy") return { className: "bad", label: "ERROR" };
+  if (health === "healthy") return { className: "healthy", label: "ONLINE" };
+  if (/VERIFIED|QUALIFIED|ACTIVE/.test(`${support} ${passport}`)) return { className: "healthy", label: "VERIFIED" };
+  if (/PARTIAL/.test(support)) return { className: "warn", label: "PARTIAL" };
+  return { className: "warn", label: "WAITING" };
+}
+
+function engineShortName(harness) {
+  const byId = {
+    H01: "Codex",
+    H02: "Claude",
+    H03: "Grok",
+    H04: "Kimi",
+    H05: "DeepSeek",
+    H06: "Qwen",
+    H07: "Antigravity",
+    H08: "Mistral"
+  };
+  return byId[harness.harness_id] ?? prettyHarnessName(harness.canonical_name ?? harness.harness_id ?? "Engine");
+}
+
 function renderModels(models, pool) {
   const list = $("modelList");
+  if (!list) return;
   list.innerHTML = "";
   if (!models.length) {
     list.innerHTML = `<div class="empty">Ollama 未连接或模型池配置不可用：${esc(pool?.error ?? "no data")}</div>`;
@@ -137,13 +171,15 @@ function renderModels(models, pool) {
   for (const model of models) {
     const row = document.createElement("div");
     row.className = "model-row";
-    row.innerHTML = `<span class="model-id">${esc(model.id)}</span><span class="model-name">${esc(model.name)}</span><span class="model-tag">${esc(model.ollama_tag)}</span><span class="model-size">${model.size_bytes ? formatBytes(model.size_bytes) : "—"}</span><span class="model-state ${model.installed ? "ok" : "missing"}">${model.installed ? "INSTALLED" : "MISSING"}</span>`;
+    row.title = `${model.ollama_tag ?? ""}${model.size_bytes ? ` · ${formatBytes(model.size_bytes)}` : ""}`;
+    row.innerHTML = `<span class="model-name">${esc(model.name)}</span><span class="model-state ${model.installed ? "ok" : "missing"}">${model.installed ? "已安装" : "缺失"}</span>`;
     list.appendChild(row);
   }
 }
 
 function renderDispatchAdapters(adapters) {
   const box = $("dispatchHarnesses");
+  if (!box) return;
   const previous = new Set([...box.querySelectorAll("input:checked")].map((item) => item.value));
   box.innerHTML = "";
   const available = adapters.filter((item) => item.enabled);
@@ -162,9 +198,10 @@ function renderDispatchAdapters(adapters) {
 
 function renderJobs(jobs) {
   const body = $("jobsBody");
+  if (!body) return;
   body.innerHTML = "";
   if (!jobs.length) {
-    body.innerHTML = `<tr><td colspan="7" class="empty">暂无任务。可以从右侧“一键派单”创建第一张 Job。</td></tr>`;
+    body.innerHTML = `<tr><td colspan="7" class="empty">暂无任务。可以从“一键派单”创建第一张 Job。</td></tr>`;
     return;
   }
   for (const job of jobs) {
@@ -181,27 +218,26 @@ function renderArena(jobs) {
   const stats = new Map();
   for (const run of jobs.flatMap((job) => job.runs ?? [])) {
     if (!["SUCCEEDED","FAILED","CANCELLED","TIMED_OUT"].includes(run.state)) continue;
-    const item = stats.get(run.adapter_id) ?? { total: 0, success: 0, duration: 0, timed: 0 };
+    const item = stats.get(run.adapter_id) ?? { total: 0, success: 0 };
     item.total += 1;
     if (run.state === "SUCCEEDED") item.success += 1;
-    const ms = Date.parse(run.updated_at) - Date.parse(run.created_at);
-    if (Number.isFinite(ms) && ms >= 0) { item.duration += ms; item.timed += 1; }
     stats.set(run.adapter_id, item);
   }
   const panel = $("arenaPanel");
+  if (!panel) return;
   if (!stats.size) {
-    panel.innerHTML = `<p class="muted">还没有终态 Run。完成第一轮同题竞技后，这里会显示各 Adapter 的成功率和平均耗时。</p>`;
+    panel.innerHTML = `<p class="muted">还没有终态 Run。完成第一轮同题竞技后，这里会显示各 Adapter 的成功率。</p>`;
     return;
   }
   const rows = [...stats.entries()].sort((a,b) => (b[1].success / b[1].total) - (a[1].success / a[1].total));
-  panel.innerHTML = rows.map(([id,s], index) => `<div class="model-row"><span class="model-id">#${index + 1}</span><span class="model-name">${esc(id)}</span><span class="model-tag">${s.success}/${s.total} success</span><span class="model-size">${s.timed ? formatDuration(s.duration / s.timed) : "—"}</span><span class="model-state ${s.success === s.total ? "ok" : "missing"}">${Math.round(100*s.success/s.total)}%</span></div>`).join("");
+  panel.innerHTML = rows.map(([id,s], index) => `<div class="model-row"><span class="model-name">#${index + 1} · ${esc(id)}</span><span class="model-state ${s.success === s.total ? "ok" : "missing"}">${Math.round(100*s.success/s.total)}%</span></div>`).join("");
 }
 
 async function dispatchJob(event) {
   event.preventDefault();
   const adapters = [...$("dispatchHarnesses").querySelectorAll("input:checked")].map((item) => item.value);
   if (!adapters.length) return showAlert("至少选择一个可用 Adapter。", true);
-  $("dispatchStatus").textContent = "派单中…";
+  setText("dispatchStatus", "派单中…");
   try {
     const job = await api("/v1/jobs/fanout", {
       method: "POST",
@@ -214,10 +250,10 @@ async function dispatchJob(event) {
         network: "restricted"
       })
     });
-    $("dispatchStatus").textContent = `已创建 ${shortId(job.job_id)}`;
+    setText("dispatchStatus", `已创建 ${shortId(job.job_id)}`);
     await refresh();
   } catch (error) {
-    $("dispatchStatus").textContent = "派单失败";
+    setText("dispatchStatus", "派单失败");
     showAlert(`派单失败：${error.message}`);
   }
 }
@@ -231,12 +267,12 @@ function matchAdapter(harness, adapters) {
   return adapters.find((adapter) => tokens.some((token) => `${adapter.id} ${adapter.kind} ${adapter.descriptor?.name ?? ""}`.toLowerCase().includes(token))) ?? null;
 }
 
-function prettyHarnessName(value = "") { return value.split("_").map((word) => word[0] + word.slice(1).toLowerCase()).join(" "); }
+function setText(id, value) { const node = $(id); if (node) node.textContent = String(value ?? ""); }
+function prettyHarnessName(value = "") { return value.split("_").filter(Boolean).map((word) => word[0] + word.slice(1).toLowerCase()).join(" "); }
 function shortId(value = "") { return value.length > 18 ? `${value.slice(0,10)}…${value.slice(-5)}` : value; }
 function fmtTime(value) { return value ? new Date(value).toLocaleString("zh-CN", { hour12:false }) : "—"; }
 function formatBytes(bytes) { const units=["B","KB","MB","GB","TB"]; let n=bytes,i=0; while(n>=1024&&i<units.length-1){n/=1024;i++;} return `${n.toFixed(i>1?1:0)} ${units[i]}`; }
-function formatDuration(ms) { if (ms < 1000) return `${Math.round(ms)}ms`; if (ms < 60000) return `${(ms/1000).toFixed(1)}s`; return `${(ms/60000).toFixed(1)}m`; }
 function esc(value) { return String(value ?? "").replace(/[&<>"']/g, (ch) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch])); }
 function escAttr(value) { return esc(value); }
-function showAlert(message, error = true) { const box=$("alertBox"); box.textContent=message; box.classList.remove("hidden"); if(!error){box.style.borderColor="rgba(31,167,101,.45)";box.style.color="#198A50";} else {box.removeAttribute("style");} }
-function hideAlert() { $("alertBox").classList.add("hidden"); }
+function showAlert(message, error = true) { const box=$("alertBox"); if(!box) return; box.textContent=message; box.classList.remove("hidden"); if(!error){box.style.borderColor="rgba(31,167,101,.45)";box.style.color="#198A50";} else {box.removeAttribute("style");} }
+function hideAlert() { $("alertBox")?.classList.add("hidden"); }

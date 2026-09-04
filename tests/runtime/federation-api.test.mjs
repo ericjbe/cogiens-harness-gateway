@@ -40,10 +40,14 @@ test("P2A-012 HTTP runtime exposes federation views and Shuishu dashboard", asyn
     const dashboard = await fetch(`${base}/dashboard/`);
     assert.equal(dashboard.status, 200);
     assert.match(dashboard.headers.get("content-type") ?? "", /text\/html/);
+    const csp = dashboard.headers.get("content-security-policy") ?? "";
+    assert.match(csp, /https:\/\/www\.cogiens\.com/);
     const html = await dashboard.text();
     assert.match(html, /水枢/);
     assert.match(html, /Cogiens Workforce OS/);
     assert.match(html, /shuishu-logo\.svg/);
+    assert.match(html, /https:\/\/www\.cogiens\.com\/brand\/js\/cogiens-header-bootstrap\.js/);
+    assert.match(html, /data-product="水枢"/);
 
     const logo = await fetch(`${base}/dashboard/shuishu-logo.svg`);
     assert.equal(logo.status, 200);

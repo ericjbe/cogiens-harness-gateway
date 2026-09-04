@@ -45,19 +45,34 @@ test("P2A-012 HTTP runtime exposes federation views and Shuishu dashboard", asyn
     const html = await dashboard.text();
     assert.match(html, /水枢/);
     assert.match(html, /Cogiens Workforce OS/);
-    assert.match(html, /cogiens-mark\.png/);
-    assert.doesNotMatch(html, /sidebar-logo[^>]+shuishu-logo\.svg/);
-    assert.doesNotMatch(html, /sidebar-brand-copy[\s\S]*?<strong>水枢<\/strong>/);
     assert.match(html, /https:\/\/www\.cogiens\.com\/brand\/js\/cogiens-header-bootstrap\.js/);
     assert.match(html, /data-product="水枢"/);
     assert.match(html, /data-product-suffix="Cogiens Workforce OS"/);
+
+    // Owner-approved hierarchy: one top product name, no duplicate sidebar brand, then overview/KPIs.
+    assert.match(html, /sidebar-spacer/);
+    assert.doesNotMatch(html, /sidebar-logo/);
+    assert.doesNotMatch(html, /sidebar-os-name/);
+    assert.match(html, /WORKFORCE OVERVIEW/);
+    assert.match(html, /<h1>概览<\/h1>/);
+    assert.match(html, /metricHarnesses/);
+    assert.match(html, /metricHealthy/);
+    assert.match(html, /metricModels/);
+    assert.match(html, /metricRunning/);
+    assert.doesNotMatch(html, /metricSuccess/);
+    assert.doesNotMatch(html, /metricGateway/);
+    assert.match(html, /primary-grid/);
+    assert.match(html, /执行引擎状态/);
+    assert.match(html, /本地模型资源池/);
 
     const dashboardJs = await fetch(`${base}/dashboard/dashboard.js`);
     assert.equal(dashboardJs.status, 200);
     const dashboardSource = await dashboardJs.text();
     assert.match(dashboardSource, /shuishu-product-name/);
     assert.match(dashboardSource, /shuishu-os-label/);
+    assert.match(dashboardSource, /shuishu-product-lockup/);
     assert.match(dashboardSource, /syncCogiensHeaderBrand/);
+    assert.match(dashboardSource, /engineShortName/);
 
     const logo = await fetch(`${base}/dashboard/cogiens-mark.png`);
     assert.equal(logo.status, 200);

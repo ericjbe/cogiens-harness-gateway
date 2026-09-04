@@ -1,20 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
-  <title id="title">Shuishu logo</title>
-  <desc id="desc">Blue water swirl and droplet mark.</desc>
+  <title id="title">水枢 · Cogiens</title>
+  <desc id="desc">Cogiens orange and blue C-shaped workforce mark.</desc>
   <defs>
-    <linearGradient id="g1" x1="18" y1="22" x2="108" y2="108" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#10B6FF"/>
-      <stop offset="0.5" stop-color="#0A86FF"/>
-      <stop offset="1" stop-color="#0757DF"/>
+    <linearGradient id="blue" x1="20" y1="38" x2="106" y2="105" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0047B8"/>
+      <stop offset="0.48" stop-color="#007FEA"/>
+      <stop offset="1" stop-color="#00B9F2"/>
     </linearGradient>
-    <linearGradient id="g2" x1="24" y1="18" x2="98" y2="94" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#19C8FF"/>
-      <stop offset="1" stop-color="#0969F4"/>
+    <linearGradient id="blue2" x1="52" y1="17" x2="112" y2="62" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#006CD8"/>
+      <stop offset="1" stop-color="#00C1F4"/>
     </linearGradient>
+    <linearGradient id="orange" x1="26" y1="65" x2="95" y2="18" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF5A00"/>
+      <stop offset="0.52" stop-color="#FF8500"/>
+      <stop offset="1" stop-color="#FFAA00"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0D2C54" flood-opacity="0.16"/>
+    </filter>
   </defs>
-  <path d="M20 57C23 37 39 21 60 17c6-1 11-1 16 0l-9 20c-12-2-24 4-31 14-4 6-6 13-6 20L20 57Z" fill="url(#g2)"/>
-  <path d="M57 11c20-2 41 7 52 24 4 6 7 13 8 20L95 49c-2-8-7-15-14-19-7-5-16-7-25-6L57 11Z" fill="url(#g1)"/>
-  <path d="M18 70c2 20 15 37 33 45 13 6 28 6 41 1l-14-17c-11 4-24 1-32-7-7-6-10-14-10-23L18 70Z" fill="url(#g1)"/>
-  <path d="M65 89c0-10 13-24 13-24s13 14 13 24a13 13 0 1 1-26 0Z" fill="url(#g2)"/>
-  <path d="M79 92c0-4 3-8 6-10 2 6 1 11-2 14-2 2-4 3-7 3 2-2 3-4 3-7Z" fill="#58D5FF" opacity="0.75"/>
+  <g filter="url(#soft)">
+    <path fill="url(#blue)" d="M108 76c-8 22-29 37-53 35-25-2-44-20-45-44-1-23 13-42 34-50 17-7 36-5 51 4L83 42c-9-5-20-6-29-2-11 4-19 14-19 27 0 14 10 25 24 27 13 2 26-5 32-18h17Z"/>
+    <path fill="url(#blue2)" d="M55 18c20-4 42 2 57 17 5 5 8 10 10 16-7 8-16 13-27 14-5-9-13-16-23-20-8-3-17-3-25 0l8-27Z"/>
+    <path fill="url(#orange)" d="M22 72C14 48 25 25 47 15c18-9 40-8 57 2-3 12-10 22-21 29-10-7-23-10-35-6-13 4-22 15-25 32H22Z"/>
+    <path fill="#69D9FA" opacity="0.48" d="M89 83c-7 10-18 16-30 14-9-1-16-6-21-13 7 5 15 7 23 6 10-1 18-6 24-14l4 7Z"/>
+  </g>
 </svg>

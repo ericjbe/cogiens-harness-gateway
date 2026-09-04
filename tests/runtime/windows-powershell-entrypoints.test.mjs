@@ -24,9 +24,12 @@ test("Windows PowerShell 5.1 entrypoints remain ASCII-safe", async () => {
 test("M-3 launcher detects and replaces a stale branded runtime", async () => {
   const launcher = await readFile(path.join(root, "deploy/m3/start-dashboard.ps1"), "utf8");
   assert.match(launcher, /Test-GatewaySurface/);
-  assert.match(launcher, /local Shuishu logo route is unavailable/);
+  assert.match(launcher, /dashboard\/cogiens-mark\.png/);
+  assert.match(launcher, /approved Cogiens mark route is unavailable/);
+  assert.match(launcher, /image\/png/);
   assert.match(launcher, /standard Cogiens header bootstrap/);
   assert.match(launcher, /running Gateway CSP does not allow/);
+  assert.match(launcher, /APPROVED_LOGO/);
   assert.match(launcher, /Stop-GatewayListener/);
   assert.match(launcher, /ForceRestart/);
 });

@@ -45,13 +45,17 @@ test("P2A-012 HTTP runtime exposes federation views and Shuishu dashboard", asyn
     const html = await dashboard.text();
     assert.match(html, /水枢/);
     assert.match(html, /Cogiens Workforce OS/);
-    assert.match(html, /shuishu-logo\.svg/);
+    assert.match(html, /cogiens-mark\.png/);
+    assert.doesNotMatch(html, /sidebar-logo[^>]+shuishu-logo\.svg/);
     assert.match(html, /https:\/\/www\.cogiens\.com\/brand\/js\/cogiens-header-bootstrap\.js/);
     assert.match(html, /data-product="水枢"/);
 
-    const logo = await fetch(`${base}/dashboard/shuishu-logo.svg`);
+    const logo = await fetch(`${base}/dashboard/cogiens-mark.png`);
     assert.equal(logo.status, 200);
-    assert.match(logo.headers.get("content-type") ?? "", /image\/svg\+xml/);
+    assert.match(logo.headers.get("content-type") ?? "", /image\/png/);
+    const logoBytes = new Uint8Array(await logo.arrayBuffer());
+    assert.ok(logoBytes.length > 1000);
+    assert.deepEqual([...logoBytes.slice(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
 
     const icon = await fetch(`${base}/dashboard/shuishu.ico`);
     assert.equal(icon.status, 200);

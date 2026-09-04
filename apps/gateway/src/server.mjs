@@ -35,7 +35,6 @@ const server = http.createServer(async (request, response) => {
   try {
     const url = new URL(request.url, `http://${request.headers.host ?? `${host}:${port}`}`);
 
-    // Dashboard static shell contains no sensitive runtime data. API calls remain bearer-protected.
     if (request.method === "GET" && url.pathname === "/dashboard") {
       response.writeHead(302, { location: "/dashboard/" });
       return response.end();
@@ -167,6 +166,7 @@ async function serveDashboardAsset(response, pathname) {
     ["/dashboard/index.html", ["index.html", "text/html; charset=utf-8"]],
     ["/dashboard/styles.css", ["styles.css", "text/css; charset=utf-8"]],
     ["/dashboard/dashboard.js", ["dashboard.js", "text/javascript; charset=utf-8"]],
+    ["/dashboard/cogiens-mark.png", ["cogiens-mark.png", "image/png"]],
     ["/dashboard/shuishu-logo.svg", ["shuishu-logo.svg", "image/svg+xml; charset=utf-8"]],
     ["/dashboard/shuishu.ico", ["shuishu.ico", "image/x-icon"]]
   ]);

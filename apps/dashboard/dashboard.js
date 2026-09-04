@@ -1,6 +1,15 @@
 const $ = (id) => document.getElementById(id);
 const state = { summary: null };
 
+const headerBootstrap = document.querySelector('script[data-product="水枢"]');
+const productSuffix = headerBootstrap?.dataset.productSuffix ?? "Cogiens Workforce OS";
+let headerObserver = null;
+
+syncCogiensHeaderBrand();
+headerObserver = new MutationObserver(syncCogiensHeaderBrand);
+headerObserver.observe(document.documentElement, { childList: true, subtree: true });
+setTimeout(() => headerObserver?.disconnect(), 15000);
+
 const tokenInput = $("tokenInput");
 tokenInput.value = sessionStorage.getItem("chg_dashboard_token") ?? "";
 $("gatewayUrl").textContent = location.origin;
@@ -15,6 +24,26 @@ $("dispatchForm").addEventListener("submit", dispatchJob);
 setInterval(() => $("clock").textContent = new Date().toLocaleString("zh-CN", { hour12: false }), 1000);
 setInterval(refresh, 5000);
 refresh();
+
+function syncCogiensHeaderBrand() {
+  const header = document.querySelector("body > header");
+  if (!header) return;
+
+  const candidates = [...header.querySelectorAll("*")].filter((node) =>
+    node.children.length === 0 && node.textContent?.trim() === "水枢"
+  );
+
+  for (const productName of candidates) {
+    productName.classList.add("shuishu-product-name");
+    const parent = productName.parentElement;
+    if (!parent) continue;
+    if (parent.querySelector(":scope > .shuishu-os-label")) continue;
+    const suffix = document.createElement("span");
+    suffix.className = "shuishu-os-label";
+    suffix.textContent = productSuffix;
+    productName.insertAdjacentElement("afterend", suffix);
+  }
+}
 
 async function api(path, options = {}) {
   const headers = new Headers(options.headers ?? {});
@@ -50,6 +79,7 @@ function render(summary) {
   const terminalRuns = jobs.flatMap((job) => job.runs ?? []).filter((run) => ["SUCCEEDED","FAILED","CANCELLED","TIMED_OUT"].includes(run.state));
   const succeeded = terminalRuns.filter((run) => run.state === "SUCCEEDED").length;
   const running = jobs.filter((job) => job.gateway_status === "RUNNING").length;
+  const gatewayHealthy = summary.gateway?.status === "healthy";
 
   $("metricHarnesses").textContent = `${harnesses.length}/8`;
   $("metricHealthy").textContent = adapters.filter((item) => item.enabled && item.health?.status === "healthy").length;
@@ -57,8 +87,12 @@ function render(summary) {
   $("metricRunning").textContent = running;
   $("metricSuccess").textContent = terminalRuns.length ? `${Math.round(100 * succeeded / terminalRuns.length)}%` : "—";
   $("metricGateway").textContent = String(summary.gateway?.status ?? "unknown").toUpperCase();
-  $("metricGateway").style.color = summary.gateway?.status === "healthy" ? "var(--green)" : "var(--amber)";
+  $("metricGateway").style.color = gatewayHealthy ? "var(--cg-green)" : "var(--cg-amber)";
   $("metricChecked").textContent = summary.gateway?.version ?? "runtime";
+
+  $("sidebarSystemStatus").textContent = gatewayHealthy ? "正常运行" : String(summary.gateway?.status ?? "检查中");
+  $("sidebarVersion").textContent = summary.gateway?.version ?? "—";
+  $("sidebarUpdated").textContent = summary.checked_at ? new Date(summary.checked_at).toLocaleTimeString("zh-CN", { hour12: false }) : "—";
 
   renderHarnesses(harnesses, adapters);
   renderModels(models, summary.models);
@@ -204,5 +238,5 @@ function formatBytes(bytes) { const units=["B","KB","MB","GB","TB"]; let n=bytes
 function formatDuration(ms) { if (ms < 1000) return `${Math.round(ms)}ms`; if (ms < 60000) return `${(ms/1000).toFixed(1)}s`; return `${(ms/60000).toFixed(1)}m`; }
 function esc(value) { return String(value ?? "").replace(/[&<>"']/g, (ch) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch])); }
 function escAttr(value) { return esc(value); }
-function showAlert(message, error = true) { const box=$("alertBox"); box.textContent=message; box.classList.remove("hidden"); if(!error){box.style.borderColor="rgba(53,208,127,.45)";box.style.color="#8ce8b5";} else {box.removeAttribute("style");} }
+function showAlert(message, error = true) { const box=$("alertBox"); box.textContent=message; box.classList.remove("hidden"); if(!error){box.style.borderColor="rgba(31,167,101,.45)";box.style.color="#198A50";} else {box.removeAttribute("style");} }
 function hideAlert() { $("alertBox").classList.add("hidden"); }

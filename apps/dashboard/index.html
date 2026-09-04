@@ -8,7 +8,6 @@
   <link rel="icon" type="image/png" href="/dashboard/cogiens-mark.png" />
   <link rel="stylesheet" href="/dashboard/styles.css" />
   <style id="cogiens-header-logo-dedupe">
-    /* The universal header must expose only the approved horizontal Cogiens lockup + product name. */
     body > header .brand:not(.cg-brand-hard),
     body > header .brand:not(.cg-brand-hard) *,
     body > header .cg-brand-logo,
@@ -21,10 +20,7 @@
     <aside class="sidebar">
       <div class="sidebar-brand">
         <img class="sidebar-logo" src="/dashboard/cogiens-mark.png" alt="Cogiens" />
-        <div class="sidebar-brand-copy">
-          <strong>水枢</strong>
-          <span>Cogiens Workforce OS</span>
-        </div>
+        <div class="sidebar-os-name">Cogiens Workforce OS</div>
       </div>
 
       <nav class="sidebar-nav" aria-label="水枢主导航">
@@ -127,8 +123,11 @@
     </div>
   </div>
 
-  <!-- CGS-UI-HDR-03 UNIVERSAL BOOTSTRAP -->
-  <script src="https://www.cogiens.com/brand/js/cogiens-header-bootstrap.js" data-product="水枢" defer></script>
+  <script
+    src="https://www.cogiens.com/brand/js/cogiens-header-bootstrap.js"
+    data-product="水枢"
+    data-product-suffix="Cogiens Workforce OS"
+    defer></script>
   <script type="module" src="/dashboard/dashboard.js"></script>
 </body>
 </html>

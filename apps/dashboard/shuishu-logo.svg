@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Shuishu logo</title>
+  <desc id="desc">Blue water swirl and droplet mark.</desc>
+  <defs>
+    <linearGradient id="g1" x1="18" y1="22" x2="108" y2="108" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#10B6FF"/>
+      <stop offset="0.5" stop-color="#0A86FF"/>
+      <stop offset="1" stop-color="#0757DF"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="24" y1="18" x2="98" y2="94" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#19C8FF"/>
+      <stop offset="1" stop-color="#0969F4"/>
+    </linearGradient>
+  </defs>
+  <path d="M20 57C23 37 39 21 60 17c6-1 11-1 16 0l-9 20c-12-2-24 4-31 14-4 6-6 13-6 20L20 57Z" fill="url(#g2)"/>
+  <path d="M57 11c20-2 41 7 52 24 4 6 7 13 8 20L95 49c-2-8-7-15-14-19-7-5-16-7-25-6L57 11Z" fill="url(#g1)"/>
+  <path d="M18 70c2 20 15 37 33 45 13 6 28 6 41 1l-14-17c-11 4-24 1-32-7-7-6-10-14-10-23L18 70Z" fill="url(#g1)"/>
+  <path d="M65 89c0-10 13-24 13-24s13 14 13 24a13 13 0 1 1-26 0Z" fill="url(#g2)"/>
+  <path d="M79 92c0-4 3-8 6-10 2 6 1 11-2 14-2 2-4 3-7 3 2-2 3-4 3-7Z" fill="#58D5FF" opacity="0.75"/>
+</svg>

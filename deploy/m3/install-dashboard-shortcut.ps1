@@ -8,15 +8,26 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
-if ([string]::IsNullOrWhiteSpace($ShortcutName)) {
-  $nameCodePoints = @(0x516B, 0x56FD, 0x8054, 0x519B, 0x6307, 0x6325, 0x53F0)
-  $nameChars = $nameCodePoints | ForEach-Object { [char]$_ }
-  $ShortcutName = "Cogiens " + (-join $nameChars)
+function Convert-CodePointsToString {
+  param(
+    [Parameter(Mandatory = $true)]
+    [int[]]$CodePoints
+  )
+  return -join ($CodePoints | ForEach-Object { [char]$_ })
 }
 
+if ([string]::IsNullOrWhiteSpace($ShortcutName)) {
+  $ShortcutName = Convert-CodePointsToString -CodePoints @(0x6C34, 0x67A2)
+}
+
+$legacyName = "Cogiens " + (Convert-CodePointsToString -CodePoints @(0x516B, 0x56FD, 0x8054, 0x519B, 0x6307, 0x6325, 0x53F0))
 $launcher = Join-Path $RepoRoot "deploy\m3\start-dashboard.ps1"
+$icon = Join-Path $RepoRoot "apps\dashboard\shuishu.ico"
 if (-not (Test-Path -LiteralPath $launcher)) {
   throw "Dashboard launcher not found: $launcher"
+}
+if (-not (Test-Path -LiteralPath $icon)) {
+  throw "Shuishu icon not found: $icon"
 }
 
 $powershell = (Get-Command powershell.exe -ErrorAction Stop).Source
@@ -42,9 +53,15 @@ function New-CogiensShortcut {
   $shortcut.TargetPath = $powershell
   $shortcut.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$launcher`""
   $shortcut.WorkingDirectory = $RepoRoot
-  $shortcut.Description = "Cogiens M-3 Joint Harness Command Center"
+  $shortcut.Description = "Shuishu - Cogiens Workforce OS"
+  $shortcut.IconLocation = "$icon,0"
   $shortcut.WindowStyle = 1
   $shortcut.Save()
+}
+
+$legacyDesktopShortcut = Join-Path $desktop "$legacyName.lnk"
+if (Test-Path -LiteralPath $legacyDesktopShortcut) {
+  Remove-Item -LiteralPath $legacyDesktopShortcut -Force
 }
 
 $desktopShortcut = Join-Path $desktop "$ShortcutName.lnk"
@@ -56,6 +73,12 @@ if (-not $NoStartMenu) {
   $programs = [Environment]::GetFolderPath("Programs")
   $cogiensFolder = Join-Path $programs "Cogiens"
   New-Item -ItemType Directory -Path $cogiensFolder -Force | Out-Null
+
+  $legacyStartMenuShortcut = Join-Path $cogiensFolder "$legacyName.lnk"
+  if (Test-Path -LiteralPath $legacyStartMenuShortcut) {
+    Remove-Item -LiteralPath $legacyStartMenuShortcut -Force
+  }
+
   $startMenuShortcut = Join-Path $cogiensFolder "$ShortcutName.lnk"
   New-CogiensShortcut -TargetPath $startMenuShortcut
   Write-Host "[PASS] Start Menu shortcut created:" -ForegroundColor Green
@@ -64,4 +87,4 @@ if (-not $NoStartMenu) {
 
 Write-Host ""
 Write-Host "Installation complete." -ForegroundColor Green
-Write-Host "From now on, use the Cogiens desktop shortcut." -ForegroundColor Green
+Write-Host "From now on, use the Shuishu desktop shortcut." -ForegroundColor Green

@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
-test("P2A-012 HTTP runtime exposes federation views and dashboard command center", async () => {
+test("P2A-012 HTTP runtime exposes federation views and Shuishu dashboard", async () => {
   const dataRoot = await mkdtemp(path.join(os.tmpdir(), "chg-p2a-api-"));
   const child = spawn(process.execPath, [path.join(root, "apps", "gateway", "src", "server.mjs")], {
     cwd: root,
@@ -40,7 +40,18 @@ test("P2A-012 HTTP runtime exposes federation views and dashboard command center
     const dashboard = await fetch(`${base}/dashboard/`);
     assert.equal(dashboard.status, 200);
     assert.match(dashboard.headers.get("content-type") ?? "", /text\/html/);
-    assert.match(await dashboard.text(), /八国联军开发指挥台/);
+    const html = await dashboard.text();
+    assert.match(html, /水枢/);
+    assert.match(html, /Cogiens Workforce OS/);
+    assert.match(html, /shuishu-logo\.svg/);
+
+    const logo = await fetch(`${base}/dashboard/shuishu-logo.svg`);
+    assert.equal(logo.status, 200);
+    assert.match(logo.headers.get("content-type") ?? "", /image\/svg\+xml/);
+
+    const icon = await fetch(`${base}/dashboard/shuishu.ico`);
+    assert.equal(icon.status, 200);
+    assert.match(icon.headers.get("content-type") ?? "", /image\/x-icon/);
 
     const missing = await fetch(`${base}/v1/federation/harnesses/H99`);
     assert.equal(missing.status, 404);

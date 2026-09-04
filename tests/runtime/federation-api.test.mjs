@@ -51,16 +51,19 @@ test("P2A-012 HTTP runtime exposes federation views and Shuishu dashboard", asyn
     assert.match(html, /\/dashboard\/proportions\.css/);
     assert.match(html, /\/dashboard\/header-shell\.css/);
 
-    // Owner-approved deterministic brand shell must remain visible regardless of plugin/browser zoom.
+    // Owner-approved deterministic brand shell remains at the top only.
     assert.match(html, /shuishu-brand-shell/);
     assert.match(html, /shuishu-primary-lockup/);
     assert.match(html, /shuishu-cogiens-wordmark/);
     assert.match(html, /shuishu-cogiens-tagline/);
     assert.match(html, /shuishu-product-lockup-local/);
     assert.match(html, /<strong>水枢<\/strong>/);
-    assert.match(html, /sidebar-brand/);
-    assert.match(html, /sidebar-logo/);
-    assert.match(html, /sidebar-os-name/);
+
+    // Sidebar is navigation-only: no repeated logo/product/OS identity block.
+    assert.match(html, /<aside class="sidebar">\s*<nav class="sidebar-nav"/);
+    assert.doesNotMatch(html, /sidebar-brand/);
+    assert.doesNotMatch(html, /sidebar-logo/);
+    assert.doesNotMatch(html, /sidebar-os-name/);
     assert.doesNotMatch(html, /sidebar-spacer/);
 
     assert.match(html, /WORKFORCE OVERVIEW/);
@@ -90,8 +93,9 @@ test("P2A-012 HTTP runtime exposes federation views and Shuishu dashboard", asyn
     assert.match(headerSource, /body\s*>\s*header\s*\{\s*display:none\s*!important/);
     assert.match(headerSource, /\.shuishu-brand-shell/);
     assert.match(headerSource, /\.shuishu-product-lockup-local/);
-    assert.match(headerSource, /\.sidebar-brand/);
-    assert.match(headerSource, /\.sidebar-logo/);
+    assert.match(headerSource, /Sidebar is navigation only/);
+    assert.match(headerSource, /\.sidebar-brand,/);
+    assert.match(headerSource, /display:none\s*!important/);
 
     const dashboardJs = await fetch(`${base}/dashboard/dashboard.js`);
     assert.equal(dashboardJs.status, 200);

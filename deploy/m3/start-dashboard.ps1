@@ -48,7 +48,7 @@ npm run gateway
   }
 }
 
-Write-Host "M-3 Harness Dashboard is ready:" -ForegroundColor Green
+Write-Host "Shuishu - Cogiens Workforce OS is ready:" -ForegroundColor Green
 Write-Host $DashboardUrl -ForegroundColor Cyan
 
 if (-not $NoBrowser) {

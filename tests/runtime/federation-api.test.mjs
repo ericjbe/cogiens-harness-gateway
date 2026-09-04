@@ -49,11 +49,20 @@ test("P2A-012 HTTP runtime exposes federation views and Shuishu dashboard", asyn
     assert.match(html, /data-product="水枢"/);
     assert.match(html, /data-product-suffix="Cogiens Workforce OS"/);
     assert.match(html, /\/dashboard\/proportions\.css/);
+    assert.match(html, /\/dashboard\/header-shell\.css/);
 
-    // Owner-approved hierarchy: one top product name, no duplicate sidebar brand, then overview/KPIs.
-    assert.match(html, /sidebar-spacer/);
-    assert.doesNotMatch(html, /sidebar-logo/);
-    assert.doesNotMatch(html, /sidebar-os-name/);
+    // Owner-approved deterministic brand shell must remain visible regardless of plugin/browser zoom.
+    assert.match(html, /shuishu-brand-shell/);
+    assert.match(html, /shuishu-primary-lockup/);
+    assert.match(html, /shuishu-cogiens-wordmark/);
+    assert.match(html, /shuishu-cogiens-tagline/);
+    assert.match(html, /shuishu-product-lockup-local/);
+    assert.match(html, /<strong>水枢<\/strong>/);
+    assert.match(html, /sidebar-brand/);
+    assert.match(html, /sidebar-logo/);
+    assert.match(html, /sidebar-os-name/);
+    assert.doesNotMatch(html, /sidebar-spacer/);
+
     assert.match(html, /WORKFORCE OVERVIEW/);
     assert.match(html, /<h1>概览<\/h1>/);
     assert.match(html, /metricHarnesses/);
@@ -72,15 +81,21 @@ test("P2A-012 HTTP runtime exposes federation views and Shuishu dashboard", asyn
     const proportionSource = await proportionCss.text();
     assert.match(proportionSource, /grid-template-columns:\s*18\.4vw/);
     assert.match(proportionSource, /max-width:\s*none/);
-    assert.match(proportionSource, /sidebar-spacer/);
     assert.match(proportionSource, /font-size:\s*max\(/);
+
+    const headerCss = await fetch(`${base}/dashboard/header-shell.css`);
+    assert.equal(headerCss.status, 200);
+    assert.match(headerCss.headers.get("content-type") ?? "", /text\/css/);
+    const headerSource = await headerCss.text();
+    assert.match(headerSource, /body\s*>\s*header\s*\{\s*display:none\s*!important/);
+    assert.match(headerSource, /\.shuishu-brand-shell/);
+    assert.match(headerSource, /\.shuishu-product-lockup-local/);
+    assert.match(headerSource, /\.sidebar-brand/);
+    assert.match(headerSource, /\.sidebar-logo/);
 
     const dashboardJs = await fetch(`${base}/dashboard/dashboard.js`);
     assert.equal(dashboardJs.status, 200);
     const dashboardSource = await dashboardJs.text();
-    assert.match(dashboardSource, /shuishu-product-name/);
-    assert.match(dashboardSource, /shuishu-os-label/);
-    assert.match(dashboardSource, /shuishu-product-lockup/);
     assert.match(dashboardSource, /syncCogiensHeaderBrand/);
     assert.match(dashboardSource, /engineShortName/);
 

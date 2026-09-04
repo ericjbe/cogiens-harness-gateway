@@ -8,18 +8,30 @@
   <link rel="icon" type="image/png" href="/dashboard/cogiens-mark.png" />
   <link rel="stylesheet" href="/dashboard/styles.css" />
   <link rel="stylesheet" href="/dashboard/proportions.css" />
-  <style id="cogiens-header-logo-dedupe">
-    body > header .brand:not(.cg-brand-hard),
-    body > header .brand:not(.cg-brand-hard) *,
-    body > header .cg-brand-logo,
-    body > header .cg-brand-copy { display:none !important; }
-    body > header .cg-brand-hard { display:flex !important; visibility:visible !important; opacity:1 !important; }
-  </style>
+  <link rel="stylesheet" href="/dashboard/header-shell.css" />
 </head>
 <body>
+  <div class="shuishu-brand-shell" role="banner" aria-label="Cogiens 水枢品牌头">
+    <div class="shuishu-primary-lockup">
+      <img class="shuishu-header-mark" src="/dashboard/cogiens-mark.png" alt="Cogiens" />
+      <div class="shuishu-primary-copy">
+        <div class="shuishu-cogiens-wordmark">Cogiens</div>
+        <div class="shuishu-cogiens-tagline">DIGITAL WORKFORCE</div>
+      </div>
+    </div>
+    <div class="shuishu-brand-divider" aria-hidden="true"></div>
+    <div class="shuishu-product-lockup-local">
+      <strong>水枢</strong>
+      <span>Cogiens Workforce OS</span>
+    </div>
+  </div>
+
   <div class="app-shell">
     <aside class="sidebar">
-      <div class="sidebar-spacer" aria-hidden="true"></div>
+      <div class="sidebar-brand">
+        <img class="sidebar-logo" src="/dashboard/cogiens-mark.png" alt="Cogiens" />
+        <div class="sidebar-os-name">Cogiens Workforce OS</div>
+      </div>
 
       <nav class="sidebar-nav" aria-label="水枢主导航">
         <a class="active" href="#overview"><span class="nav-icon">▦</span><span>概览</span></a>

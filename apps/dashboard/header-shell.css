@@ -1,0 +1,150 @@
+/*
+ * Deterministic 水枢 brand shell.
+ * The Cogiens Universal Header plugin stays connected for shared platform behavior,
+ * but its injected visual header is hidden because its own responsive rules collapse
+ * under aggressive browser zoom. This local shell freezes the owner-approved lockup.
+ */
+
+/* Hide only the plugin-injected visual header. */
+body > header { display:none !important; }
+
+.shuishu-brand-shell {
+  height:clamp(140px,9vw,300px);
+  display:flex;
+  align-items:center;
+  gap:0;
+  padding:0 3.2vw;
+  background:#fff;
+  border-bottom:1px solid #D8E2EE;
+  color:#071B3A;
+  overflow:hidden;
+}
+
+.shuishu-primary-lockup {
+  display:flex;
+  align-items:center;
+  gap:clamp(18px,1.1vw,34px);
+  flex:0 0 auto;
+}
+
+.shuishu-header-mark {
+  width:clamp(78px,5.2vw,150px);
+  height:clamp(78px,5.2vw,150px);
+  object-fit:contain;
+  flex:0 0 auto;
+}
+
+.shuishu-primary-copy {
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-width:0;
+}
+
+.shuishu-cogiens-wordmark {
+  font-size:clamp(38px,3.2vw,82px);
+  line-height:.92;
+  font-weight:800;
+  letter-spacing:-.035em;
+  color:#071B3A;
+  white-space:nowrap;
+}
+
+.shuishu-cogiens-tagline {
+  margin-top:clamp(8px,.6vw,18px);
+  font-size:clamp(13px,.92vw,26px);
+  line-height:1;
+  font-weight:650;
+  letter-spacing:.26em;
+  color:#6F809A;
+  white-space:nowrap;
+}
+
+.shuishu-brand-divider {
+  width:1px;
+  height:clamp(72px,5.4vw,155px);
+  margin:0 clamp(30px,2.2vw,66px);
+  background:#CFD8E5;
+  flex:0 0 1px;
+}
+
+.shuishu-product-lockup-local {
+  display:flex;
+  align-items:baseline;
+  gap:clamp(18px,1.35vw,42px);
+  min-width:0;
+  white-space:nowrap;
+}
+
+.shuishu-product-lockup-local strong {
+  font-size:clamp(46px,3.7vw,98px);
+  line-height:1;
+  font-weight:800;
+  letter-spacing:.02em;
+  color:#071B3A;
+}
+
+.shuishu-product-lockup-local span {
+  font-size:clamp(19px,1.5vw,42px);
+  line-height:1;
+  font-weight:500;
+  color:#5E7190;
+}
+
+/* Keep the main shell aligned to the deterministic header rather than plugin height. */
+.app-shell {
+  min-height:calc(100vh - clamp(140px,9vw,300px)) !important;
+}
+.sidebar {
+  min-height:calc(100vh - clamp(140px,9vw,300px)) !important;
+}
+
+/* Restore the approved sidebar identity block. */
+.sidebar-spacer { display:none !important; }
+.sidebar-brand {
+  min-height:clamp(150px,10.5vw,300px);
+  display:flex !important;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+  gap:clamp(12px,.8vw,22px);
+  padding:clamp(18px,1.2vw,34px) 1.45vw !important;
+  border-bottom:1px solid rgba(255,255,255,.13);
+}
+.sidebar-logo {
+  display:block !important;
+  width:clamp(80px,5.2vw,150px) !important;
+  height:clamp(80px,5.2vw,150px) !important;
+  object-fit:contain;
+  filter:drop-shadow(0 9px 18px rgba(0,0,0,.16));
+}
+.sidebar-os-name {
+  display:block !important;
+  font-size:max(17px,1.08vw) !important;
+  line-height:1.2;
+  font-weight:500;
+  color:#F2F6FC;
+  white-space:nowrap;
+}
+.sidebar-nav {
+  padding-top:clamp(20px,1.25vw,38px) !important;
+}
+
+@media (max-width:1180px) {
+  .shuishu-brand-shell {
+    height:126px;
+    padding:0 28px;
+  }
+  .shuishu-header-mark { width:70px; height:70px; }
+  .shuishu-cogiens-wordmark { font-size:40px; }
+  .shuishu-cogiens-tagline { font-size:11px; }
+  .shuishu-brand-divider { height:66px; margin:0 24px; }
+  .shuishu-product-lockup-local { gap:14px; }
+  .shuishu-product-lockup-local strong { font-size:36px; }
+  .shuishu-product-lockup-local span { font-size:15px; }
+  .app-shell { min-height:calc(100vh - 126px) !important; }
+  .sidebar { min-height:calc(100vh - 126px) !important; }
+  .sidebar-brand { min-height:150px; padding:20px 16px !important; }
+  .sidebar-logo { width:76px !important; height:76px !important; }
+  .sidebar-os-name { font-size:15px !important; }
+}

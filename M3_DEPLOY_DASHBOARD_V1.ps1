@@ -8,7 +8,7 @@ if (-not (Test-Path -LiteralPath $Launcher)) {
   throw "Dashboard launcher not found: $Launcher"
 }
 
-Write-Host 'Cogiens M-3 Dashboard deployment entrypoint' -ForegroundColor Cyan
+Write-Host 'Shuishu M-3 Dashboard deployment entrypoint' -ForegroundColor Cyan
 Write-Host "Repository: $RepoRoot"
 
-& $Launcher -RepoRoot $RepoRoot
+& $Launcher -RepoRoot $RepoRoot -ForceRestart

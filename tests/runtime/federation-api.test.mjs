@@ -48,6 +48,7 @@ test("P2A-012 HTTP runtime exposes federation views and Shuishu dashboard", asyn
     assert.match(html, /https:\/\/www\.cogiens\.com\/brand\/js\/cogiens-header-bootstrap\.js/);
     assert.match(html, /data-product="水枢"/);
     assert.match(html, /data-product-suffix="Cogiens Workforce OS"/);
+    assert.match(html, /\/dashboard\/proportions\.css/);
 
     // Owner-approved hierarchy: one top product name, no duplicate sidebar brand, then overview/KPIs.
     assert.match(html, /sidebar-spacer/);
@@ -64,6 +65,15 @@ test("P2A-012 HTTP runtime exposes federation views and Shuishu dashboard", asyn
     assert.match(html, /primary-grid/);
     assert.match(html, /执行引擎状态/);
     assert.match(html, /本地模型资源池/);
+
+    const proportionCss = await fetch(`${base}/dashboard/proportions.css`);
+    assert.equal(proportionCss.status, 200);
+    assert.match(proportionCss.headers.get("content-type") ?? "", /text\/css/);
+    const proportionSource = await proportionCss.text();
+    assert.match(proportionSource, /grid-template-columns:\s*18\.4vw/);
+    assert.match(proportionSource, /max-width:\s*none/);
+    assert.match(proportionSource, /sidebar-spacer/);
+    assert.match(proportionSource, /font-size:\s*max\(/);
 
     const dashboardJs = await fetch(`${base}/dashboard/dashboard.js`);
     assert.equal(dashboardJs.status, 200);

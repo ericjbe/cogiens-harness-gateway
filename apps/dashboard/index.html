@@ -1,15 +1,15 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-cg-theme="light">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#071016" />
+  <meta name="theme-color" content="#0D2C54" />
   <title>水枢 · Cogiens Workforce OS</title>
   <link rel="icon" type="image/svg+xml" href="/dashboard/shuishu-logo.svg" />
   <link rel="stylesheet" href="/dashboard/styles.css" />
 </head>
 <body>
-  <header class="topbar">
+  <section class="topbar product-banner" aria-label="水枢产品信息">
     <div class="brand-lockup">
       <img class="brand-logo" src="/dashboard/shuishu-logo.svg" alt="水枢" />
       <div>
@@ -22,7 +22,7 @@
       <span id="clock" class="clock">--:--:--</span>
       <button id="refreshBtn" class="button secondary">刷新</button>
     </div>
-  </header>
+  </section>
 
   <main>
     <section class="auth-strip">
@@ -91,6 +91,12 @@
   </main>
 
   <footer>水枢 · Cogiens Workforce OS · Powered by Cogiens Harness Gateway</footer>
+
+  <!-- CGS-UI-HDR-03 UNIVERSAL BOOTSTRAP -->
+  <script
+    src="https://www.cogiens.com/brand/js/cogiens-header-bootstrap.js"
+    data-product="水枢"
+    defer></script>
   <script type="module" src="/dashboard/dashboard.js"></script>
 </body>
 </html>

@@ -179,7 +179,17 @@ async function serveDashboardAsset(response, pathname) {
     "content-length": body.length,
     "cache-control": "no-store",
     "x-content-type-options": "nosniff",
-    "content-security-policy": "default-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self'; img-src 'self' data:"
+    "content-security-policy": [
+      "default-src 'self'",
+      "script-src 'self' https://www.cogiens.com https://cogiens.com",
+      "style-src 'self' 'unsafe-inline' https://www.cogiens.com https://cogiens.com",
+      "img-src 'self' data: https://www.cogiens.com https://cogiens.com",
+      "font-src 'self' data: https://www.cogiens.com https://cogiens.com",
+      "connect-src 'self' https://www.cogiens.com https://cogiens.com",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "frame-ancestors 'none'"
+    ].join("; ")
   });
   response.end(body);
 }

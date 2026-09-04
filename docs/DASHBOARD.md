@@ -9,6 +9,23 @@ Status: Dashboard v1
 - Internal execution layer: **Cogiens Harness Gateway**
 - H01-H08 remain engineering execution engines and are not the public product brand.
 
+## Standard Cogiens header
+
+水枢 uses the same **Cogiens Universal Header Plugin** as the other Cogiens products. It follows the ONE_PLUGIN_ONE_BOOTSTRAP rule and does not copy a product-specific header implementation into this repository.
+
+Canonical bootstrap:
+
+```html
+<script
+  src="https://www.cogiens.com/brand/js/cogiens-header-bootstrap.js"
+  data-product="水枢"
+  defer></script>
+```
+
+The Dashboard Content-Security-Policy explicitly permits only the required `cogiens.com` header resources in addition to same-origin assets. The 水枢 product banner is a separate section below the universal header so global header CSS cannot collide with the product-specific banner.
+
+The Dashboard brand palette follows the Cogiens visual system: deep navy, Cogiens blue/cyan, orange accents, cool gray, white panels, and a matching dark theme driven by `data-cg-theme`.
+
 ## Purpose
 
 The Dashboard is the human operating surface for 水枢 / Cogiens Workforce OS on M-3. It exposes digital jobs, execution-engine state, local models, Jobs, Runs, artifacts and evidence without requiring the operator to remember CLI commands.

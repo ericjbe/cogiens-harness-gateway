@@ -4,11 +4,13 @@ import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { createOllamaLocalAdapter } from "../../adapters/ollama-local/src/index.mjs";
 import { collectEvents, requireEvent } from "../../packages/conformance-kit/src/index.mjs";
+import { createRegistry, loadGatewayConfig } from "../../packages/gateway-core/src/registry.mjs";
 
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 let counter = 0;
 
 async function withFakeLocalRuntime(handler) {
@@ -36,6 +38,19 @@ async function session(instance, workspace) {
     policy: { network: "restricted", approval_mode: "never", max_runtime_seconds: 5, max_output_bytes: 64 * 1024 }
   });
 }
+
+test("M3 config exposes eight Cogiens local execution units", async () => {
+  const config = await loadGatewayConfig(path.join(root, "config", "harnesses.m3.json"));
+  assert.equal(config.adapters.length, 8);
+  assert.deepEqual(config.adapters.map((item) => item.id), [
+    "cogiens.h01.local", "cogiens.h02.local", "cogiens.h03.local", "cogiens.h04.local",
+    "cogiens.h05.local", "cogiens.h06.local", "cogiens.h07.local", "cogiens.h08.local"
+  ]);
+  assert.ok(config.adapters.every((item) => item.kind === "ollama-local" && item.enabled === true));
+  const registry = createRegistry(config);
+  assert.equal(registry.length, 8);
+  assert.ok(registry.every((record) => record.adapter));
+});
 
 test("local execution adapter reports healthy and returns a durable text artifact", async () => {
   const workspace = await mkdtemp(path.join(os.tmpdir(), "chg-local-"));

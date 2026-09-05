@@ -77,7 +77,7 @@ test("local execution adapter reports healthy and returns a durable text artifac
 
     const artifacts = await collectEvents(instance.collectArtifacts({}, handle));
     assert.equal(artifacts.length, 1);
-    assert.equal(artifacts[0].content.text, "Local result.");
+    assert.equal(artifacts[0].content, "Local result.");
   } finally {
     await fake.close();
     await rm(workspace, { recursive: true, force: true });

@@ -75,8 +75,9 @@ test("P2A-012 HTTP runtime exposes federation views and Shuishu dashboard", asyn
     assert.doesNotMatch(html, /metricSuccess/);
     assert.doesNotMatch(html, /metricGateway/);
     assert.match(html, /primary-grid/);
-    assert.match(html, /执行引擎状态/);
-    assert.match(html, /本地模型资源池/);
+    assert.match(html, /执行单元状态/);
+    assert.match(html, /本地执行资源池/);
+    assert.match(html, /岗位管理/);
 
     const proportionCss = await fetch(`${base}/dashboard/proportions.css`);
     assert.equal(proportionCss.status, 200);
@@ -101,7 +102,11 @@ test("P2A-012 HTTP runtime exposes federation views and Shuishu dashboard", asyn
     assert.equal(dashboardJs.status, 200);
     const dashboardSource = await dashboardJs.text();
     assert.match(dashboardSource, /syncCogiensHeaderBrand/);
-    assert.match(dashboardSource, /engineShortName/);
+    assert.match(dashboardSource, /publicEngineCode/);
+    assert.match(dashboardSource, /buildAdapterCodeMap/);
+    assert.doesNotMatch(dashboardSource, /engineShortName/);
+    assert.doesNotMatch(dashboardSource, /\$\{esc\(harness\.vendor/);
+    assert.doesNotMatch(dashboardSource, /\$\{esc\(model\.name/);
 
     const logo = await fetch(`${base}/dashboard/cogiens-mark.png`);
     assert.equal(logo.status, 200);

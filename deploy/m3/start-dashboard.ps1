@@ -16,6 +16,12 @@ $DashboardUrl = "http://127.0.0.1:$Port/dashboard/"
 $HealthUrl = "http://127.0.0.1:$Port/health"
 $LogoUrl = "http://127.0.0.1:$Port/dashboard/cogiens-mark.png"
 $HeaderBootstrapUrl = "https://www.cogiens.com/brand/js/cogiens-header-bootstrap.js"
+$LocalConfig = Join-Path $RepoRoot "config\harnesses.local.json"
+$M3Config = Join-Path $RepoRoot "config\harnesses.m3.json"
+$GatewayConfig = if (Test-Path -LiteralPath $LocalConfig) { $LocalConfig } elseif (Test-Path -LiteralPath $M3Config) { $M3Config } else { $null }
+$PowerShellExe = Join-Path $PSHOME "powershell.exe"
+$NodeDir = "C:\Program Files\nodejs"
+$NpmCandidate = Join-Path $NodeDir "npm.cmd"
 
 function Invoke-LocalProbe {
   param(
@@ -108,18 +114,36 @@ function Stop-GatewayListener {
   throw "Gateway listener on port $Port did not stop."
 }
 
+function Resolve-NpmCommand {
+  $found = Get-Command npm.cmd -ErrorAction SilentlyContinue
+  if ($null -ne $found) { return $found.Source }
+  if (Test-Path -LiteralPath $NpmCandidate) { return $NpmCandidate }
+  throw "npm.cmd was not found. Expected it at $NpmCandidate or on PATH."
+}
+
 function Start-Gateway {
-  $null = Get-Command npm -ErrorAction Stop
+  $npmCommand = Resolve-NpmCommand
+  if (-not (Test-Path -LiteralPath $PowerShellExe)) { throw "powershell.exe not found: $PowerShellExe" }
+
+  $configCommand = if ($null -ne $GatewayConfig) {
+    "`$env:CHG_CONFIG='" + $GatewayConfig.Replace("'", "''") + "'"
+  } else {
+    "Remove-Item Env:CHG_CONFIG -ErrorAction SilentlyContinue"
+  }
+
   $command = @"
+`$env:Path='$NodeDir;' + `$env:Path
 `$env:CHG_HOST='127.0.0.1'
 `$env:CHG_PORT='$Port'
+$configCommand
 Set-Location -LiteralPath '$RepoRoot'
-npm run gateway
+& '$npmCommand' run gateway
 "@
   Write-Host "[START] Starting the current Gateway code..." -ForegroundColor Yellow
-  Start-Process powershell.exe -ArgumentList @("-NoExit","-NoProfile","-ExecutionPolicy","Bypass","-Command",$command) -WorkingDirectory $RepoRoot | Out-Null
+  if ($null -ne $GatewayConfig) { Write-Host "[CONFIG] $GatewayConfig" -ForegroundColor Cyan }
+  Start-Process -FilePath $PowerShellExe -ArgumentList @("-NoExit","-NoProfile","-ExecutionPolicy","Bypass","-Command",$command) -WorkingDirectory $RepoRoot | Out-Null
 
-  for ($attempt = 0; $attempt -lt 40; $attempt++) {
+  for ($attempt = 0; $attempt -lt 60; $attempt++) {
     Start-Sleep -Milliseconds 500
     $surface = Test-GatewaySurface
     if ($surface.Healthy -and $surface.BrandReady) { return }
@@ -164,6 +188,7 @@ Write-Host "HEALTH             = PASS"
 Write-Host "APPROVED_LOGO      = PASS"
 Write-Host "HEADER_MOUNT       = PASS"
 Write-Host "HEADER_REMOTE      = $remoteHeaderStatus"
+Write-Host "CONFIG             = $($GatewayConfig ?? 'default')"
 Write-Host "DASHBOARD          = $DashboardUrl"
 Write-Host "============================================================" -ForegroundColor Green
 

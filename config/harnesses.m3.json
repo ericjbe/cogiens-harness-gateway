@@ -1,0 +1,23 @@
+{
+  "version": "0.3.0-alpha.1",
+  "server": {
+    "host": "127.0.0.1",
+    "port": 8787,
+    "token_env": "CHG_API_TOKEN",
+    "max_request_bytes": 1048576,
+    "max_output_bytes": 4194304,
+    "max_runtime_seconds": 3600,
+    "max_concurrency": 4,
+    "max_adapters_per_job": 8
+  },
+  "adapters": [
+    {"id":"cogiens.h01.local","kind":"ollama-local","enabled":true,"resource_id":"M01","model":"qwen3-coder:30b"},
+    {"id":"cogiens.h02.local","kind":"ollama-local","enabled":true,"resource_id":"M02","model":"devstral-small-2"},
+    {"id":"cogiens.h03.local","kind":"ollama-local","enabled":true,"resource_id":"M03","model":"gpt-oss:20b"},
+    {"id":"cogiens.h04.local","kind":"ollama-local","enabled":true,"resource_id":"M04","model":"qwen3:30b"},
+    {"id":"cogiens.h05.local","kind":"ollama-local","enabled":true,"resource_id":"M05","model":"deepseek-r1:32b"},
+    {"id":"cogiens.h06.local","kind":"ollama-local","enabled":true,"resource_id":"M06","model":"nemotron-3.5-lightning:30b-a3b"},
+    {"id":"cogiens.h07.local","kind":"ollama-local","enabled":true,"resource_id":"M07","model":"ministral-3:14b"},
+    {"id":"cogiens.h08.local","kind":"ollama-local","enabled":true,"resource_id":"M08","model":"deepcoder:14b"}
+  ]
+}

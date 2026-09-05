@@ -4,11 +4,13 @@ import path from "node:path";
 import { createCodexCliAdapter } from "../../../adapters/codex-cli/src/index.mjs";
 import { createDeepSeekPythonAdapter } from "../../../adapters/deepseek-python/src/index.mjs";
 import { createHermesCliAdapter } from "../../../adapters/hermes-cli/src/index.mjs";
+import { createOllamaLocalAdapter } from "../../../adapters/ollama-local/src/index.mjs";
 
 const FACTORIES = new Map([
   ["codex-cli", createCodexCliAdapter],
   ["hermes-cli", createHermesCliAdapter],
-  ["deepseek-python", createDeepSeekPythonAdapter]
+  ["deepseek-python", createDeepSeekPythonAdapter],
+  ["ollama-local", createOllamaLocalAdapter]
 ]);
 
 export async function loadGatewayConfig(configPath) {

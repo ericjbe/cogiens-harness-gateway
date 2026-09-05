@@ -33,3 +33,14 @@ test("M-3 launcher detects and replaces a stale branded runtime", async () => {
   assert.match(launcher, /Stop-GatewayListener/);
   assert.match(launcher, /ForceRestart/);
 });
+
+test("M-3 launcher selects local workforce routing and survives restricted SSH PATH", async () => {
+  const launcher = await readFile(path.join(root, "deploy/m3/start-dashboard.ps1"), "utf8");
+  assert.match(launcher, /harnesses\.m3\.json/);
+  assert.match(launcher, /Resolve-NpmCommand/);
+  assert.match(launcher, /C:\\Program Files\\nodejs/);
+  assert.match(launcher, /npm\.cmd/);
+  assert.match(launcher, /CHG_CONFIG/);
+  assert.match(launcher, /CONFIG\s+=/);
+  assert.doesNotMatch(launcher, /\?\?/);
+});

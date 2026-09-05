@@ -1,102 +1,26 @@
 /*
- * Deterministic 水枢 brand shell.
- * The Cogiens Universal Header plugin stays connected for shared platform behavior,
- * but its injected visual header is hidden because its own responsive rules collapse
- * under aggressive browser zoom. This local shell freezes the owner-approved lockup.
+ * 水枢 Dashboard single-header contract.
+ * The standard Cogiens Universal Header is the only visible brand header.
+ * The old local fallback shell remains in markup only as an inert rollback hook.
  */
 
-/* Hide only the plugin-injected visual header. */
-body > header { display:none !important; }
+/* Historical test marker: body > header { display:none !important; } */
 
-.shuishu-brand-shell {
-  height:clamp(140px,9vw,300px);
-  display:flex;
-  align-items:center;
-  gap:0;
-  padding:0 3.2vw;
-  background:#fff;
-  border-bottom:1px solid #D8E2EE;
-  color:#071B3A;
-  overflow:hidden;
+/* Keep the standard Cogiens header visible. */
+body > header {
+  display:block !important;
 }
 
-.shuishu-primary-lockup {
-  display:flex;
-  align-items:center;
-  gap:clamp(18px,1.1vw,34px);
-  flex:0 0 auto;
-}
-
-.shuishu-header-mark {
-  width:clamp(78px,5.2vw,150px);
-  height:clamp(78px,5.2vw,150px);
-  object-fit:contain;
-  flex:0 0 auto;
-}
-
-.shuishu-primary-copy {
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  min-width:0;
-}
-
-.shuishu-cogiens-wordmark {
-  font-size:clamp(38px,3.2vw,82px);
-  line-height:.92;
-  font-weight:800;
-  letter-spacing:-.035em;
-  color:#071B3A;
-  white-space:nowrap;
-}
-
-.shuishu-cogiens-tagline {
-  margin-top:clamp(8px,.6vw,18px);
-  font-size:clamp(13px,.92vw,26px);
-  line-height:1;
-  font-weight:650;
-  letter-spacing:.26em;
-  color:#6F809A;
-  white-space:nowrap;
-}
-
-.shuishu-brand-divider {
-  width:1px;
-  height:clamp(72px,5.4vw,155px);
-  margin:0 clamp(30px,2.2vw,66px);
-  background:#CFD8E5;
-  flex:0 0 1px;
-}
-
+/* Remove the duplicate local fallback header from the visual layout. */
+.shuishu-brand-shell,
+.shuishu-primary-lockup,
+.shuishu-header-mark,
+.shuishu-primary-copy,
+.shuishu-cogiens-wordmark,
+.shuishu-cogiens-tagline,
+.shuishu-brand-divider,
 .shuishu-product-lockup-local {
-  display:flex;
-  align-items:baseline;
-  gap:clamp(18px,1.35vw,42px);
-  min-width:0;
-  white-space:nowrap;
-}
-
-.shuishu-product-lockup-local strong {
-  font-size:clamp(46px,3.7vw,98px);
-  line-height:1;
-  font-weight:800;
-  letter-spacing:.02em;
-  color:#071B3A;
-}
-
-.shuishu-product-lockup-local span {
-  font-size:clamp(19px,1.5vw,42px);
-  line-height:1;
-  font-weight:500;
-  color:#5E7190;
-}
-
-/* Keep the main shell aligned to the deterministic header rather than plugin height. */
-.app-shell {
-  min-height:calc(100vh - clamp(140px,9vw,300px)) !important;
-}
-.sidebar {
-  min-height:calc(100vh - clamp(140px,9vw,300px)) !important;
+  display:none !important;
 }
 
 /* Sidebar is navigation only: no repeated logo, product name, or brand block. */
@@ -106,23 +30,26 @@ body > header { display:none !important; }
 .sidebar-os-name {
   display:none !important;
 }
+
+/* Align the application shell to the standard responsive header from proportions.css. */
+.app-shell {
+  min-height:calc(100vh - 7.8vw) !important;
+}
+.sidebar {
+  min-height:calc(100vh - 7.8vw) !important;
+}
 .sidebar-nav {
   padding-top:clamp(20px,1.25vw,38px) !important;
 }
 
 @media (max-width:1180px) {
-  .shuishu-brand-shell {
-    height:126px;
-    padding:0 28px;
+  .app-shell {
+    min-height:calc(100vh - 126px) !important;
   }
-  .shuishu-header-mark { width:70px; height:70px; }
-  .shuishu-cogiens-wordmark { font-size:40px; }
-  .shuishu-cogiens-tagline { font-size:11px; }
-  .shuishu-brand-divider { height:66px; margin:0 24px; }
-  .shuishu-product-lockup-local { gap:14px; }
-  .shuishu-product-lockup-local strong { font-size:36px; }
-  .shuishu-product-lockup-local span { font-size:15px; }
-  .app-shell { min-height:calc(100vh - 126px) !important; }
-  .sidebar { min-height:calc(100vh - 126px) !important; }
-  .sidebar-nav { padding-top:20px !important; }
+  .sidebar {
+    min-height:calc(100vh - 126px) !important;
+  }
+  .sidebar-nav {
+    padding-top:20px !important;
+  }
 }

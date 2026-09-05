@@ -97,10 +97,12 @@ function render(summary) {
   const gatewayHealthy = summary.gateway?.status === "healthy";
   const healthyAdapters = adapters.filter((item) => item.enabled && item.health?.status === "healthy" && state.adapterCodes.has(item.id)).length;
   const installedModels = models.filter((item) => item.installed).length;
+  const localResourcesReady = summary.models?.status === "connected" && installedModels > 0;
+  const availableUnits = localResourcesReady ? harnesses.length : healthyAdapters;
   const successRate = terminalRuns.length ? `${Math.round(100 * succeeded / terminalRuns.length)}%` : "—";
 
   setText("metricHarnesses", `${harnesses.length}/8`);
-  setText("metricHealthy", healthyAdapters);
+  setText("metricHealthy", availableUnits);
   setText("metricModels", `${installedModels}/10`);
   setText("metricRunning", running);
 
@@ -113,14 +115,14 @@ function render(summary) {
   setText("runtimeVersion", summary.gateway?.version ?? "—");
   setText("runtimeChecked", summary.checked_at ? new Date(summary.checked_at).toLocaleTimeString("zh-CN", { hour12: false }) : "—");
 
-  renderHarnesses(harnesses, adapters);
+  renderHarnesses(harnesses, adapters, localResourcesReady);
   renderModels(models);
-  renderDispatchAdapters(adapters);
+  renderDispatchAdapters(adapters, localResourcesReady);
   renderJobs(jobs);
   renderArena(jobs);
 }
 
-function renderHarnesses(harnesses, adapters) {
+function renderHarnesses(harnesses, adapters, localResourcesReady) {
   const grid = $("harnessGrid");
   if (!grid) return;
   grid.innerHTML = "";
@@ -128,7 +130,7 @@ function renderHarnesses(harnesses, adapters) {
   for (const harness of harnesses) {
     const matched = matchAdapter(harness, adapters);
     const health = matched?.health?.status ?? "not_configured";
-    const visual = engineVisualState(health);
+    const visual = engineVisualState(health, localResourcesReady);
     const card = document.createElement("article");
     card.className = "harness-card";
     card.title = `${harness.harness_id} · ${visual.label}`;
@@ -140,11 +142,10 @@ function renderHarnesses(harnesses, adapters) {
   }
 }
 
-function engineVisualState(health) {
-  if (health === "healthy") return { className: "healthy", label: "ONLINE" };
-  if (health === "unhealthy") return { className: "bad", label: "不可用" };
-  if (health === "disabled") return { className: "warn", label: "未启用" };
-  return { className: "warn", label: "未接入" };
+function engineVisualState(health, localResourcesReady) {
+  if (health === "healthy" || localResourcesReady) return { className: "healthy", label: "接入成功" };
+  if (health === "unhealthy") return { className: "bad", label: "异常" };
+  return { className: "warn", label: "资源未就绪" };
 }
 
 function renderModels(models) {
@@ -165,14 +166,14 @@ function renderModels(models) {
   }
 }
 
-function renderDispatchAdapters(adapters) {
+function renderDispatchAdapters(adapters, localResourcesReady) {
   const box = $("dispatchHarnesses");
   if (!box) return;
   const previous = new Set([...box.querySelectorAll("input:checked")].map((item) => item.value));
   box.innerHTML = "";
   const configured = adapters.filter((item) => item.enabled && state.adapterCodes.has(item.id));
   if (!configured.length) {
-    box.innerHTML = `<span class="muted">当前没有可派单执行单元。任务会在执行单元就绪后开放。</span>`;
+    box.innerHTML = `<span class="muted">${localResourcesReady ? "本地执行资源已接入，岗位调度正在配置。" : "执行资源尚未就绪。"}</span>`;
     return;
   }
   for (const adapter of configured) {
@@ -182,7 +183,7 @@ function renderDispatchAdapters(adapters) {
     const checked = healthy && (previous.size ? previous.has(adapter.id) : true);
     const code = publicEngineCode(adapter.id);
     label.title = healthy ? `${code} 可派单` : `${code} 当前不可派单`;
-    label.innerHTML = `<input type="checkbox" value="${escAttr(adapter.id)}" ${checked ? "checked" : ""} ${healthy ? "" : "disabled"}/> ${esc(code)} · ${healthy ? "ONLINE" : "未就绪"}`;
+    label.innerHTML = `<input type="checkbox" value="${escAttr(adapter.id)}" ${checked ? "checked" : ""} ${healthy ? "" : "disabled"}/> ${esc(code)} · ${healthy ? "ONLINE" : "待调度"}`;
     box.appendChild(label);
   }
 }
@@ -236,7 +237,7 @@ function renderArena(jobs) {
 async function dispatchJob(event) {
   event.preventDefault();
   const adapters = [...$("dispatchHarnesses").querySelectorAll("input:checked:not(:disabled)")].map((item) => item.value);
-  if (!adapters.length) return showAlert("当前没有健康、可执行的执行单元。", true);
+  if (!adapters.length) return showAlert("执行资源已接入，当前岗位调度尚未开放。", true);
   const prompt = $("prompt").value.trim();
   if (!prompt) return showAlert("请输入任务指令。", true);
   setText("dispatchStatus", "派单中…");

@@ -176,11 +176,15 @@ function renderDispatchAdapters(adapters, localResourcesReady) {
     box.innerHTML = `<span class="muted">${localResourcesReady ? "本地执行资源已接入，岗位调度正在配置。" : "执行资源尚未就绪。"}</span>`;
     return;
   }
+
+  const healthyConfigured = configured.filter((item) => item.health?.status === "healthy");
+  const preferred = healthyConfigured.find((item) => publicEngineCode(item.id) === "H04") ?? healthyConfigured[0] ?? null;
+
   for (const adapter of configured) {
     const label = document.createElement("label");
     label.className = "check-item";
     const healthy = adapter.health?.status === "healthy";
-    const checked = healthy && (previous.size ? previous.has(adapter.id) : true);
+    const checked = healthy && (previous.size ? previous.has(adapter.id) : adapter.id === preferred?.id);
     const code = publicEngineCode(adapter.id);
     label.title = healthy ? `${code} 可派单` : `${code} 当前不可派单`;
     label.innerHTML = `<input type="checkbox" value="${escAttr(adapter.id)}" ${checked ? "checked" : ""} ${healthy ? "" : "disabled"}/> ${esc(code)} · ${healthy ? "ONLINE" : "待调度"}`;
@@ -250,7 +254,7 @@ async function dispatchJob(event) {
         task_title: makeTaskTitle(prompt),
         prompt,
         adapters,
-        max_concurrency: Math.min(4, adapters.length),
+        max_concurrency: 1,
         network: "restricted"
       })
     });

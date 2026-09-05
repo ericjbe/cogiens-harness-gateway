@@ -178,6 +178,7 @@ try {
 $currentHead = "unknown"
 try { $currentHead = ((& git -C $RepoRoot rev-parse --short HEAD) | Select-Object -First 1).Trim() } catch {}
 $openUrl = $DashboardUrl + "?v=" + $currentHead + "-" + [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+$configDisplay = if ($null -ne $GatewayConfig) { $GatewayConfig } else { "default" }
 
 Write-Host ""
 Write-Host "============================================================" -ForegroundColor Green
@@ -188,7 +189,7 @@ Write-Host "HEALTH             = PASS"
 Write-Host "APPROVED_LOGO      = PASS"
 Write-Host "HEADER_MOUNT       = PASS"
 Write-Host "HEADER_REMOTE      = $remoteHeaderStatus"
-Write-Host "CONFIG             = $($GatewayConfig ?? 'default')"
+Write-Host "CONFIG             = $configDisplay"
 Write-Host "DASHBOARD          = $DashboardUrl"
 Write-Host "============================================================" -ForegroundColor Green
 

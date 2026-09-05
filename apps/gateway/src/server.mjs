@@ -48,6 +48,10 @@ const server = http.createServer(async (request, response) => {
     if (request.method === "GET" && url.pathname === "/v1/adapters") return send(response, 200, { adapters: await runtime.listAdapters() });
     if (request.method === "GET" && url.pathname === "/v1/federation/registry") return send(response, 200, federationRegistry.snapshot());
     if (request.method === "GET" && url.pathname === "/v1/dashboard/summary") return send(response, 200, await dashboardSummary());
+    if (request.method === "GET" && url.pathname === "/v1/jobs") {
+      const limit = clampQueryInteger(url.searchParams.get("limit"), 1, 200, 50);
+      return send(response, 200, { jobs: runtime.listJobs(limit) });
+    }
     const federationMatch = url.pathname.match(/^\/v1\/federation\/harnesses\/([A-Za-z0-9_.-]+)(?:\/(capabilities|passport))?$/);
     if (request.method === "GET" && federationMatch) {
       const [, harnessId, resource] = federationMatch;
@@ -68,6 +72,12 @@ const server = http.createServer(async (request, response) => {
     const jobMatch = url.pathname.match(/^\/v1\/jobs\/(job_[A-Za-z0-9_-]+)$/);
     if (request.method === "GET" && jobMatch) {
       const job = runtime.getJob(jobMatch[1]);
+      return job ? send(response, 200, job) : send(response, 404, { error: { code: "NOT_FOUND", message: "Job not found" } });
+    }
+    const cancelJobMatch = url.pathname.match(/^\/v1\/jobs\/(job_[A-Za-z0-9_-]+)\/cancel$/);
+    if (request.method === "POST" && cancelJobMatch) {
+      const body = await readJson(request, 64 * 1024);
+      const job = await runtime.cancelJob(cancelJobMatch[1], body.reason ?? "user");
       return job ? send(response, 200, job) : send(response, 404, { error: { code: "NOT_FOUND", message: "Job not found" } });
     }
     const cancelMatch = url.pathname.match(/^\/v1\/jobs\/(job_[A-Za-z0-9_-]+)\/runs\/(run_[A-Za-z0-9_-]+)\/cancel$/);
@@ -98,11 +108,6 @@ for (const signal of ["SIGINT", "SIGTERM"]) {
 
 async function dashboardSummary() {
   const health = await runtime.health();
-  const jobs = [...runtime.jobs.keys()]
-    .map((jobId) => runtime.getJob(jobId))
-    .filter(Boolean)
-    .sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at))
-    .slice(0, 50);
   return {
     schema_version: "chg.dashboard.summary.v0.1",
     checked_at: new Date().toISOString(),
@@ -115,7 +120,7 @@ async function dashboardSummary() {
     federation: federationRegistry.snapshot(),
     adapters: health.adapters,
     models: await probeOllamaModels(),
-    jobs
+    jobs: runtime.listJobs(50)
   };
 }
 
@@ -218,6 +223,12 @@ async function readJson(request, maxBytes) {
     body += chunk.toString("utf8");
   }
   try { return body ? JSON.parse(body) : {}; } catch { throw new AdapterError("PROTOCOL_MISMATCH", "Request body must be valid JSON"); }
+}
+
+function clampQueryInteger(value, min, max, fallback) {
+  const parsed = Number.parseInt(String(value ?? ""), 10);
+  if (!Number.isInteger(parsed)) return fallback;
+  return Math.min(max, Math.max(min, parsed));
 }
 
 function send(response, status, payload, headers = {}) {

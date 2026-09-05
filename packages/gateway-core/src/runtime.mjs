@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, rename, stat, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -11,6 +11,8 @@ const TERMINAL_TO_STATE = {
   "run.cancelled": "CANCELLED",
   "run.timed_out": "TIMED_OUT"
 };
+const TERMINAL_STATES = new Set(["SUCCEEDED", "FAILED", "CANCELLED", "TIMED_OUT"]);
+const ACTIVE_STATES = new Set(["QUEUED", "STARTING", "RUNNING"]);
 
 export class GatewayRuntime {
   constructor({ config, registry, dataRoot }) {
@@ -23,7 +25,9 @@ export class GatewayRuntime {
   }
 
   async initialize() {
-    await mkdir(path.join(this.dataRoot, "jobs"), { recursive: true });
+    const jobsDirectory = path.join(this.dataRoot, "jobs");
+    await mkdir(jobsDirectory, { recursive: true });
+    await this.#loadPersistedJobs(jobsDirectory);
     return this;
   }
 
@@ -52,6 +56,14 @@ export class GatewayRuntime {
     }));
   }
 
+  listJobs(limit = 50) {
+    const safeLimit = Math.min(200, Math.max(1, Number.isInteger(limit) ? limit : 50));
+    return [...this.jobs.values()]
+      .sort((a, b) => Date.parse(b.updated_at ?? b.created_at ?? 0) - Date.parse(a.updated_at ?? a.created_at ?? 0))
+      .slice(0, safeLimit)
+      .map((job) => publicJob(job));
+  }
+
   async submitFanout(input) {
     const normalized = await validateFanout(input, this.registry, this.config);
     const now = new Date().toISOString();
@@ -61,11 +73,13 @@ export class GatewayRuntime {
       trace_id: makeId("trc"),
       tenant_id: input.tenant_id ?? "local",
       project_id: input.project_id ?? "local-project",
+      task_title: normalizeTaskTitle(input.task_title, normalized.prompt),
       prompt: { sha256: sha256Text(normalized.prompt), length: normalized.prompt.length },
       status: "running",
       gateway_status: "RUNNING",
       requested_adapters: normalized.adapters,
       workspace: normalized.workspace,
+      cancel_requested: false,
       created_at: now,
       updated_at: now,
       runs: normalized.adapters.map((adapterId) => ({
@@ -111,13 +125,38 @@ export class GatewayRuntime {
     return job ? publicJob(job) : null;
   }
 
+  async cancelJob(jobId, reason = "user") {
+    const job = this.jobs.get(jobId);
+    if (!job) return null;
+    job.cancel_requested = true;
+    job.cancel_reason = String(reason || "user").slice(0, 200);
+    job.updated_at = new Date().toISOString();
+
+    for (const run of job.runs) {
+      if (TERMINAL_STATES.has(run.state)) continue;
+      const active = this.activeRuns.get(run.run_id);
+      if (active) {
+        try {
+          await active.adapter.cancel({ actor: "gateway" }, active.session, { reason: job.cancel_reason });
+        } catch (error) {
+          run.cancel_error = stableError(error);
+        }
+      } else {
+        run.state = "CANCELLED";
+        run.updated_at = new Date().toISOString();
+      }
+    }
+    await this.#persist(job);
+    return publicJob(job);
+  }
+
   async cancelRun(jobId, runId, reason = "user") {
     const job = this.jobs.get(jobId);
     const run = job?.runs.find((candidate) => candidate.run_id === runId);
     if (!job || !run) return null;
     const active = this.activeRuns.get(runId);
     if (!active) {
-      return { cancelled: false, confirmed: ["SUCCEEDED", "FAILED", "CANCELLED", "TIMED_OUT"].includes(run.state) };
+      return { cancelled: false, confirmed: TERMINAL_STATES.has(run.state) };
     }
     run.cancel_requested = true;
     run.updated_at = new Date().toISOString();
@@ -129,14 +168,38 @@ export class GatewayRuntime {
   async #execute(job, input) {
     await mapLimit(job.runs, input.maxConcurrency, (run) => this.#executeRun(job, run, input));
     const succeeded = job.runs.filter((run) => run.state === "SUCCEEDED").length;
+    const cancelled = job.runs.filter((run) => run.state === "CANCELLED").length;
+    const all = job.runs.length;
+    let gatewayStatus;
+    let status;
+    if (succeeded === all) {
+      gatewayStatus = "COMPLETED";
+      status = "needs_review";
+    } else if (succeeded > 0) {
+      gatewayStatus = "PARTIAL";
+      status = "needs_review";
+    } else if (cancelled > 0 && job.cancel_requested) {
+      gatewayStatus = "CANCELLED";
+      status = "cancelled";
+    } else {
+      gatewayStatus = "FAILED";
+      status = "rejected";
+    }
     await this.#commitDurableState(job, {
-      gateway_status: succeeded === job.runs.length ? "COMPLETED" : succeeded > 0 ? "PARTIAL" : "FAILED",
-      status: succeeded > 0 ? "needs_review" : "rejected",
+      gateway_status: gatewayStatus,
+      status,
       updated_at: new Date().toISOString()
     });
   }
 
   async #executeRun(job, run, input) {
+    if (job.cancel_requested) {
+      run.state = "CANCELLED";
+      run.updated_at = new Date().toISOString();
+      await this.#persist(job);
+      return;
+    }
+
     const record = this.registry.find((candidate) => candidate.config.id === run.adapter_id);
     if (!record?.adapter) {
       return this.#failRun(job, run, new AdapterError("ADAPTER_UNHEALTHY", `${run.adapter_id} is disabled`));
@@ -210,6 +273,42 @@ export class GatewayRuntime {
     await this.#persist(job);
   }
 
+  async #loadPersistedJobs(jobsDirectory) {
+    const entries = await readdir(jobsDirectory, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
+      try {
+        const job = JSON.parse(await readFile(path.join(jobsDirectory, entry.name), "utf8"));
+        if (!job?.job_id || !Array.isArray(job.runs)) continue;
+        let recovered = false;
+        const now = new Date().toISOString();
+        for (const run of job.runs) {
+          if (!ACTIVE_STATES.has(run.state)) continue;
+          run.state = "FAILED";
+          run.error = {
+            code: "GATEWAY_RESTARTED",
+            message: "Gateway restarted before this run reached a terminal state",
+            retryable: true,
+            origin: "gateway"
+          };
+          run.updated_at = now;
+          recovered = true;
+        }
+        if (job.gateway_status === "RUNNING" || recovered) {
+          job.gateway_status = "FAILED";
+          job.status = "rejected";
+          job.recovered_after_restart = true;
+          job.updated_at = now;
+          recovered = true;
+        }
+        this.jobs.set(job.job_id, job);
+        if (recovered) await this.#persist(job);
+      } catch {
+        // Ignore malformed historical snapshots; they remain on disk for manual inspection.
+      }
+    }
+  }
+
   async #commitDurableState(job, fields) {
     const durableSnapshot = Object.assign(structuredClone(job), fields);
     await this.#persist(durableSnapshot);
@@ -260,6 +359,12 @@ async function validateFanout(input, registry, config) {
     maxConcurrency: clampInteger(input.max_concurrency, 1, config.server?.max_concurrency ?? 4, config.server?.max_concurrency ?? 4),
     network: input.network === "live" ? "live" : "restricted"
   };
+}
+
+function normalizeTaskTitle(value, prompt) {
+  const explicit = typeof value === "string" ? value.trim() : "";
+  const firstLine = String(prompt ?? "").split(/\r?\n/).map((line) => line.trim()).find(Boolean) ?? "Untitled task";
+  return (explicit || firstLine).slice(0, 120);
 }
 
 function publicJob(job) {

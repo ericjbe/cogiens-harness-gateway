@@ -20,6 +20,7 @@ $("saveTokenBtn")?.addEventListener("click", () => {
 });
 $("refreshBtn")?.addEventListener("click", refresh);
 $("dispatchForm")?.addEventListener("submit", dispatchJob);
+$("jobsBody")?.addEventListener("click", handleJobAction);
 
 document.querySelectorAll(".sidebar-nav a").forEach((link) => {
   link.addEventListener("click", () => {
@@ -31,7 +32,7 @@ document.querySelectorAll(".sidebar-nav a").forEach((link) => {
 setInterval(() => {
   if ($("clock")) $("clock").textContent = new Date().toLocaleString("zh-CN", { hour12: false });
 }, 1000);
-setInterval(refresh, 5000);
+setInterval(refresh, 3000);
 refresh();
 
 function syncCogiensHeaderBrand() {
@@ -125,11 +126,12 @@ function renderHarnesses(harnesses, adapters) {
   for (const harness of harnesses) {
     const matched = matchAdapter(harness, adapters);
     const health = matched?.health?.status ?? "not_configured";
-    const support = String(harness.support_status ?? "UNKNOWN");
-    const passport = String(harness.combat_passport?.status ?? "NOT_READY");
-    const visual = engineVisualState(health, support, passport);
+    const visual = engineVisualState(health);
     const card = document.createElement("article");
     card.className = "harness-card";
+    card.title = matched
+      ? `${matched.id} · ${health}`
+      : `${harness.harness_id} 尚未接入本机执行 Adapter`;
     card.innerHTML = `
       <div class="harness-title"><span class="harness-id">${esc(harness.harness_id)} · ${esc(engineShortName(harness))}</span></div>
       <div class="harness-vendor">${esc(harness.vendor ?? "")}</div>
@@ -138,12 +140,11 @@ function renderHarnesses(harnesses, adapters) {
   }
 }
 
-function engineVisualState(health, support, passport) {
-  if (health === "unhealthy") return { className: "bad", label: "ERROR" };
+function engineVisualState(health) {
   if (health === "healthy") return { className: "healthy", label: "ONLINE" };
-  if (/VERIFIED|QUALIFIED|ACTIVE/.test(`${support} ${passport}`)) return { className: "healthy", label: "VERIFIED" };
-  if (/PARTIAL/.test(support)) return { className: "warn", label: "PARTIAL" };
-  return { className: "warn", label: "WAITING" };
+  if (health === "unhealthy") return { className: "bad", label: "不可用" };
+  if (health === "disabled") return { className: "warn", label: "未启用" };
+  return { className: "warn", label: "未接入" };
 }
 
 function engineShortName(harness) {
@@ -182,16 +183,18 @@ function renderDispatchAdapters(adapters) {
   if (!box) return;
   const previous = new Set([...box.querySelectorAll("input:checked")].map((item) => item.value));
   box.innerHTML = "";
-  const available = adapters.filter((item) => item.enabled);
-  if (!available.length) {
-    box.innerHTML = `<span class="muted">当前没有可派单 Adapter。先完成 H01–H08 本机验军。</span>`;
+  const configured = adapters.filter((item) => item.enabled);
+  if (!configured.length) {
+    box.innerHTML = `<span class="muted">当前没有已启用的执行 Adapter。任务中心不会向“已声明但未接入”的引擎派单。</span>`;
     return;
   }
-  for (const adapter of available) {
+  for (const adapter of configured) {
     const label = document.createElement("label");
     label.className = "check-item";
-    const checked = previous.size ? previous.has(adapter.id) : adapter.health?.status === "healthy";
-    label.innerHTML = `<input type="checkbox" value="${escAttr(adapter.id)}" ${checked ? "checked" : ""}/> ${esc(adapter.id)} · ${esc(adapter.health?.status ?? "unknown")}`;
+    const healthy = adapter.health?.status === "healthy";
+    const checked = healthy && (previous.size ? previous.has(adapter.id) : true);
+    label.title = healthy ? "可派单" : `当前不可派单：${adapter.health?.status ?? "unknown"}`;
+    label.innerHTML = `<input type="checkbox" value="${escAttr(adapter.id)}" ${checked ? "checked" : ""} ${healthy ? "" : "disabled"}/> ${esc(adapter.id)} · ${esc(adapter.health?.status ?? "unknown")}`;
     box.appendChild(label);
   }
 }
@@ -208,8 +211,12 @@ function renderJobs(jobs) {
     const runs = job.runs ?? [];
     const artifacts = runs.reduce((sum, run) => sum + (run.artifacts?.length ?? 0), 0);
     const chips = runs.map((run) => `<span class="run-chip ${escAttr(run.state)}" title="${escAttr(run.error?.message ?? "")}">${esc(run.adapter_id)}:${esc(run.state)}</span>`).join("");
+    const canCancel = job.gateway_status === "RUNNING";
+    const action = canCancel
+      ? `<button class="button" type="button" data-job-action="cancel" data-job-id="${escAttr(job.job_id)}">停止</button>`
+      : "";
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td><code>${esc(shortId(job.job_id))}</code></td><td>${esc(job.project_id ?? "")}</td><td class="job-status ${escAttr(job.gateway_status)}">${esc(job.gateway_status)}</td><td>${esc((job.requested_adapters ?? []).join(", "))}</td><td>${chips || "—"}</td><td>${artifacts}</td><td>${fmtTime(job.updated_at)}</td>`;
+    tr.innerHTML = `<td><code>${esc(shortId(job.job_id))}</code></td><td><div>${esc(job.task_title ?? "未命名任务")}</div><div class="muted">${esc(job.project_id ?? "")}</div></td><td class="job-status ${escAttr(job.gateway_status)}">${esc(job.gateway_status)} ${action}</td><td>${esc((job.requested_adapters ?? []).join(", "))}</td><td>${chips || "—"}</td><td>${artifacts}</td><td>${fmtTime(job.updated_at)}</td>`;
     body.appendChild(tr);
   }
 }
@@ -235,8 +242,10 @@ function renderArena(jobs) {
 
 async function dispatchJob(event) {
   event.preventDefault();
-  const adapters = [...$("dispatchHarnesses").querySelectorAll("input:checked")].map((item) => item.value);
-  if (!adapters.length) return showAlert("至少选择一个可用 Adapter。", true);
+  const adapters = [...$("dispatchHarnesses").querySelectorAll("input:checked:not(:disabled)")].map((item) => item.value);
+  if (!adapters.length) return showAlert("当前没有健康、可执行的 Adapter。先完成至少一个执行引擎接入。", true);
+  const prompt = $("prompt").value.trim();
+  if (!prompt) return showAlert("请输入任务指令。", true);
   setText("dispatchStatus", "派单中…");
   try {
     const job = await api("/v1/jobs/fanout", {
@@ -244,18 +253,46 @@ async function dispatchJob(event) {
       body: JSON.stringify({
         project_id: $("projectId").value.trim(),
         workspace: $("workspace").value.trim(),
-        prompt: $("prompt").value.trim(),
+        task_title: makeTaskTitle(prompt),
+        prompt,
         adapters,
         max_concurrency: Math.min(4, adapters.length),
         network: "restricted"
       })
     });
     setText("dispatchStatus", `已创建 ${shortId(job.job_id)}`);
+    showAlert(`任务已进入执行队列：${job.task_title ?? shortId(job.job_id)}`, false);
     await refresh();
   } catch (error) {
     setText("dispatchStatus", "派单失败");
     showAlert(`派单失败：${error.message}`);
   }
+}
+
+async function handleJobAction(event) {
+  const button = event.target.closest("button[data-job-action]");
+  if (!button || button.dataset.jobAction !== "cancel") return;
+  const jobId = button.dataset.jobId;
+  if (!jobId) return;
+  if (!window.confirm("确认停止这个任务及其仍在运行的执行引擎吗？")) return;
+  button.disabled = true;
+  button.textContent = "停止中…";
+  try {
+    await api(`/v1/jobs/${encodeURIComponent(jobId)}/cancel`, {
+      method: "POST",
+      body: JSON.stringify({ reason: "dashboard-user" })
+    });
+    showAlert(`已提交停止请求：${shortId(jobId)}`, false);
+    await refresh();
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = "停止";
+    showAlert(`停止任务失败：${error.message}`);
+  }
+}
+
+function makeTaskTitle(prompt) {
+  return prompt.split(/\r?\n/).map((line) => line.trim()).find(Boolean)?.slice(0, 80) ?? "未命名任务";
 }
 
 function matchAdapter(harness, adapters) {

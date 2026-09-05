@@ -291,6 +291,10 @@ function makeTaskTitle(prompt) {
 
 function buildAdapterCodeMap(harnesses, adapters) {
   const map = new Map();
+  for (const adapter of adapters) {
+    const direct = adapterCodeFromId(adapter.id);
+    if (direct) map.set(adapter.id, direct);
+  }
   for (const harness of harnesses) {
     const matched = matchAdapter(harness, adapters);
     if (matched?.id && harness.harness_id) map.set(matched.id, harness.harness_id);
@@ -299,10 +303,18 @@ function buildAdapterCodeMap(harnesses, adapters) {
 }
 
 function publicEngineCode(adapterId) {
-  return state.adapterCodes.get(adapterId) ?? "H--";
+  return state.adapterCodes.get(adapterId) ?? adapterCodeFromId(adapterId) ?? "H--";
+}
+
+function adapterCodeFromId(adapterId) {
+  const match = String(adapterId ?? "").match(/(?:^|[._-])(h0[1-8])(?:$|[._-])/i);
+  return match ? match[1].toUpperCase() : null;
 }
 
 function matchAdapter(harness, adapters) {
+  const direct = adapters.find((adapter) => adapterCodeFromId(adapter.id) === harness.harness_id);
+  if (direct) return direct;
+
   const haystack = `${harness.canonical_name ?? ""} ${harness.vendor ?? ""}`.toLowerCase();
   const tokens = [
     ["codex", "openai"], ["claude", "anthropic"], ["grok", "xai"], ["kimi", "moonshot"],

@@ -7,7 +7,7 @@
     "max_request_bytes": 1048576,
     "max_output_bytes": 4194304,
     "max_runtime_seconds": 3600,
-    "max_concurrency": 4,
+    "max_concurrency": 1,
     "max_adapters_per_job": 8
   },
   "adapters": [

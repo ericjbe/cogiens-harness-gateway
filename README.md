@@ -216,3 +216,7 @@ A star is not the product. Working adapters, repeatable jobs, conformance eviden
 - Citation metadata: [CITATION.cff](CITATION.cff)
 
 Do not open a public issue for vulnerabilities that expose credentials, customer code, or a working exploit. Follow [SECURITY.md](SECURITY.md).
+
+## Markdown link verification
+
+`npm run verify` includes `node scripts/verify-md-links.mjs`, which fails on broken relative Markdown links.

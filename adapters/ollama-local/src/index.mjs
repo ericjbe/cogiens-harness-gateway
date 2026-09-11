@@ -84,7 +84,11 @@ export class OllamaLocalAdapter {
         details: {
           resource_id: this.config.resourceId,
           execution_mode: "local",
-          data_path: "device-local"
+          data_path: "device-local",
+          probe_scope: "model-listed-only",
+          model: this.config.model,
+          base_url: this.config.baseUrl,
+          execution_capability: "text-generation"
         }
       };
     } catch (error) {
@@ -103,6 +107,8 @@ export class OllamaLocalAdapter {
     const state = {
       request: structuredClone(request),
       controller: null,
+      timedOut: false,
+      cancelRequested: false,
       terminal: null,
       closed: false,
       artifacts: []
@@ -136,8 +142,10 @@ export class OllamaLocalAdapter {
     state.controller = new AbortController();
     const policySeconds = Math.max(1, Number(state.request.policy?.max_runtime_seconds ?? 1800));
     const timeoutMs = Math.min(this.config.timeoutMs, policySeconds * 1000);
-    const timeout = setTimeout(() => state.controller?.abort(new Error("local execution timed out")), timeoutMs);
+    const timeout = setTimeout(() => { state.timedOut = true; state.controller?.abort(new Error("local execution timed out")); }, timeoutMs);
     timeout.unref?.();
+
+    if (state.cancelRequested) state.controller.abort(new Error("cancelled"));
 
     yield emit("run.started", {
       execution_mode: "local",
@@ -160,11 +168,12 @@ export class OllamaLocalAdapter {
       });
 
       if (!response.ok) {
-        const detail = await response.text().catch(() => "");
+        const detail = await readBoundedBody(response, 16 * 1024).catch(() => "HTTP error body exceeded limit");
         throw new AdapterError("HARNESS_CRASHED", `Local execution HTTP ${response.status}${detail ? `: ${tail(detail)}` : ""}`);
       }
 
-      const payload = await response.json();
+      const maxBytes = Math.max(1024, Number(state.request.policy?.max_output_bytes ?? 4 * 1024 * 1024));
+      const payload = JSON.parse(await readBoundedBody(response, maxBytes));
       const output = String(payload.response ?? "").trim();
       if (!output) throw new AdapterError("PROTOCOL_MISMATCH", "Local execution returned no result");
 
@@ -190,8 +199,8 @@ export class OllamaLocalAdapter {
       });
     } catch (error) {
       if (state.controller?.signal.aborted) {
-        state.terminal = "run.cancelled";
-        yield emit("run.cancelled", { confirmed: true }, "warning");
+        state.terminal = state.timedOut ? "run.timed_out" : "run.cancelled";
+        yield emit(state.terminal, state.timedOut ? { error: { code: "RUN_TIMED_OUT", message: "Local inference exceeded its timeout" } } : { confirmed: true }, "warning");
         return;
       }
       state.terminal = "run.failed";
@@ -207,6 +216,7 @@ export class OllamaLocalAdapter {
   async cancel(_context, session) {
     const state = this.#getState(session);
     if (state.terminal) return { cancelled: false, confirmed: true, already_terminal: true, terminal: state.terminal };
+    state.cancelRequested = true;
     if (!state.controller) return { cancelled: true, confirmed: false, already_terminal: false };
     state.controller.abort(new Error("cancelled"));
     return { cancelled: true, confirmed: true, already_terminal: false };
@@ -264,4 +274,23 @@ function tagMatches(expected, actual) {
 function tail(value, length = 500) {
   const text = String(value ?? "");
   return text.length <= length ? text : text.slice(-length);
+}
+
+async function readBoundedBody(response, maxBytes) {
+  if (!response.body) return "";
+  const reader = response.body.getReader();
+  const chunks = []; let size = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > maxBytes) {
+        await reader.cancel();
+        throw new AdapterError("POLICY_DENIED", "Local response exceeded the output byte limit");
+      }
+      chunks.push(Buffer.from(value));
+    }
+    return Buffer.concat(chunks).toString("utf8");
+  } finally { reader.releaseLock(); }
 }

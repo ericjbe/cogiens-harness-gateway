@@ -67,7 +67,7 @@ test("P2A-012 HTTP runtime exposes federation views and Shuishu dashboard", asyn
     assert.doesNotMatch(html, /sidebar-spacer/);
 
     assert.match(html, /WORKFORCE OVERVIEW/);
-    assert.match(html, /<h1>概览<\/h1>/);
+    assert.match(html, /<h1>工程运行概览<\/h1>/);
     assert.match(html, /metricHarnesses/);
     assert.match(html, /metricHealthy/);
     assert.match(html, /metricModels/);
@@ -77,7 +77,7 @@ test("P2A-012 HTTP runtime exposes federation views and Shuishu dashboard", asyn
     assert.match(html, /primary-grid/);
     assert.match(html, /执行单元状态/);
     assert.match(html, /本地执行资源池/);
-    assert.match(html, /岗位管理/);
+    assert.match(html, /<h2 id="modelHarnessTitle">大模型与 Harness 管理台<\/h2>/);
 
     const proportionCss = await fetch(`${base}/dashboard/proportions.css`);
     assert.equal(proportionCss.status, 200);

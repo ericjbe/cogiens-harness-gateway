@@ -2,7 +2,7 @@
 set -euo pipefail
 umask 077
 
-MIRROR_ROOT="${MIRROR_ROOT:-/opt/cogiens-git-mirror}"
+MIRROR_ROOT="${MIRROR_ROOT:?Set MIRROR_ROOT to an operator-owned directory}"
 HARNESS_REPO="${HARNESS_REPO:-git@github.com:ericjbe/cogiens-harness-gateway.git}"
 WATER_REPO="${WATER_REPO:-git@github.com:ericjbe/Water-science.git}"
 

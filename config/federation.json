@@ -1,0 +1,59 @@
+{
+  "schema_version": "0.3.0-alpha.1",
+  "runtime_implemented": true,
+  "required_evidence": [
+    "real-execution",
+    "artifact",
+    "review"
+  ],
+  "harnesses": [
+    {
+      "harness_id": "H01",
+      "canonical_name": "OpenAI Codex",
+      "support_status": "DECLARED_UNVERIFIED",
+      "local_deployment_status": "NOT_PROBED"
+    },
+    {
+      "harness_id": "H02",
+      "canonical_name": "Anthropic Claude Code",
+      "support_status": "DECLARED_UNVERIFIED",
+      "local_deployment_status": "NOT_PROBED"
+    },
+    {
+      "harness_id": "H03",
+      "canonical_name": "xAI Grok Build",
+      "support_status": "DECLARED_UNVERIFIED",
+      "local_deployment_status": "NOT_PROBED"
+    },
+    {
+      "harness_id": "H04",
+      "canonical_name": "Moonshot Kimi Code",
+      "support_status": "DECLARED_UNVERIFIED",
+      "local_deployment_status": "NOT_PROBED"
+    },
+    {
+      "harness_id": "H05",
+      "canonical_name": "DeepSeek Harness",
+      "support_status": "DECLARED_UNVERIFIED",
+      "local_deployment_status": "NOT_PROBED"
+    },
+    {
+      "harness_id": "H06",
+      "canonical_name": "Qwen Code",
+      "support_status": "DECLARED_UNVERIFIED",
+      "local_deployment_status": "NOT_PROBED"
+    },
+    {
+      "harness_id": "H07",
+      "canonical_name": "Google Antigravity CLI",
+      "support_status": "DECLARED_UNVERIFIED",
+      "local_deployment_status": "NOT_PROBED"
+    },
+    {
+      "harness_id": "H08",
+      "canonical_name": "Mistral Vibe",
+      "support_status": "DECLARED_UNVERIFIED",
+      "local_deployment_status": "NOT_PROBED"
+    }
+  ]
+}

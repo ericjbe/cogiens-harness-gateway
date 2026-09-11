@@ -1,5 +1,5 @@
 param(
-    [string]$ProjectRoot = "D:\FND\M3-Harness-Projects"
+    [Parameter(Mandatory = $true)][string]$ProjectRoot
 )
 
 $ErrorActionPreference = "Stop"
@@ -36,7 +36,7 @@ $readme = @"
 ROOT: $ProjectRoot
 
 Rules:
-1. Harness infrastructure remains outside this root under D:\FND\M3-Harness.
+1. Harness infrastructure remains outside this root in an operator-selected infrastructure directory.
 2. Clean integration clones live under 01_projects.
 3. H01-H08 consequential changes are made in isolated worktrees under 02_worktrees.
 4. No Harness directly mutates a production deployment.

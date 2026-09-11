@@ -167,7 +167,7 @@ export function sha256Text(content) {
 }
 
 export function createTextArtifact(binding, options) {
-  const content = String(options.content ?? "");
+  const content = redactText(String(options.content ?? ""));
   return {
     schema_version: ARTIFACT_SCHEMA_VERSION,
     artifact_id: `art_${randomUUID().replaceAll("-", "")}`,

@@ -45,7 +45,7 @@ The Dashboard is the human operating surface for 水枢 / Cogiens Workforce OS o
 For R0 installation and engineering maintenance:
 
 ```powershell
-cd D:\FND\M3-Harness-Projects\01_projects\cogiens-harness-gateway
+Set-Location $GatewayRepository
 git fetch --all --prune
 git switch main
 git pull --ff-only

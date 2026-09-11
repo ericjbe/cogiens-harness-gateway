@@ -1,3 +1,4 @@
+import { modelHarnessCatalog } from "../../../packages/gateway-core/src/model-harness.mjs";
 import http from "node:http";
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
@@ -6,8 +7,13 @@ import { fileURLToPath } from "node:url";
 
 import { AdapterError } from "../../../packages/adapter-sdk/src/index.mjs";
 import { loadFederationRegistry } from "../../../packages/gateway-core/src/federation-registry.mjs";
-import { createRegistry, loadGatewayConfig } from "../../../packages/gateway-core/src/registry.mjs";
+import { createRegistryWithPlugins, loadGatewayConfig } from "../../../packages/gateway-core/src/registry.mjs";
 import { GatewayRuntime } from "../../../packages/gateway-core/src/runtime.mjs";
+
+import { VERSION, RELEASE_LABEL } from "../../../packages/gateway-core/src/version.mjs";
+import { resolveResult } from "../../../packages/gateway-core/src/result-api.mjs";
+import { ResultStore } from "../../../packages/result-sync/store.mjs";
+import { ingestRequest, evidenceResponse } from "../../../packages/result-sync/http.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const DASHBOARD_ROOT = path.join(ROOT, "apps", "dashboard");
@@ -27,9 +33,13 @@ const localModelPool = await loadJsonFile(path.join(ROOT, "config", "local-model
 
 const runtime = await new GatewayRuntime({
   config,
-  registry: createRegistry(config),
+  registry: await createRegistryWithPlugins(config),
   dataRoot: process.env.CHG_DATA_ROOT ?? path.join(ROOT, "var")
 }).initialize();
+const resultSync = process.env.CHG_RESULT_SYNC_ROOT
+  ? await new ResultStore(process.env.CHG_RESULT_SYNC_ROOT,
+      JSON.parse(await readFile(process.env.CHG_RESULT_SYNC_IDENTITIES, 'utf8'))).initialize()
+  : null;
 
 const server = http.createServer(async (request, response) => {
   try {
@@ -43,8 +53,41 @@ const server = http.createServer(async (request, response) => {
       return serveDashboardAsset(response, url.pathname);
     }
 
+    if (request.method === 'POST' && url.pathname === '/v1/result-sync/ingest') {
+      if (!resultSync) return send(response, 503, { error: { code: 'SYNC_NOT_CONFIGURED' } });
+      return ingestRequest(resultSync, request, response);
+    }
     if (!authorized(request, token)) return send(response, 401, { error: { code: "AUTH_REQUIRED", message: "Invalid bearer token" } });
+    if (request.method === 'GET' && url.pathname === '/v1/result-sync/summary') return send(response, 200,
+      resultSync?.summary() ?? {sync_status: 'NOT_SYNCED', nodes: [], jobs: []});
+    if (request.method === 'GET' && resultSync && evidenceResponse(resultSync, url.pathname, response)) return;
+    if (request.method === "GET" && url.pathname === "/v1/platform") return send(response, 200, {
+      version: VERSION, release_label: RELEASE_LABEL,
+      role: "shared-infrastructure", app_cp_integration: "NOT_VERIFIED",
+      customer_access_ready: false,
+      protocols: [{ name: "chg.adapter.v0.1", status: "IMPLEMENTED" }, { name: "MCP", status: "NOT_IMPLEMENTED" }],
+      capabilities: { job_results: true, inline_artifact_download: true, operator_installed_plugins: true,
+        tenant_authorization: false, model_harness_selection: true, model_harness_catalog: "v2",
+        paid_model_execution: "policy-gated", app_cp_sdk: true, automatic_code_development: false }
+    });
+    if (request.method === "GET") {
+      const result = resolveResult(runtime, url.pathname);
+      if (result) {
+        if (result.error) return send(response, result.status, { error: { code: "RESULT_UNAVAILABLE", message: result.error } });
+        if (result.json) return send(response, result.status, result.json);
+        response.writeHead(200, { "content-type": "text/plain; charset=utf-8", "content-length": Buffer.byteLength(result.body),
+          "content-disposition": 'attachment; filename="' + result.filename + '"', "cache-control": "no-store",
+          "x-content-type-options": "nosniff", ...(result.sha256 ? { "x-content-sha256": result.sha256 } : {}) });
+        return response.end(result.body);
+      }
+    }
     if (request.method === "GET" && url.pathname === "/health") return send(response, 200, await runtime.health());
+    if (request.method === "GET" && url.pathname === "/v1/model-harness/catalog") return send(response, 200, await runtime.modelCatalog());
+    if (request.method === "POST" && url.pathname === "/v1/jobs/selected") {
+      const body = await readJson(request, config.server?.max_request_bytes ?? 1024 * 1024);
+      const job = await runtime.submitSelected(body);
+      return send(response, 202, job, { location: `/v1/jobs/${job.job_id}` });
+    }
     if (request.method === "GET" && url.pathname === "/v1/adapters") return send(response, 200, { adapters: await runtime.listAdapters() });
     if (request.method === "GET" && url.pathname === "/v1/federation/registry") return send(response, 200, federationRegistry.snapshot());
     if (request.method === "GET" && url.pathname === "/v1/dashboard/summary") return send(response, 200, await dashboardSummary());
@@ -96,7 +139,7 @@ const server = http.createServer(async (request, response) => {
 server.listen(port, host, () => {
   const address = server.address();
   const listeningPort = typeof address === "object" && address ? address.port : port;
-  process.stdout.write(`Cogiens Harness Gateway v${config.version ?? "0.3.0-alpha.1"} listening on http://${host}:${listeningPort}\n`);
+  process.stdout.write(`Cogiens Harness Gateway v${VERSION} listening on http://${host}:${listeningPort}\n`);
   process.stdout.write(`Dashboard: http://${host}:${listeningPort}/dashboard/\n`);
   process.stdout.write(`Config: ${config.config_path}\n`);
   process.stdout.write(`Federation registry: ${federationRegistry.sourcePath}\n`);
@@ -113,12 +156,13 @@ async function dashboardSummary() {
     checked_at: new Date().toISOString(),
     gateway: {
       status: health.status,
-      version: config.version ?? "0.3.0-alpha.1",
+      version: VERSION,
       host,
       port
     },
     federation: federationRegistry.snapshot(),
     adapters: health.adapters,
+    model_harness: modelHarnessCatalog(config, health.adapters),
     models: await probeOllamaModels(),
     jobs: runtime.listJobs(50)
   };

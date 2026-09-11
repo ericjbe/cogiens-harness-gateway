@@ -1,5 +1,5 @@
 param(
-  [string]$RepoRoot = "D:\FND\M3-Harness-Projects\01_projects\cogiens-harness-gateway",
+  [string]$RepoRoot = (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)),
   [int]$Port = 8787,
   [switch]$NoBrowser,
   [switch]$ForceRestart

@@ -1,5 +1,5 @@
 param(
-    [string]$ProjectRoot = "D:\FND\M3-Harness-Projects",
+    [Parameter(Mandatory = $true)][string]$ProjectRoot,
     [string]$HarnessRepo = "https://github.com/ericjbe/cogiens-harness-gateway.git",
     [string]$WaterRepo = "https://github.com/ericjbe/Water-science.git"
 )

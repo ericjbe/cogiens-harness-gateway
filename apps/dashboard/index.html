@@ -30,9 +30,10 @@
     <aside class="sidebar">
       <nav class="sidebar-nav" aria-label="水枢主导航">
         <a class="active" href="#overview"><span class="nav-icon">▦</span><span>概览</span></a>
-        <a href="#workforce"><span class="nav-icon">⊙</span><span>人员管理</span></a>
-        <a href="#positions"><span class="nav-icon">▣</span><span>岗位管理</span></a>
+
+
         <a href="#engines"><span class="nav-icon">⚙</span><span>执行单元</span></a>
+        <a href="#model-harness"><span class="nav-icon">◇</span><span>大模型与 Harness</span></a>
         <a href="#models"><span class="nav-icon">◇</span><span>执行资源</span></a>
         <a href="#tasks"><span class="nav-icon">▤</span><span>任务中心</span></a>
         <a href="#knowledge"><span class="nav-icon">▧</span><span>知识库</span></a>
@@ -54,7 +55,7 @@
         <section class="view-toolbar" aria-label="当前视图">
           <div>
             <span class="view-kicker">WORKFORCE OVERVIEW</span>
-            <h1>概览</h1>
+            <h1>工程运行概览</h1><p>水枢公共基础设施 · 客户及平台管理复用现有 APP／CP；当前为内部诊断入口。</p>
           </div>
         </section>
 
@@ -75,15 +76,15 @@
           </article>
           <article class="metric">
             <div class="metric-icon green">◆</div>
-            <div class="metric-copy"><span>可用执行单元</span><strong id="metricHealthy">0</strong></div>
+            <div class="metric-copy"><span>预检查通过</span><strong id="metricHealthy">0</strong></div>
           </article>
           <article class="metric">
             <div class="metric-icon orange">▣</div>
-            <div class="metric-copy"><span>本地执行资源</span><strong id="metricModels">0/10</strong></div>
+            <div class="metric-copy"><span>本地执行资源</span><strong id="metricModels">尚未同步</strong></div>
           </article>
           <article class="metric">
             <div class="metric-icon navy">▶</div>
-            <div class="metric-copy"><span>运行任务</span><strong id="metricRunning">0</strong></div>
+            <div class="metric-copy"><span>运行任务</span><strong id="metricRunning">尚未同步</strong></div>
           </article>
         </section>
 
@@ -99,14 +100,30 @@
           </article>
         </section>
 
+        <section class="dashboard-card" id="model-harness" aria-labelledby="modelHarnessTitle">
+          <div class="card-head model-harness-heading">
+            <div><div class="eyebrow">MODEL &amp; HARNESS CONTROL</div><h2 id="modelHarnessTitle">大模型与 Harness 管理台</h2></div>
+            <label class="catalog-filter">查看
+              <select id="modelHarnessFilter"><option value="all">全部</option><option value="free">免费模型</option><option value="paid">收费模型</option><option value="selectable">当前可派单</option></select>
+            </label>
+          </div>
+          <p>模型只是算力，Harness 才是执行工具。槽位可见不代表模型在线；只有适配器、节点、授权、计费和额度全部通过后才能派单。</p>
+          <div class="catalog-summary" aria-label="模型资源摘要">
+            <div><span>免费槽位</span><strong id="catalogFree">0/10</strong><small>可派单/总数</small></div>
+            <div><span>收费槽位</span><strong id="catalogPaid">0/6</strong><small>可派单/总数</small></div>
+            <div><span>租户开放</span><strong id="catalogTenant">关闭</strong><small>由现有 APP/CP 授权</small></div>
+            <div><span>自动付费兜底</span><strong id="catalogFallback">关闭</strong><small>必须明确选择与授权</small></div>
+          </div>
+          <div class="model-harness-table"><table><thead><tr><th>类别</th><th>模型槽位 / 实际模型</th><th>Harness</th><th>节点</th><th>授权与预算</th><th>租户范围</th><th>状态</th><th>执行</th></tr></thead><tbody id="modelHarnessRows"></tbody></table></div>
+        </section>
         <section class="secondary-grid">
           <article class="dashboard-card dispatch-panel" id="tools">
             <div class="card-head"><div><div class="eyebrow">DISPATCH</div><h2>一键派单</h2></div></div>
             <form id="dispatchForm" class="dispatch-form">
-              <label>Project ID<input id="projectId" value="M3-DASHBOARD-TEST" required /></label>
-              <label>Workspace<input id="workspace" value="D:\\FND\\M3-Harness-Projects\\01_projects\\water-intelligence" required /></label>
+              <label>Project ID<input id="projectId" placeholder="输入已确认的项目编号" required /></label>
+              <label>Workspace<input id="workspace" placeholder="输入该项目在执行机上的绝对目录" required /></label>
               <label>任务指令<textarea id="prompt" rows="5" required placeholder="输入任务描述、要求与验收条件……"></textarea></label>
-              <fieldset><legend>选择执行单元</legend><div id="dispatchHarnesses" class="check-grid"></div></fieldset>
+              <fieldset><legend>大模型与 Harness（必选）</legend><div id="dispatchHarnesses" class="check-grid"></div></fieldset>
               <div class="dispatch-actions"><button class="button primary" type="submit">立即派单</button><span id="dispatchStatus" class="muted"></span></div>
             </form>
           </article>

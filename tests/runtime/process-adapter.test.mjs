@@ -46,7 +46,20 @@ test("process adapter executes a real child and captures an artifact", async () 
     const events = await collectEvents(instance.startRun({}, handle, { prompt: { text: "hello" } }));
     assert.equal(requireEvent(events, "assistant.message.completed").payload.message, "fixture:hello");
     requireEvent(events, "run.succeeded");
-    assert.equal((await collectEvents(instance.collectArtifacts({}, handle))).length, 1);
+    const artifacts = await collectEvents(instance.collectArtifacts({}, handle));
+    assert.deepEqual(artifacts.map((artifact) => artifact.kind).sort(),
+      ["execution-log", "structured-output", "workspace-change-report"]);
+    assert.equal(artifacts.find((artifact) => artifact.kind === "structured-output").content, "fixture:hello");
+    const log = JSON.parse(artifacts.find((artifact) => artifact.kind === "execution-log").content);
+    assert.equal(log.exit_code, 0);
+    assert.equal(log.stdout, "fixture:hello");
+    const report = JSON.parse(artifacts.find((artifact) => artifact.kind === "workspace-change-report").content);
+    assert.deepEqual(report.changes, []);
+    for (const artifact of artifacts) {
+      assert.equal(artifact.job_id, handle.job_id);
+      assert.equal(artifact.run_id, handle.run_id);
+      assert.equal(artifact.trace_id, handle.trace_id);
+    }
   } finally { await rm(workspace, { recursive: true, force: true }); }
 });
 

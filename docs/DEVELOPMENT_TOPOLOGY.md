@@ -23,8 +23,8 @@ There must be only one canonical `main` branch. The Hong Kong mirror is not a se
 ## 3. M-3 directory standard
 
 ```text
-D:\FND\M3-Harness\                       # Harness infrastructure only
-D:\FND\M3-Harness-Projects\              # All actual development work
+<infrastructure-root>/                       # Harness infrastructure only
+<development-root>/              # All actual development work
   00_inbox\
   01_projects\                             # clean integration clones
   02_worktrees\

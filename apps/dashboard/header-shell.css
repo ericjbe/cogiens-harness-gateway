@@ -53,3 +53,21 @@ body > header {
     padding-top:20px !important;
   }
 }
+
+/* Keep real result evidence readable on narrow screens. */
+@media (max-width: 760px) {
+  .app-shell { display: block !important; }
+  .sidebar { min-height: 0 !important; padding: 8px !important; }
+  .sidebar-nav { flex-direction: row !important; overflow-x: auto; padding: 0 !important; gap: 8px !important; }
+  .sidebar-nav a { flex: 0 0 auto; min-height: 40px !important; white-space: nowrap; }
+  .sidebar-status { display: none; }
+  .workspace { width: 100%; }
+  main { padding: 16px !important; }
+  .sync-results { padding: 16px; }
+  .metric-grid { grid-template-columns: 1fr !important; }
+  .metric { min-height: 100px !important; }
+  .harness-grid { grid-auto-columns: 160px !important; }
+  .check-grid, .runtime-grid, .principles { grid-template-columns: 1fr !important; }
+  #model-harness { padding: 16px; }
+  .view-toolbar h1 { font-size: 30px !important; }
+}

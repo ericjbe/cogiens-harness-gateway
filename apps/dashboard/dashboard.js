@@ -21,6 +21,7 @@ $("saveTokenBtn")?.addEventListener("click", () => {
 $("refreshBtn")?.addEventListener("click", refresh);
 $("dispatchForm")?.addEventListener("submit", dispatchJob);
 $("jobsBody")?.addEventListener("click", handleJobAction);
+$("modelHarnessFilter")?.addEventListener("change", () => renderModelHarness(state.summary?.model_harness));
 
 document.querySelectorAll(".sidebar-nav a").forEach((link) => {
   link.addEventListener("click", () => {
@@ -75,6 +76,7 @@ async function refresh() {
     const summary = await api("/v1/dashboard/summary");
     state.summary = summary;
     render(summary);
+    await refreshSyncedResults();
     if ($("lastUpdated")) {
       $("lastUpdated").textContent = `更新时间 ${new Date(summary.checked_at).toLocaleTimeString("zh-CN", { hour12: false })}`;
     }
@@ -98,13 +100,13 @@ function render(summary) {
   const healthyAdapters = adapters.filter((item) => item.enabled && item.health?.status === "healthy" && state.adapterCodes.has(item.id)).length;
   const installedModels = models.filter((item) => item.installed).length;
   const localResourcesReady = summary.models?.status === "connected" && installedModels > 0;
-  const availableUnits = localResourcesReady ? harnesses.length : healthyAdapters;
+  const availableUnits = healthyAdapters;
   const successRate = terminalRuns.length ? `${Math.round(100 * succeeded / terminalRuns.length)}%` : "—";
 
   setText("metricHarnesses", `${harnesses.length}/8`);
   setText("metricHealthy", availableUnits);
-  setText("metricModels", `${installedModels}/10`);
-  setText("metricRunning", running);
+  setText("metricModels", summary.models?.status === 'connected' ? `${installedModels}/10` : '尚未同步');
+  setText("metricRunning", state.syncedResults?.sync_status === 'SYNCED' ? state.syncedResults.jobs.filter(j => j.status === 'RUNNING').length : '尚未同步');
 
   setText("sidebarSystemStatus", gatewayHealthy ? "正常运行" : String(summary.gateway?.status ?? "检查中"));
   setText("sidebarVersion", summary.gateway?.version ?? "—");
@@ -117,7 +119,7 @@ function render(summary) {
 
   renderHarnesses(harnesses, adapters, localResourcesReady);
   renderModels(models);
-  renderDispatchAdapters(adapters, localResourcesReady);
+  renderModelHarness(summary.model_harness);
   renderJobs(jobs);
   renderArena(jobs);
 }
@@ -131,19 +133,22 @@ function renderHarnesses(harnesses, adapters, localResourcesReady) {
     const matched = matchAdapter(harness, adapters);
     const health = matched?.health?.status ?? "not_configured";
     const visual = engineVisualState(health, localResourcesReady);
+    const last = matched?.last_execution;
     const card = document.createElement("article");
     card.className = "harness-card";
     card.title = `${harness.harness_id} · ${visual.label}`;
     card.innerHTML = `
       <div class="harness-title"><span class="harness-id">${esc(harness.harness_id)}</span></div>
       <div class="harness-vendor">Cogiens 执行单元</div>
-      <div class="harness-status ${visual.className}"><span class="status-dot"></span>${esc(visual.label)}</div>`;
+      <div class="harness-status ${visual.className}"><span class="status-dot"></span>${esc(visual.label)}</div>
+      <div class="muted">最近执行：${esc(last?.state ?? "尚无验收记录")}</div>
+      <div class="muted">${esc(matched?.health?.details?.execution_capability ?? matched?.kind ?? "未配置")}</div>`;
     grid.appendChild(card);
   }
 }
 
 function engineVisualState(health, localResourcesReady) {
-  if (health === "healthy" || localResourcesReady) return { className: "healthy", label: "接入成功" };
+  if (health === "healthy") return { className: "healthy", label: "预检查通过（非任务验收）" };
   if (health === "unhealthy") return { className: "bad", label: "异常" };
   return { className: "warn", label: "资源未就绪" };
 }
@@ -161,35 +166,80 @@ function renderModels(models) {
     row.className = "model-row";
     const resourceId = String(model.id ?? "M--").toUpperCase();
     row.title = model.size_bytes ? `${resourceId} · ${formatBytes(model.size_bytes)}` : resourceId;
-    row.innerHTML = `<span class="model-name">${esc(resourceId)} · 本地执行资源</span><span class="model-state ${model.installed ? "ok" : "missing"}">${model.installed ? "可用" : "未就绪"}</span>`;
+    row.innerHTML = `<span class="model-name">${esc(resourceId)} · 本地执行资源</span><span class="model-state ${model.installed ? "ok" : "missing"}">${state.summary?.models?.status !== 'connected' ? '尚未同步' : model.installed ? "已安装（未验证推理）" : "未就绪"}</span>`;
     list.appendChild(row);
   }
 }
 
-function renderDispatchAdapters(adapters, localResourcesReady) {
+function renderModelHarness(catalog) {
   const box = $("dispatchHarnesses");
-  if (!box) return;
-  const previous = new Set([...box.querySelectorAll("input:checked")].map((item) => item.value));
-  box.innerHTML = "";
-  const configured = adapters.filter((item) => item.enabled && state.adapterCodes.has(item.id));
-  if (!configured.length) {
-    box.innerHTML = `<span class="muted">${localResourcesReady ? "本地执行资源已接入，岗位调度正在配置。" : "执行资源尚未就绪。"}</span>`;
-    return;
+  const rows = $("modelHarnessRows");
+  const choices = catalog?.choices ?? [];
+  if (!box || !rows) return;
+  const totals = catalog?.summary ?? {
+    free: choices.filter(choice => choice.access_class === "free").length,
+    paid: choices.filter(choice => choice.access_class === "paid").length,
+    selectable_free: choices.filter(choice => choice.access_class === "free" && choice.selectable).length,
+    selectable_paid: choices.filter(choice => choice.access_class === "paid" && choice.selectable).length
+  };
+  setText("catalogFree", `${totals.selectable_free ?? 0}/${totals.free ?? 0}`);
+  setText("catalogPaid", `${totals.selectable_paid ?? 0}/${totals.paid ?? 0}`);
+  setText("catalogTenant", catalog?.customer_access_ready ? "已开放" : "关闭");
+  setText("catalogFallback", catalog?.automatic_paid_fallback ? "已开启" : "关闭");
+  const filter = $("modelHarnessFilter")?.value ?? "all";
+  const visible = choices.filter(choice => filter === "all" || choice.access_class === filter || (filter === "selectable" && choice.selectable));
+  const previous = new Set([...box.querySelectorAll("input:checked")].map(item => item.value));
+  box.replaceChildren(); rows.replaceChildren();
+  if (!choices.length) {
+    const message = "尚未配置模型与 Harness 组合，等待接入执行节点。";
+    box.textContent = message;
+    const row = rows.insertRow(); const cell = row.insertCell(); cell.colSpan = 8; cell.textContent = message;
   }
-
-  const healthyConfigured = configured.filter((item) => item.health?.status === "healthy");
-  const preferred = healthyConfigured.find((item) => publicEngineCode(item.id) === "H04") ?? healthyConfigured[0] ?? null;
-
-  for (const adapter of configured) {
-    const label = document.createElement("label");
-    label.className = "check-item";
-    const healthy = adapter.health?.status === "healthy";
-    const checked = healthy && (previous.size ? previous.has(adapter.id) : adapter.id === preferred?.id);
-    const code = publicEngineCode(adapter.id);
-    label.title = healthy ? `${code} 可派单` : `${code} 当前不可派单`;
-    label.innerHTML = `<input type="checkbox" value="${escAttr(adapter.id)}" ${checked ? "checked" : ""} ${healthy ? "" : "disabled"}/> ${esc(code)} · ${healthy ? "ONLINE" : "待调度"}`;
+  if (choices.length && !visible.length) {
+    const row = rows.insertRow(); const cell = row.insertCell(); cell.colSpan = 8; cell.textContent = "当前筛选条件下没有模型槽位。";
+  }
+  for (const choice of choices) {
+    const status = choice.blocked_reason ?? (choice.verification === "VERIFIED" ? "已验证（仍需任务验收）" : "预检查通过 · 推理未验收");
+    const tier = choice.access_class === "paid" ? "收费" : "免费";
+    const label = document.createElement("label"); label.className = "check-item";
+    const checkbox = document.createElement("input"); checkbox.type = "checkbox";
+    checkbox.value = choice.choice_id; checkbox.disabled = !choice.selectable;
+    checkbox.checked = choice.selectable && previous.has(choice.choice_id);
+    label.append(checkbox, document.createTextNode(` ${tier} · ${choice.model ?? choice.display_name ?? choice.choice_id} · ${choice.harness} · ${choice.node} — ${status}`));
     box.appendChild(label);
   }
+  for (const choice of visible) {
+    const row = rows.insertRow();
+    const status = choice.blocked_reason ?? (choice.verification === "VERIFIED" ? "已验证（仍需任务验收）" : "预检查通过 · 推理未验收");
+    const tier = choice.access_class === "paid" ? "收费" : "免费";
+    const model = choice.model ? `${choice.display_name ?? choice.choice_id} / ${choice.model}` : `${choice.display_name ?? choice.choice_id} / 尚未绑定`;
+    const finance = choice.access_class === "paid"
+      ? `授权 ${choice.authorization_status ?? "MISSING"} · 计费 ${choice.billing_status ?? "PENDING"} · 余额 ${formatBudget(choice.budget)}`
+      : "本地资源 · 无调用费";
+    for (const value of [tier, model, choice.harness, choice.node, finance, tenantVisibilityLabel(choice.tenant_visibility), status]) row.insertCell().textContent = value;
+    const actionCell = row.insertCell();
+    const action = document.createElement("button"); action.type = "button"; action.className = "button compact";
+    action.textContent = choice.selectable ? "加入派单" : "不可用"; action.disabled = !choice.selectable;
+    action.addEventListener("click", () => {
+      const target = [...box.querySelectorAll("input")].find(input => input.value === choice.choice_id);
+      if (target) { target.checked = true; target.scrollIntoView?.({ block: "nearest" }); }
+    });
+    actionCell.appendChild(action);
+  }
+  const submit = $("dispatchForm")?.querySelector('button[type="submit"]');
+  if (submit) submit.disabled = !choices.some(choice => choice.selectable);
+}
+
+function tenantVisibilityLabel(value) {
+  if (value === "all-tenants") return "全部授权租户";
+  if (value === "tenant-allowlist") return "租户白名单";
+  return "仅超级管理员";
+}
+
+function formatBudget(budget) {
+  if (!budget || !Number.isFinite(Number(budget.remaining))) return "未配置";
+  const currency = budget.currency ? `${budget.currency} ` : "";
+  return `${currency}${Number(budget.remaining).toFixed(2)}`;
 }
 
 function renderJobs(jobs) {
@@ -213,7 +263,7 @@ function renderJobs(jobs) {
       : "";
     const requested = (job.requested_adapters ?? []).map(publicEngineCode).join(", ");
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td><code>${esc(shortId(job.job_id))}</code></td><td><div>${esc(job.task_title ?? "未命名任务")}</div><div class="muted">${esc(job.project_id ?? "")}</div></td><td class="job-status ${escAttr(job.gateway_status)}">${esc(job.gateway_status)} ${action}</td><td>${esc(requested || "—")}</td><td>${chips || "—"}</td><td>${artifacts}</td><td>${fmtTime(job.updated_at)}</td>`;
+    tr.innerHTML = `<td><button class="button" type="button" data-job-action="details" data-job-id="${escAttr(job.job_id)}">${esc(shortId(job.job_id))}<br>查看结果</button></td><td><div>${esc(job.task_title ?? "未命名任务")}</div><div class="muted">${esc(job.project_id ?? "")}</div></td><td class="job-status ${escAttr(job.gateway_status)}">${esc(job.gateway_status)} ${action}</td><td>${esc(requested || "—")}</td><td>${chips || "—"}</td><td>${artifacts}</td><td>${fmtTime(job.updated_at)}</td>`;
     body.appendChild(tr);
   }
 }
@@ -241,19 +291,19 @@ function renderArena(jobs) {
 async function dispatchJob(event) {
   event.preventDefault();
   const adapters = [...$("dispatchHarnesses").querySelectorAll("input:checked:not(:disabled)")].map((item) => item.value);
-  if (!adapters.length) return showAlert("执行资源已接入，当前岗位调度尚未开放。", true);
+  if (!adapters.length) return showAlert("请先选择大模型与 Harness 组合。", true);
   const prompt = $("prompt").value.trim();
   if (!prompt) return showAlert("请输入任务指令。", true);
   setText("dispatchStatus", "派单中…");
   try {
-    const job = await api("/v1/jobs/fanout", {
+    const job = await api("/v1/jobs/selected", {
       method: "POST",
       body: JSON.stringify({
         project_id: $("projectId").value.trim(),
         workspace: $("workspace").value.trim(),
         task_title: makeTaskTitle(prompt),
         prompt,
-        adapters,
+        model_choices: adapters,
         max_concurrency: 1,
         network: "restricted"
       })
@@ -269,7 +319,9 @@ async function dispatchJob(event) {
 
 async function handleJobAction(event) {
   const button = event.target.closest("button[data-job-action]");
-  if (!button || button.dataset.jobAction !== "cancel") return;
+  if (!button) return;
+  if (button.dataset.jobAction === "details") return openJobDetails(button.dataset.jobId);
+  if (button.dataset.jobAction !== "cancel") return;
   const jobId = button.dataset.jobId;
   if (!jobId) return;
   if (!window.confirm("确认停止这个任务及其仍在运行的执行单元吗？")) return;
@@ -343,3 +395,119 @@ function esc(value) { return String(value ?? "").replace(/[&<>"']/g, (ch) => ({"
 function escAttr(value) { return esc(value); }
 function showAlert(message, error = true) { const box=$("alertBox"); if(!box) return; box.textContent=message; box.classList.remove("hidden"); if(!error){box.style.borderColor="rgba(31,167,101,.45)";box.style.color="#198A50";} else {box.removeAttribute("style");} }
 function hideAlert() { $("alertBox")?.classList.add("hidden"); }
+
+function runError(run) {
+  return run.error ?? [...(run.events ?? [])].reverse().find(event => event.payload?.error)?.payload.error ?? null;
+}
+function downloadText(name, content, type = 'text/plain;charset=utf-8') {
+  const url = URL.createObjectURL(new Blob([content], { type }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = name.replace(/[^a-zA-Z0-9_.-]/g, '_');
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+async function openJobDetails(jobId) {
+  try {
+    const job = await api('/v1/jobs/' + encodeURIComponent(jobId));
+    document.getElementById('jobResultDialog')?.remove();
+    const dialog = document.createElement('dialog');
+    dialog.id = 'jobResultDialog';
+    dialog.className = 'job-result-dialog';
+    const text = (tag, value, parent = dialog) => {
+      const node = document.createElement(tag);
+      node.textContent = String(value ?? '');
+      parent.appendChild(node);
+      return node;
+    };
+    const button = (label, action, parent = dialog) => {
+      const node = text('button', label, parent);
+      node.type = 'button'; node.className = 'button';
+      node.addEventListener('click', action);
+    };
+    button('关闭', () => { dialog.close(); dialog.remove(); });
+    button('刷新详情', () => openJobDetails(jobId));
+    text('h2', job.task_title || job.job_id);
+    text('p', '任务：' + job.job_id + '\n状态：' + job.gateway_status + '；业务验收：' + job.status + '\n项目：' + job.project_id + '\n工作目录：' + job.workspace + '\n更新时间：' + fmtTime(job.updated_at));
+    text('p', '执行成功不等于软件验收。文字产物是模型回复；代码交付需结合文件及测试证据判断。');
+    button('下载任务记录 JSON', () => downloadText(job.job_id + '.json', JSON.stringify(job, null, 2), 'application/json;charset=utf-8'));
+    if (job.error) text('pre', JSON.stringify(job.error, null, 2));
+    for (const run of job.runs ?? []) {
+      const section = document.createElement('section'); dialog.appendChild(section);
+      text('h3', publicEngineCode(run.adapter_id) + ' · ' + run.state, section);
+      const selection = job.model_selection?.choices?.find(choice => choice.choice_id === run.adapter_id);
+      if (selection) text('p', '所选模型：' + selection.model + '；Harness：' + selection.harness + '；节点：' + selection.node, section);
+      text('p', '实际适配器：' + run.adapter_id + '；业务验收：' + (run.business_acceptance ?? 'PENDING'), section);
+      const error = runError(run);
+      if (error) text('pre', '错误：' + (error.code ?? '') + '\n' + (error.message ?? JSON.stringify(error)), section);
+      const messages = (run.events ?? []).filter(event => event.type === 'assistant.message.completed').map(event => event.payload?.message).filter(value => typeof value === 'string');
+      if (messages.length) {
+        text('h4', '执行输出', section); text('pre', messages.join('\n\n'), section);
+        button('下载输出 TXT', () => downloadText(run.run_id + '-output.txt', messages.join('\n\n')), section);
+      }
+      const artifacts = run.artifacts ?? [];
+      if (!artifacts.length) text('p', '无登记产物。', section);
+      for (const artifact of artifacts) {
+        text('h4', '产物：' + artifact.artifact_id, section);
+        text('p', '类型：' + (artifact.media_type ?? '未知') + '；记录位置：任务 JSON / runs / artifacts / content', section);
+        if (typeof artifact.content === 'string') {
+          text('pre', artifact.content, section);
+          const extension = artifact.media_type === 'text/markdown' ? '.md' : '.txt';
+          button('下载文字产物', () => downloadText(artifact.artifact_id + extension, artifact.content), section);
+        } else {
+          text('p', '此产物未内嵌内容，需核验实际文件位置：' + (artifact.uri ?? '未提供'), section);
+        }
+      }
+      const events = document.createElement('details'); section.appendChild(events);
+      text('summary', '事件日志（展开查看）', events);
+      text('pre', JSON.stringify(run.events ?? [], null, 2), events);
+    }
+    document.body.appendChild(dialog); dialog.showModal();
+  } catch (error) { showAlert('读取任务详情失败：' + error.message); }
+}
+
+
+async function refreshSyncedResults() {
+  let panel = document.getElementById('syncedResults');
+  if (!panel) {
+    panel = document.createElement('section'); panel.id = 'syncedResults'; panel.className = 'panel sync-results';
+    document.querySelector('main')?.prepend(panel);
+  }
+  try {
+    const data = await api('/v1/result-sync/summary'); state.syncedResults = data;
+    panel.replaceChildren();
+    const add = (tag, text, parent = panel) => { const el = document.createElement(tag); el.textContent = text; parent.append(el); return el; };
+    add('h2', '真实任务与自动恢复');
+    if (data.sync_status !== 'SYNCED') { add('p', '尚未同步：等待执行节点主动推送结果。'); setText('metricRunning', '尚未同步'); return; }
+    const newest = [...data.jobs].sort((a,b) => b.updated_at.localeCompare(a.updated_at));
+    add('p', `已同步 ${newest.length} 条真实工单记录 · 状态 READY_FOR_REVIEW 表示待审查，DEPLOYED 表示已部署`);
+    for (const node of data.nodes) {
+      const stale = Date.now() - Date.parse(node.last_heartbeat) > 180000;
+      add('p', `${node.node_id} · 最后心跳 ${new Date(node.last_heartbeat).toLocaleString('zh-CN')} · ${stale ? '心跳过期，显示最后已知结果' : '同步正常'}`);
+    }
+    setText('metricRunning', newest.filter(j => j.status === 'RUNNING').length);
+    for (const job of newest) {
+      const item = add('article', ''); item.className = 'sync-job'; item.dataset.jobId = job.job_id;
+      add('h3', job.job_id, item);
+      const badge = add('strong', job.status, item); badge.className = `sync-status sync-${job.status}`;
+      add('p', `完整 verify：${job.tests ? `${job.tests.passed}/${job.tests.total} 通过，${job.tests.failed} 失败` : '尚无测试记录'}`, item);
+      add('p', `恢复根工单：${job.root_job_id} · 上一工单：${job.parent_job_id ?? '无'}`, item);
+      const details = add('details','',item); add('summary','关联标识与审计摘要',details);
+      add('p', `run_id: ${job.run_id} · trace_id: ${job.trace_id}（同步适配器派生标识）`,details);
+      add('p', `原始结果 SHA-256: ${job.source_sha256}`,details);
+      const stages = add('ol','',item); stages.className = 'sync-stages';
+      const labels = ['生产只读诊断','Git 保全','隔离基线','清单完整性','完整测试','候选运行','生产保全门禁'];
+      for (const stage of job.stages) add('li', `${stage.number}. ${labels[stage.number-1]}：${stage.status}${stage.inherited_from ? '（最终尝试）' : ''}`, stages);
+      if (job.summary_code === 'PAYLOAD_GATE_REJECTED') add('p','测试通过；清单门禁拒绝。失败历史已保留。',item);
+      for (const artifact of job.artifacts) {
+        const link = add('a', '下载经批准的结果证据', item); link.href = artifact.download_url; link.download = artifact.name;
+        add('p', `${artifact.bytes} bytes · SHA-256 ${artifact.sha256}`, details);
+      }
+    }
+  } catch {
+    panel.replaceChildren(); const message = document.createElement('p'); message.textContent = '尚未同步：结果服务暂不可用，不能据此判断任务数量。'; panel.append(message);
+    state.syncedResults = null; setText('metricRunning','尚未同步');
+  }
+}

@@ -1,0 +1,16 @@
+.git
+node_modules
+var
+coverage
+dist
+tmp
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.session
+*.log
+secrets
+credentials
+config/harnesses.local.json

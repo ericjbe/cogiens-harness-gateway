@@ -1,0 +1,28 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8787
+  },
+  "model_harness": {
+    "customer_access_ready": false,
+    "slots": [
+      { "slot_id": "free-01", "display_name": "本地免费模型 01", "access_class": "free", "tenant_visibility": "tenant-allowlist" },
+      { "slot_id": "free-02", "display_name": "本地免费模型 02", "access_class": "free", "tenant_visibility": "tenant-allowlist" },
+      { "slot_id": "free-03", "display_name": "本地免费模型 03", "access_class": "free", "tenant_visibility": "tenant-allowlist" },
+      { "slot_id": "free-04", "display_name": "本地免费模型 04", "access_class": "free", "tenant_visibility": "tenant-allowlist" },
+      { "slot_id": "free-05", "display_name": "本地免费模型 05", "access_class": "free", "tenant_visibility": "tenant-allowlist" },
+      { "slot_id": "free-06", "display_name": "本地免费模型 06", "access_class": "free", "tenant_visibility": "tenant-allowlist" },
+      { "slot_id": "free-07", "display_name": "本地免费模型 07", "access_class": "free", "tenant_visibility": "tenant-allowlist" },
+      { "slot_id": "free-08", "display_name": "本地免费模型 08", "access_class": "free", "tenant_visibility": "tenant-allowlist" },
+      { "slot_id": "free-09", "display_name": "本地免费模型 09", "access_class": "free", "tenant_visibility": "tenant-allowlist" },
+      { "slot_id": "free-10", "display_name": "本地免费模型 10", "access_class": "free", "tenant_visibility": "tenant-allowlist" },
+      { "slot_id": "paid-01", "display_name": "收费模型服务 01", "access_class": "paid", "tenant_visibility": "operator-only" },
+      { "slot_id": "paid-02", "display_name": "收费模型服务 02", "access_class": "paid", "tenant_visibility": "operator-only" },
+      { "slot_id": "paid-03", "display_name": "收费模型服务 03", "access_class": "paid", "tenant_visibility": "operator-only" },
+      { "slot_id": "paid-04", "display_name": "收费模型服务 04", "access_class": "paid", "tenant_visibility": "operator-only" },
+      { "slot_id": "paid-05", "display_name": "收费模型服务 05", "access_class": "paid", "tenant_visibility": "operator-only" },
+      { "slot_id": "paid-06", "display_name": "收费模型服务 06", "access_class": "paid", "tenant_visibility": "operator-only" }
+    ]
+  },
+  "adapters": []
+}

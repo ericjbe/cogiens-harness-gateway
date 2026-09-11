@@ -10,6 +10,7 @@ import {
   validateCreateSessionRequest,
   validateDescriptor
 } from "../../../packages/adapter-sdk/src/index.mjs";
+import { captureWorkspaceBaseline, createProcessEvidenceArtifacts } from "./workspace-artifacts.mjs";
 
 const PLATFORM = process.platform === "win32" ? "windows" : process.platform === "darwin" ? "macos" : "linux";
 
@@ -171,6 +172,17 @@ export class OneShotProcessAdapter {
       timeout_seconds: timeoutMs / 1000
     });
 
+    let workspaceBaseline;
+    try {
+      workspaceBaseline = await captureWorkspaceBaseline(cwd);
+    } catch (cause) {
+      state.terminal = "run.failed";
+      yield emit("run.failed", {
+        error: { code: "ARTIFACT_CAPTURE_FAILED", message: `Execution baseline capture failed: ${cause instanceof Error ? cause.message : String(cause)}` }
+      }, "error");
+      return;
+    }
+
     state.exitPromise = runChild({
       command: this.options.command,
       args: invocation.args ?? [],
@@ -182,6 +194,18 @@ export class OneShotProcessAdapter {
       onSpawn: (child) => { state.child = child; }
     });
     const outcome = await state.exitPromise;
+
+    try {
+      const evidence = await createProcessEvidenceArtifacts(state.handle, workspaceBaseline, cwd, outcome);
+      state.artifacts.push(...evidence);
+      for (const artifact of evidence) yield emit("artifact.created", { artifact });
+    } catch (cause) {
+      state.terminal = "run.failed";
+      yield emit("run.failed", {
+        error: { code: "ARTIFACT_CAPTURE_FAILED", message: `Execution evidence capture failed: ${cause instanceof Error ? cause.message : String(cause)}` }
+      }, "error");
+      return;
+    }
 
     if (state.cancelRequested) {
       state.terminal = "run.cancelled";

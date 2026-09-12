@@ -49,7 +49,7 @@ async function startWorkbenchTask() {
   if (!prompt) { if (status) status.textContent = "请先输入任务交代。"; return; }
   const healthy = (state.summary?.adapters ?? []).find(item => item.health?.status === "healthy");
   if (!healthy) { if (status) status.textContent = "当前没有已验证可用资源，任务保持 WAITING_FOR_RESOURCE。"; return; }
-  try { const job = await api("/v1/jobs/selected", { method: "POST", body: JSON.stringify({ task_title: prompt.slice(0, 120), prompt: { text: prompt }, adapters: [healthy.id], workspace: location.origin === "file:" ? "." : "." }) }); if (status) status.textContent = `任务已入队：${job.job_id}`; refresh(); } catch (error) { if (status) status.textContent = `派单失败：${error.message}`; }
+  try { const job = await api("/v1/jobs/selected", { method: "POST", body: JSON.stringify({ task_title: prompt.slice(0, 120), prompt: { text: prompt }, adapters: [healthy.id], project_id: $("projectSelect")?.value ?? "local-project", workspace: $("workspaceInput")?.value.trim() || ".", branch: $("branchInput")?.value.trim() || undefined, budget: Number($("budgetInput")?.value) || undefined, maxConcurrency: Number($("concurrencyInput")?.value) || 1, timeout_seconds: Number($("timeoutInput")?.value) || 900 }) }); if (status) status.textContent = `任务已入队：${job.job_id}`; refresh(); } catch (error) { if (status) status.textContent = `派单失败：${error.message}`; }
 }
 async function importCommandPackage(event) {
   const file = event.target.files?.[0]; if (!file) return; const status = $("workbenchStatus");
@@ -96,6 +96,7 @@ async function refresh() {
     const summary = await api("/v1/dashboard/summary");
     state.summary = summary;
     render(summary);
+    refreshQueue();
     await refreshSyncedResults();
     if ($("lastUpdated")) {
       $("lastUpdated").textContent = `更新时间 ${new Date(summary.checked_at).toLocaleTimeString("zh-CN", { hour12: false })}`;
@@ -105,6 +106,7 @@ async function refresh() {
     showAlert(`Dashboard 数据读取失败：${safeUiError(error.message)}`);
   }
 }
+async function refreshQueue() { try { const q = await api("/v1/jobs/queue"); for (const [id, value] of Object.entries(q.counts ?? {})) setText(`queue${id[0].toUpperCase()}${id.slice(1)}`, value); } catch {} }
 
 function render(summary) {
   const harnesses = summary.federation?.harnesses ?? [];

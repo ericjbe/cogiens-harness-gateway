@@ -1,0 +1,3 @@
+export function resourceState({ online, authorized = false, quota = true, lastTested = null }) { if (!online) return "OFFLINE"; if (!authorized) return "UNAUTHORIZED"; if (!quota) return "QUOTA_EXCEEDED"; return lastTested ? "AVAILABLE" : "PENDING"; }
+export function recommend(resources, { tenantId, requiredTools = [], allowPaid = false } = {}) { return resources.filter(r => r.tenant_ids?.includes(tenantId) && requiredTools.every(t => r.tools?.includes(t)) && r.state === "AVAILABLE" && (allowPaid || r.cost_tier === "free")).sort((a,b) => Number(a.cost_tier !== "free") - Number(b.cost_tier !== "free") || b.health_score - a.health_score); }
+export function authorizeTool(tool, allowed = []) { return allowed.includes(tool); }

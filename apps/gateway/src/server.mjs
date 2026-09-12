@@ -14,6 +14,7 @@ import { VERSION, RELEASE_LABEL } from "../../../packages/gateway-core/src/versi
 import { resolveResult } from "../../../packages/gateway-core/src/result-api.mjs";
 import { ResultStore } from "../../../packages/result-sync/store.mjs";
 import { ingestRequest, evidenceResponse } from "../../../packages/result-sync/http.mjs";
+import { CommandPackageStore } from "../../../packages/workbench/src/command-packages.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const DASHBOARD_ROOT = path.join(ROOT, "apps", "dashboard");
@@ -36,6 +37,7 @@ const runtime = await new GatewayRuntime({
   registry: await createRegistryWithPlugins(config),
   dataRoot: process.env.CHG_DATA_ROOT ?? path.join(ROOT, "var")
 }).initialize();
+const commandPackages = await new CommandPackageStore(process.env.CHG_COMMAND_PACKAGE_ROOT ?? path.join(ROOT, "var", "command-packages")).initialize();
 const resultSync = process.env.CHG_RESULT_SYNC_ROOT
   ? await new ResultStore(process.env.CHG_RESULT_SYNC_ROOT,
       JSON.parse(await readFile(process.env.CHG_RESULT_SYNC_IDENTITIES, 'utf8'))).initialize()
@@ -49,6 +51,9 @@ const server = http.createServer(async (request, response) => {
       response.writeHead(302, { location: "/dashboard/" });
       return response.end();
     }
+    if (request.method === "GET" && ["/command-packages", "/resources/models-harnesses", "/tools"].includes(url.pathname)) {
+      response.writeHead(302, { location: `/dashboard/#${url.pathname.slice(1).replaceAll("/", "-")}` }); return response.end();
+    }
     if (request.method === "GET" && url.pathname.startsWith("/dashboard/")) {
       return serveDashboardAsset(response, url.pathname);
     }
@@ -58,6 +63,18 @@ const server = http.createServer(async (request, response) => {
       return ingestRequest(resultSync, request, response);
     }
     if (!authorized(request, token)) return send(response, 401, { error: { code: "AUTH_REQUIRED", message: "Invalid bearer token" } });
+    if (request.method === "GET" && url.pathname === "/v1/command-packages") return send(response, 200, { packages: commandPackages.list() });
+    if (request.method === "POST" && url.pathname === "/v1/command-packages/import") {
+      const body = await readJson(request, config.server?.max_request_bytes ?? 32 * 1024 * 1024);
+      if (typeof body.zip_base64 !== "string") return send(response, 400, { error: { code: "ZIP_REQUIRED" } });
+      try { return send(response, 201, await commandPackages.ingest(Buffer.from(body.zip_base64, "base64"), body)); }
+      catch (error) { return send(response, 422, { error: { code: error instanceof Error ? error.message : "PACKAGE_INVALID" } }); }
+    }
+    if (request.method === "GET" && url.pathname === "/v1/resources/models-harnesses") return send(response, 200, { resources: await runtime.modelCatalog(), discovered_at: new Date().toISOString() });
+    if (request.method === "GET" && url.pathname === "/v1/tools") return send(response, 200, { tools: ["git", "file-read", "file-write", "shell", "powershell", "tests", "browser", "compile", "build", "deploy", "database-readonly", "evidence"], policy: "adapter-declared; server-side secrets only" });
+    if (request.method === "GET" && url.pathname === "/v1/jobs/queue") {
+      const jobs = runtime.listJobs(200); return send(response, 200, { queued: jobs.filter(job => ["QUEUED", "RUNNING", "WAITING_FOR_RESOURCE"].includes(job.gateway_status)), counts: { queued: jobs.filter(job => job.gateway_status === "QUEUED").length, running: jobs.filter(job => job.gateway_status === "RUNNING").length, blocked: jobs.filter(job => ["WAITING_FOR_RESOURCE", "FAILED"].includes(job.gateway_status)).length, review: jobs.filter(job => job.status === "needs_review").length } });
+    }
     if (request.method === 'GET' && url.pathname === '/v1/result-sync/summary') return send(response, 200,
       resultSync?.summary() ?? {sync_status: 'NOT_SYNCED', nodes: [], jobs: []});
     if (request.method === 'GET' && resultSync && evidenceResponse(resultSync, url.pathname, response)) return;

@@ -34,6 +34,7 @@
 
         <a href="#engines"><span class="nav-icon">⚙</span><span>执行单元</span></a>
         <a href="#model-harness"><span class="nav-icon">◇</span><span>大模型与 Harness</span></a>
+        <a href="#operator-workbench"><span class="nav-icon">⇧</span><span>命令包</span></a>
         <a href="#models"><span class="nav-icon">◇</span><span>执行资源</span></a>
         <a href="#tasks"><span class="nav-icon">▤</span><span>任务中心</span></a>
         <a href="#knowledge"><span class="nav-icon">▧</span><span>知识库</span></a>
@@ -52,6 +53,12 @@
 
     <div class="workspace">
       <main id="overview">
+        <section class="dashboard-card operator-workbench" id="operator-workbench" aria-labelledby="operatorTitle">
+          <div class="card-head"><div><div class="eyebrow">OPERATOR WORKBENCH</div><h2 id="operatorTitle">直接派单</h2><p>输入任务或导入命令包，水枢会先检查并推荐可用资源。</p></div></div>
+          <textarea id="taskPrompt" rows="4" placeholder="交代要完成的任务…"></textarea>
+          <div class="workbench-actions"><label class="dropzone" for="commandPackageInput">拖入命令包 ZIP 或选择文件<input id="commandPackageInput" type="file" accept=".zip,application/zip" hidden></label><label><input id="autoRecommend" type="checkbox" checked> 自动推荐资源</label><button id="preflightBtn" type="button">预检查</button><button id="startTaskBtn" type="button" class="primary">开始执行</button></div>
+          <div id="workbenchStatus" role="status" aria-live="polite"></div><div class="queue-counts"><span>排队 <b id="queueQueued">0</b></span><span>执行 <b id="queueRunning">0</b></span><span>阻塞 <b id="queueBlocked">0</b></span><span>待验收 <b id="queueReview">0</b></span></div>
+        </section>
         <section class="view-toolbar" aria-label="当前视图">
           <div>
             <span class="view-kicker">WORKFORCE OVERVIEW</span>

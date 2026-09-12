@@ -36,6 +36,26 @@ setInterval(() => {
 setInterval(refresh, 3000);
 refresh();
 
+$("preflightBtn")?.addEventListener("click", preflightWorkbench);
+$("startTaskBtn")?.addEventListener("click", startWorkbenchTask);
+$("commandPackageInput")?.addEventListener("change", importCommandPackage);
+
+async function preflightWorkbench() {
+  const status = $("workbenchStatus"); if (!status) return;
+  try { const resources = await api("/v1/resources/models-harnesses"); status.textContent = `已发现 ${resources.resources?.federation?.harnesses?.length ?? 0} 个 Harness；请确认任务范围后开始执行。`; } catch (error) { status.textContent = `预检查失败：${error.message}`; }
+}
+async function startWorkbenchTask() {
+  const prompt = $("taskPrompt")?.value.trim(); const status = $("workbenchStatus");
+  if (!prompt) { if (status) status.textContent = "请先输入任务交代。"; return; }
+  const healthy = (state.summary?.adapters ?? []).find(item => item.health?.status === "healthy");
+  if (!healthy) { if (status) status.textContent = "当前没有已验证可用资源，任务保持 WAITING_FOR_RESOURCE。"; return; }
+  try { const job = await api("/v1/jobs/selected", { method: "POST", body: JSON.stringify({ task_title: prompt.slice(0, 120), prompt: { text: prompt }, adapters: [healthy.id], workspace: location.origin === "file:" ? "." : "." }) }); if (status) status.textContent = `任务已入队：${job.job_id}`; refresh(); } catch (error) { if (status) status.textContent = `派单失败：${error.message}`; }
+}
+async function importCommandPackage(event) {
+  const file = event.target.files?.[0]; if (!file) return; const status = $("workbenchStatus");
+  try { const bytes = new Uint8Array(await file.arrayBuffer()); let binary = ""; for (const byte of bytes) binary += String.fromCharCode(byte); const result = await api("/v1/command-packages/import", { method: "POST", body: JSON.stringify({ zip_base64: btoa(binary), project_id: null }) }); if (status) status.textContent = result.idempotent ? "命令包已存在，未重复创建任务。" : `命令包已进入隔离检疫：${result.sha256}`; } catch (error) { if (status) status.textContent = `命令包拒绝导入：${error.message}`; }
+}
+
 function syncCogiensHeaderBrand() {
   const header = document.querySelector("body > header");
   if (!header) return;

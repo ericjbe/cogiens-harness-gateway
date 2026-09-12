@@ -15,6 +15,7 @@ import { resolveResult } from "../../../packages/gateway-core/src/result-api.mjs
 import { ResultStore } from "../../../packages/result-sync/store.mjs";
 import { ingestRequest, evidenceResponse } from "../../../packages/result-sync/http.mjs";
 import { CommandPackageStore } from "../../../packages/workbench/src/command-packages.mjs";
+import { M3DeliveryQueue, createWorkOrder } from "../../../packages/workbench/src/m3-delivery.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const DASHBOARD_ROOT = path.join(ROOT, "apps", "dashboard");
@@ -38,6 +39,7 @@ const runtime = await new GatewayRuntime({
   dataRoot: process.env.CHG_DATA_ROOT ?? path.join(ROOT, "var")
 }).initialize();
 const commandPackages = await new CommandPackageStore(process.env.CHG_COMMAND_PACKAGE_ROOT ?? path.join(ROOT, "var", "command-packages")).initialize();
+const m3Delivery = process.env.CHG_M3_WORK_ORDER_ENDPOINT ? new M3DeliveryQueue(path.join(process.env.CHG_DATA_ROOT ?? path.join(ROOT, "var"), "m3-delivery"), async order => { const r = await fetch(process.env.CHG_M3_WORK_ORDER_ENDPOINT, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(order), signal: AbortSignal.timeout(15000) }); return r.json(); }) : null;
 const resultSync = process.env.CHG_RESULT_SYNC_ROOT
   ? await new ResultStore(process.env.CHG_RESULT_SYNC_ROOT,
       JSON.parse(await readFile(process.env.CHG_RESULT_SYNC_IDENTITIES, 'utf8'))).initialize()
@@ -63,6 +65,11 @@ const server = http.createServer(async (request, response) => {
       return ingestRequest(resultSync, request, response);
     }
     if (!authorized(request, token)) return send(response, 401, { error: { code: "AUTH_REQUIRED", message: "Invalid bearer token" } });
+    if (request.method === "POST" && url.pathname === "/v1/m3/work-orders") {
+      if (!m3Delivery) return send(response, 503, { error: { code: "M3_DELIVERY_NOT_CONFIGURED", message: "M3 work-order endpoint is unavailable" } });
+      try { const body = await readJson(request, config.server?.max_request_bytes ?? 32 * 1024 * 1024); const result = await m3Delivery.deliver(createWorkOrder(body)); return send(response, result.status === "M3_DURABLE_ACCEPTED" ? 201 : 202, result); }
+      catch (error) { return send(response, 422, { error: { code: error instanceof Error ? error.message : "M3_WORK_ORDER_INVALID" } }); }
+    }
     if (request.method === "GET" && url.pathname === "/v1/command-packages") return send(response, 200, { packages: commandPackages.list() });
     if (request.method === "POST" && url.pathname === "/v1/command-packages/import") {
       const body = await readJson(request, config.server?.max_request_bytes ?? 32 * 1024 * 1024);

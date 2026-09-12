@@ -1,3 +1,4 @@
+import { modelHarnessCatalog, resolveModelSelection } from "./model-harness.mjs";
 import { randomUUID } from "node:crypto";
 import { mkdir, readdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -51,8 +52,18 @@ export class GatewayRuntime {
           health: { status: "disabled", adapter_id: record.config.id, checked_at: new Date().toISOString(), details: {} }
         };
       }
-      const [descriptor, health] = await Promise.all([record.adapter.describe({}), record.adapter.health({})]);
-      return { id: record.config.id, kind: record.config.kind, enabled: true, descriptor, health };
+      let descriptor = null, health;
+      try {
+        [descriptor, health] = await Promise.all([record.adapter.describe({}), record.adapter.health({})]);
+      } catch (error) {
+        health = { status: "unhealthy", details: { error: stableError(error) } };
+      }
+      const latest = [...this.jobs.values()].flatMap(job => job.runs ?? [])
+        .filter(run => run.adapter_id === record.config.id && TERMINAL_STATES.has(run.state))
+        .sort((a,b) => Date.parse(b.updated_at) - Date.parse(a.updated_at))[0];
+      return { id: record.config.id, kind: record.config.kind, enabled: true, descriptor, health,
+        last_execution: latest ? { state: latest.state, checked_at: latest.updated_at, run_id: latest.run_id,
+          error: latest.error ?? [...(latest.events ?? [])].reverse().find(event => event.payload?.error)?.payload.error ?? null } : null };
     }));
   }
 
@@ -64,7 +75,16 @@ export class GatewayRuntime {
       .map((job) => publicJob(job));
   }
 
-  async submitFanout(input) {
+  async modelCatalog() {
+    return modelHarnessCatalog(this.config, await this.listAdapters());
+  }
+
+  async submitSelected(input) {
+    const resolved = resolveModelSelection(this.config, await this.listAdapters(), input);
+    return this.submitFanout(resolved.input, resolved.selection);
+  }
+
+  async submitFanout(input, selectedBinding = null) {
     const normalized = await validateFanout(input, this.registry, this.config);
     const now = new Date().toISOString();
     const job = {
@@ -78,6 +98,7 @@ export class GatewayRuntime {
       status: "running",
       gateway_status: "RUNNING",
       requested_adapters: normalized.adapters,
+      model_selection: selectedBinding ? structuredClone(selectedBinding) : null,
       workspace: normalized.workspace,
       cancel_requested: false,
       created_at: now,
@@ -156,6 +177,13 @@ export class GatewayRuntime {
     if (!job || !run) return null;
     const active = this.activeRuns.get(runId);
     if (!active) {
+      if (run.state === "QUEUED") {
+        run.cancel_requested = true;
+        run.state = "CANCELLED";
+        run.updated_at = new Date().toISOString();
+        await this.#persist(job);
+        return { cancelled: true, confirmed: true };
+      }
       return { cancelled: false, confirmed: TERMINAL_STATES.has(run.state) };
     }
     run.cancel_requested = true;
@@ -193,7 +221,7 @@ export class GatewayRuntime {
   }
 
   async #executeRun(job, run, input) {
-    if (job.cancel_requested) {
+    if (job.cancel_requested || run.cancel_requested) {
       run.state = "CANCELLED";
       run.updated_at = new Date().toISOString();
       await this.#persist(job);
@@ -204,7 +232,9 @@ export class GatewayRuntime {
     if (!record?.adapter) {
       return this.#failRun(job, run, new AdapterError("ADAPTER_UNHEALTHY", `${run.adapter_id} is disabled`));
     }
-    const health = await record.adapter.health({ actor: "gateway" });
+    let health;
+    try { health = await record.adapter.health({ actor: "gateway" }); }
+    catch (error) { return this.#failRun(job, run, error); }
     if (health.status !== "healthy") {
       return this.#failRun(job, run, new AdapterError("ADAPTER_UNHEALTHY", `${run.adapter_id} failed preflight`, { details: health.details }));
     }

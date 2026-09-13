@@ -1,0 +1,6 @@
+{
+  "queue": [
+    {"job_id":"shuishu_dashboard_publish_v1","depends_on":null,"status":"RUNNING","goal":"switch 127.0.0.1:20288 to existing /dashboard/ upstream"},
+    {"job_id":"shuishu_first_model_runtime_v1","depends_on":"shuishu_dashboard_publish_v1","status":"WAITING_FOR_DEPENDENCY","goal":"install isolated portable runtime on 11436 and verify one model 3/3"}
+  ]
+}

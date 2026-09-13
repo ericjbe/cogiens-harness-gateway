@@ -1,0 +1,13 @@
+{
+  "git_integration": "PASS",
+  "candidate_tests": "101/101",
+  "candidate_dashboard_port": "127.0.0.1:20288",
+  "candidate_dashboard_health": "PASS",
+  "visible_models": 12,
+  "visible_harnesses": 1,
+  "production_dashboard_ui": "NOT_DEPLOYED",
+  "windows_ollama": "FAILED_0xC0000005",
+  "old_payload": "RETIRED_DO_NOT_REOPEN",
+  "m3_production_git": "PRESERVE",
+  "gateway_8787": "DO_NOT_RESTART"
+}

@@ -9,3 +9,6 @@
 - 2026-09-13 attempt-2: 官方 ggml-org/llama.cpp b10936 Windows CPU 包已下载至隔离运行目录并记录 SHA-256；未启动模型，避免重复 Windows Ollama 探针。
 - 2026-09-13 retest-2: M3 已发现 qwen2.5:7b 对应本地 blob（F:\\ollama-models\\models\\blobs 下，约 4.68GB）；候选运行时已展开，尚未完成独立 11436 推理验收。
 - 2026-09-13 result-1: 香港认证网关 include 已切换到 20288，nginx syntax/reload 成功；匿名保护仍为 303。由于没有可合法复用的 Founder 会话，已认证页面与 12 模型渲染尚未宣称通过。
+- 2026-09-13 decision-2: 按要求解除模型运行时对 Dashboard 已认证验收的单向依赖；Dashboard 工单保持 VERIFYING，shuishu_first_model_runtime_v1 独立进入 RUNNING。不得复制会话或绕过认证。
+- 2026-09-13 attempt-3: 使用 llama.cpp b10936 `llama-server.exe --help/--version` 验证参数与二进制；以本地 qwen2.5:7b blob 启动 11436。进程在监听前退出，11436 未监听，run.out/run.err 均为空；未执行推理请求，避免将启动失败误报为模型结果。
+- 2026-09-13 result-2: 该 Ollama blob 不能直接作为 llama.cpp GGUF 文件启动（无可用监听/响应证据）；保留原 blob 与运行日志，未修改模型存储。需从 Ollama manifest 解析完整模型层后再继续。

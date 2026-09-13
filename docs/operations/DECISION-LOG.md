@@ -15,3 +15,5 @@
 - 2026-09-13 correction-1: 上述“blob 不能作为 GGUF”结论证据不足；此前仅观察到未监听和空日志，模型格式兼容性保持未确定。原始失败事实与记录全部保留。
 - 2026-09-13 evidence-1: Ollama `/api/show` Modelfile 指向 qwen2.5:7b 模型层 `sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730`；文件大小 4683073952，文件头 `47-47-55-46-03-00-00-00`（GGUF v3）。
 - 2026-09-13 evidence-2: llama.cpp b10936 版本命令输出 `0.4.0-dev (build 10936, commit 790cf51aa)`；保守参数启动时实际加载模型并监听 11436，随后 HTTP 推理请求连接失败。stderr 仅出现模型加载与 control-looking token 警告；当前 Windows 事件窗口未检索到 Application Error/WER 条目，根因保持未确定。
+- 2026-09-13 implementation-1: 新增 `scripts/llama-supervised-experiment.mjs`，以 Node `spawn(shell:false)` 托管 llama-server，记录 spawn/error/exit/close、PID、起止时间、signal/exit code、健康等待和三次请求结果；脚本已通过 node --check 并推送。
+- 2026-09-13 blocked-1: 触发脚本后 M3 SSH 连续两次（含10秒超时）连接失败，无法读取本地 experiment-result.json、进程退出码或计划任务结果；未重启整机、8787或Ollama。模型工单保持 RUNNING（无可确认心跳），最近尝试结果为 UNOBSERVABLE_M3_SSH_TIMEOUT。

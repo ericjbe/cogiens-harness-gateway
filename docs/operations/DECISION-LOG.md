@@ -12,3 +12,4 @@
 - 2026-09-13 decision-2: 按要求解除模型运行时对 Dashboard 已认证验收的单向依赖；Dashboard 工单保持 VERIFYING，shuishu_first_model_runtime_v1 独立进入 RUNNING。不得复制会话或绕过认证。
 - 2026-09-13 attempt-3: 使用 llama.cpp b10936 `llama-server.exe --help/--version` 验证参数与二进制；以本地 qwen2.5:7b blob 启动 11436。进程在监听前退出，11436 未监听，run.out/run.err 均为空；未执行推理请求，避免将启动失败误报为模型结果。
 - 2026-09-13 result-2: 该 Ollama blob 不能直接作为 llama.cpp GGUF 文件启动（无可用监听/响应证据）；保留原 blob 与运行日志，未修改模型存储。需从 Ollama manifest 解析完整模型层后再继续。
+- 2026-09-13 correction-1: 上述“blob 不能作为 GGUF”结论证据不足；此前仅观察到未监听和空日志，模型格式兼容性保持未确定。原始失败事实与记录全部保留。

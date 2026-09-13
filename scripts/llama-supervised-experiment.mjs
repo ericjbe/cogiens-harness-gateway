@@ -1,59 +1,26 @@
 import { spawn } from 'node:child_process';
-import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import { createConnection } from 'node:net';
+import { mkdir, appendFile, writeFile, rename } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 
-const env = process.env;
-const exe = env.LLAMA_EXE;
-const model = env.LLAMA_MODEL;
-const workdir = env.LLAMA_WORKDIR;
-const outputPath = env.LLAMA_RESULT || './llama-experiment-result.json';
-const port = Number(env.LLAMA_PORT || 11436);
-const startupTimeoutMs = Number(env.LLAMA_STARTUP_TIMEOUT_MS || 120000);
-const requestTimeoutMs = Number(env.LLAMA_REQUEST_TIMEOUT_MS || 30000);
-
-if (!exe || !model || !workdir) throw new Error('LLAMA_EXE, LLAMA_MODEL and LLAMA_WORKDIR are required');
-const args = ['-m', model, '--host', '127.0.0.1', '--port', String(port), '-c', '1024', '-b', '128', '-t', '4', '-n', '32', '--temp', '0'];
-const result = { exe, model, workdir, args, port, started_at: new Date().toISOString(), events: [], probes: [], stop: null };
-const started = Date.now();
-const child = spawn(exe, args, { cwd: workdir, shell: false, windowsHide: true });
-result.pid = child.pid ?? null;
-let stdout = '', stderr = '';
-child.stdout.on('data', b => { stdout += b.toString(); });
-child.stderr.on('data', b => { stderr += b.toString(); });
-child.on('spawn', () => result.events.push({ type: 'spawn', at: new Date().toISOString(), pid: child.pid }));
-child.on('error', error => result.events.push({ type: 'error', at: new Date().toISOString(), error: String(error.message) }));
-child.on('exit', (code, signal) => result.events.push({ type: 'exit', at: new Date().toISOString(), code, signal }));
-let closeResolve;
-const closePromise = new Promise(resolve => { closeResolve = resolve; });
-child.on('close', (code, signal) => { result.events.push({ type: 'close', at: new Date().toISOString(), code, signal }); closeResolve({ code, signal }); });
-
-async function health() {
-  try { const r = await fetch(`http://127.0.0.1:${port}/health`); return r.ok; } catch { return false; }
-}
-const deadline = Date.now() + startupTimeoutMs;
-let ready = false;
-while (Date.now() < deadline && !ready) { ready = await health(); if (!ready) await new Promise(r => setTimeout(r, 1000)); }
-result.ready_at = ready ? new Date().toISOString() : null;
-result.startup_ready = ready;
-if (ready) {
-  for (let i = 0; i < 3; i++) {
-    const began = Date.now();
-    const probe = { attempt: i + 1, started_at: new Date().toISOString() };
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), requestTimeoutMs);
-    try {
-      const response = await fetch(`http://127.0.0.1:${port}/v1/chat/completions`, { method: 'POST', headers: { 'content-type': 'application/json' }, signal: controller.signal, body: JSON.stringify({ model: 'qwen2.5:7b', messages: [{ role: 'user', content: 'Reply with exactly SHUISHU_READY' }], max_tokens: 8, temperature: 0, stream: false }) });
-      const text = await response.text();
-      probe.http_status = response.status; probe.response = text; probe.elapsed_ms = Date.now() - began; probe.instruction_followed = text.includes('SHUISHU_READY');
-    } catch (error) { probe.error = error.name === 'AbortError' ? 'request_timeout' : String(error.message); probe.elapsed_ms = Date.now() - began; }
-    clearTimeout(timer); probe.finished_at = new Date().toISOString(); result.probes.push(probe);
-  }
-}
-result.stop = { requested: true, reason: ready ? 'experiment_complete' : 'startup_timeout', at: new Date().toISOString() };
-if (!child.killed) child.kill('SIGTERM');
-const closed = await Promise.race([closePromise, new Promise(resolve => setTimeout(() => resolve(null), 10000))]);
-result.process_close = closed;
-result.stdout = stdout; result.stderr = stderr; result.finished_at = new Date().toISOString();
-await mkdir(dirname(outputPath), { recursive: true });
-await writeFile(outputPath, JSON.stringify(result, null, 2), 'utf8');
-console.log(JSON.stringify({ output: outputPath, pid: result.pid, startup_ready: result.startup_ready, probes: result.probes.map(p => ({ attempt: p.attempt, http_status: p.http_status, elapsed_ms: p.elapsed_ms, instruction_followed: p.instruction_followed, error: p.error })), process_close: result.process_close }, null, 2));
+const e=process.env, exe=e.LLAMA_EXE, model=e.LLAMA_MODEL, workdir=e.LLAMA_WORKDIR;
+const out=e.LLAMA_RESULT||'./llama-experiment-result.json', dir=e.LLAMA_EXPERIMENT_DIR||join(dirname(out),`experiment-${Date.now()}`);
+const port=Number(e.LLAMA_PORT||11436), startupMs=Number(e.LLAMA_STARTUP_TIMEOUT_MS||120000), requestMs=Number(e.LLAMA_REQUEST_TIMEOUT_MS||30000);
+if(!exe||!model||!workdir) throw new Error('LLAMA_EXE, LLAMA_MODEL and LLAMA_WORKDIR are required');
+const args=['-m',model,'--host','127.0.0.1','--port',String(port),'-c','1024','-b','128','-t','4','-n','32','--temp','0'];
+await mkdir(dir,{recursive:true}); const statePath=join(dir,'state.json'),eventsPath=join(dir,'events.jsonl');
+const result={exe,model,workdir,args,port,started_at:new Date().toISOString(),events:[],probes:[]};
+async function state(status,extra={}){const p={...result,status,...extra},tmp=statePath+'.tmp';await writeFile(tmp,JSON.stringify(p,null,2));await rename(tmp,statePath);}
+async function event(type,data={}){const row={type,at:new Date().toISOString(),...data};result.events.push(row);await appendFile(eventsPath,JSON.stringify(row)+'\n');await state(type);}
+await state('STARTING'); await event('supervisor_start',{pid:process.pid});
+const sock=createConnection({host:'127.0.0.1',port}); const occupied=await new Promise(r=>{sock.once('connect',()=>{sock.destroy();r(true)});sock.once('error',()=>r(false))});
+if(occupied){await event('port_occupied',{port});result.finished_at=new Date().toISOString();await writeFile(out,JSON.stringify(result,null,2));process.exit(2);}
+const child=spawn(exe,args,{cwd:workdir,shell:false,windowsHide:true}); result.pid=child.pid??null;
+const stdoutPath=join(dir,'stdout.log'),stderrPath=join(dir,'stderr.log'); child.stdout.on('data',b=>appendFile(stdoutPath,b)); child.stderr.on('data',b=>appendFile(stderrPath,b));
+child.on('error',err=>event('error',{error:String(err.message)})); let closeResolve;const closePromise=new Promise(r=>closeResolve=r);
+child.on('exit',(code,signal)=>event('exit',{code,signal})); child.on('close',(code,signal)=>{event('close',{code,signal});closeResolve({code,signal})}); await event('spawn',{pid:child.pid});
+async function health(){const c=new AbortController(),t=setTimeout(()=>c.abort(),Math.min(requestMs,3000));try{return(await fetch(`http://127.0.0.1:${port}/health`,{signal:c.signal})).ok}catch{return false}finally{clearTimeout(t)}}
+let ready=false;const deadline=Date.now()+startupMs;while(Date.now()<deadline&&!ready&&!child.exitCode){ready=await health();if(!ready)await new Promise(r=>setTimeout(r,1000))} result.startup_ready=ready;await event(ready?'ready':'startup_timeout',{pid:child.pid});
+if(ready)for(let i=0;i<3;i++){const p={attempt:i+1,started_at:new Date().toISOString()},began=Date.now(),c=new AbortController(),t=setTimeout(()=>c.abort(),requestMs);try{const r=await fetch(`http://127.0.0.1:${port}/v1/chat/completions`,{method:'POST',headers:{'content-type':'application/json'},signal:c.signal,body:JSON.stringify({model:'qwen2.5:7b',messages:[{role:'user',content:'Reply with exactly SHUISHU_READY'}],max_tokens:8,temperature:0,stream:false})});const text=await r.text();p.http_status=r.status;p.elapsed_ms=Date.now()-began;try{const j=JSON.parse(text);p.response_text=j?.choices?.[0]?.message?.content??null;p.json_valid=true}catch{p.response_text=null;p.json_valid=false}p.instruction_followed=p.response_text?.trim()==='SHUISHU_READY'}catch(err){p.error=err.name==='AbortError'?'request_timeout':String(err.message);p.elapsed_ms=Date.now()-began}finally{clearTimeout(t)}p.finished_at=new Date().toISOString();result.probes.push(p);await event('probe_complete',p)}
+result.stop={requested:true,reason:ready?'experiment_complete':'startup_timeout',at:new Date().toISOString()};await event('supervisor_stop_requested',result.stop);if(!child.killed)child.kill('SIGTERM');result.process_close=await Promise.race([closePromise,new Promise(r=>setTimeout(()=>r(null),10000))]);result.finished_at=new Date().toISOString();await event('experiment_complete',{process_close:result.process_close});await writeFile(out,JSON.stringify(result,null,2));
+console.log(JSON.stringify({output:out,pid:result.pid,startup_ready:ready,probes:result.probes.map(p=>({attempt:p.attempt,http_status:p.http_status,response_text:p.response_text,instruction_followed:p.instruction_followed,error:p.error})),process_close:result.process_close},null,2));

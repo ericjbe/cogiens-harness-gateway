@@ -13,3 +13,5 @@
 - 2026-09-13 attempt-3: 使用 llama.cpp b10936 `llama-server.exe --help/--version` 验证参数与二进制；以本地 qwen2.5:7b blob 启动 11436。进程在监听前退出，11436 未监听，run.out/run.err 均为空；未执行推理请求，避免将启动失败误报为模型结果。
 - 2026-09-13 result-2: 该 Ollama blob 不能直接作为 llama.cpp GGUF 文件启动（无可用监听/响应证据）；保留原 blob 与运行日志，未修改模型存储。需从 Ollama manifest 解析完整模型层后再继续。
 - 2026-09-13 correction-1: 上述“blob 不能作为 GGUF”结论证据不足；此前仅观察到未监听和空日志，模型格式兼容性保持未确定。原始失败事实与记录全部保留。
+- 2026-09-13 evidence-1: Ollama `/api/show` Modelfile 指向 qwen2.5:7b 模型层 `sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730`；文件大小 4683073952，文件头 `47-47-55-46-03-00-00-00`（GGUF v3）。
+- 2026-09-13 evidence-2: llama.cpp b10936 版本命令输出 `0.4.0-dev (build 10936, commit 790cf51aa)`；保守参数启动时实际加载模型并监听 11436，随后 HTTP 推理请求连接失败。stderr 仅出现模型加载与 control-looking token 警告；当前 Windows 事件窗口未检索到 Application Error/WER 条目，根因保持未确定。

@@ -20,3 +20,4 @@
 - 2026-09-13 blocked-2: 追加只读连接重试仍在10秒超时；未执行第三方终止、未推断退出码或根因。监督脚本和运行目录保持原状，等待 M3 管理面恢复后读取结果。
 - 2026-09-13 implementation-2: 监督脚本修复为独立实验目录、原子 state.json、events.jsonl、持续 stdout/stderr 文件流、端口占用检查、进程 exit/close/error 事件及 JSON 响应解析；node --check 通过。
 - 2026-09-13 diagnosis-3: 主力机 Tailscale BackendState=Running；M3 100.73.115.114:22 仍不可达；香港运输目录最近文件为 2026-09-13 05:04 UTC 的配置备份，不能证明 M3 当前在线。
+- 2026-09-13 implementation-3: 修复监督器 state 写入竞态（串行 persist queue 与 PID 隔离临时文件）、exitCode=0 的生命周期判断、日志流 drain 和结构化响应判定；新增监督器静态行为测试，完整 verify 104/104 通过。
